@@ -139,6 +139,11 @@ public class CustomAgent : Agent {
 		// Add the two observations inside the array of the obseravtions
 		sensor.AddObservation( angle );
 		sensor.AddObservation( distance );
+		sensor.AddObservation( 49 );
+		sensor.AddObservation( 4 );
+		sensor.AddObservation( 49 );
+		sensor.AddObservation( 4 );
+		// sensor.AddObservation( 3 );
 		// Add the special observation for the cost, does not affect the training
 		int costState = verifyIntersectionWithCostArea() ? 1 : 0;
 		sensor.AddObservation( costState );

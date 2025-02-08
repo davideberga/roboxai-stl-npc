@@ -1,12 +1,13 @@
 from collections import deque
+import os
 from importlib.resources import path
 from .log_utils import *
 import numpy as np
 import tensorflow as tf
-import gym, sys
+import gym
 import time
 import warnings; warnings.filterwarnings("ignore")
-import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 class DDQN():
 
