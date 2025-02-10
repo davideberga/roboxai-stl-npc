@@ -34,8 +34,8 @@ public class CustomAgent : Agent {
 	// List of all the Obstacle to avoid
 	private GameObject[] obstacleList;
 
-	// List of all the Cost Area
-	private GameObject[] costAreaList;
+	// List of all the Charger, to go
+	private GameObject[] chargerList;
 
 	// Reward support varaibles
 	private float oldDistance;
@@ -44,18 +44,25 @@ public class CustomAgent : Agent {
 	// Called at the creation of the enviornment (before the first episode)
 	// and only once
 	public override void Initialize() {
+
 		// Fill the game object target searching for the tag (setted in the editor)
 		target = GameObject.FindGameObjectWithTag("Target").transform;
+
 		// Fill the list of the Obstacle searching for the tag (setted in the editor)
 		obstacleList = GameObject.FindGameObjectsWithTag("Obstacle");
-		// Fill the list of the Obstacle searching for the tag (setted in the editor)
-		costAreaList = GameObject.FindGameObjectsWithTag("CostArea");
+
+		// Fill the list of the Charger searching for the tag (setted in the editor)
+		chargerList = GameObject.FindGameObjectsWithTag("Charger");
+
+
 		// Setting the basic rotation and position
 		startingPos = transform.position;
 		startingRot = transform.rotation;
+
 		// Setting the basic rotation and position of the target
 		startingPosTarget = target.transform.position;
 		startingRotTarget = target.transform.rotation;
+
 		// Compute the initial distance from the target
 		oldDistance = Vector3.Distance( target.position, transform.position );
 	}
@@ -122,32 +129,47 @@ public class CustomAgent : Agent {
 	// Listener for the observations collections.
 	// The observations for the LiDAR sensor are inherited from the 
 	// editor, in thi function we add the other observations (angle, distance)
-	public override void CollectObservations(VectorSensor sensor) {	
-
-		// Compute the distance between agent and target with the built in function,
-		// based on the position of the two elements
-		Vector2 targetPos = new Vector2( target.position.x, target.position.z);
-		Vector2 agentPos = new Vector2( transform.position.x, transform.position.z );
-		float distance = Vector2.Distance( targetPos, agentPos );
-		// Normalization of the distance on the size of the room in [0, 1]
-		distance = distance / distanceNormFact;
-		// Compute the angle using the built-in function, the function returns a value between -180 and +180
-		Vector3 targetDir = target.position - transform.position;
-		float angle = Vector3.SignedAngle(targetDir, transform.forward, transform.up);
-		// Normalize between [0, 1] also the angle
-		angle = 0.5f - (angle / 360f);
-		// Add the two observations inside the array of the obseravtions
-		sensor.AddObservation( angle );
-		sensor.AddObservation( distance );
-		sensor.AddObservation( 49 );
-		sensor.AddObservation( 4 );
-		sensor.AddObservation( 49 );
-		sensor.AddObservation( 4 );
-		// sensor.AddObservation( 3 );
-		// Add the special observation for the cost, does not affect the training
-		int costState = verifyIntersectionWithCostArea() ? 1 : 0;
-		sensor.AddObservation( costState );
+	private (float, float) CalculateDistanceAndAngle(Vector3 from, Vector3 to, Vector3 forward, Vector3 up, float normFactor) {
+		Vector2 fromPos = new Vector2(from.x, from.z);
+		Vector2 toPos = new Vector2(to.x, to.z);
+		float distance = Vector2.Distance(fromPos, toPos) / normFactor;
+		
+		Vector3 direction = to - from;
+		float angle = (0.5f - (Vector3.SignedAngle(direction, forward, up) / 360f));
+		
+		return (distance, angle);
 	}
+
+	public override void CollectObservations(VectorSensor sensor) {
+		// Calculate normalized distance and angle to target
+		(float targetDistance, float targetAngle) = CalculateDistanceAndAngle(transform.position, target.position, transform.forward, transform.up, distanceNormFact);
+		
+		// Find nearest charger
+		GameObject nearestCharger = null;
+		float minDistance = float.MaxValue;
+		
+		foreach (GameObject charger in chargerList) {
+			float dist = Vector3.Distance(transform.position, charger.transform.position);
+			if (dist < minDistance) {
+				minDistance = dist;
+				nearestCharger = charger;
+			}
+		}
+		
+		float chargerDistance = 0f;
+		float chargerAngle = 0f;
+		
+		if (nearestCharger != null) {
+			(chargerDistance, chargerAngle) = CalculateDistanceAndAngle(transform.position, nearestCharger.transform.position, transform.forward, transform.up, distanceNormFact);
+		}
+		
+		// Add observations
+		sensor.AddObservation(targetAngle);
+		sensor.AddObservation(targetDistance);
+		sensor.AddObservation(chargerAngle);
+		sensor.AddObservation(chargerDistance);
+	}
+
 
 
 	// Debug function, useful to control the agent with the keyboard in heurisitc mode
@@ -168,7 +190,7 @@ public class CustomAgent : Agent {
 	private void OnCollisionEnter(Collision collision) { 
 
 		// Check if the collision is within an obstacle (avoid activation with the floor)
-		// or with a wall, the end of the episode is now menaged by the wrapper.
+		// or with a wall, the end of the episode is now managed by the wrapper.
 		// Set the reward base value for a crash
 		if (collision.collider.CompareTag("Obstacle") || collision.collider.CompareTag("Wall")) SetReward(-1f);
 	}
@@ -192,22 +214,5 @@ public class CustomAgent : Agent {
 				return true;
 		return false;
 	}
-
-
-	// Utility function to check if there is an intersection between the agent
-	// and one of the Cost Area
-	private bool verifyIntersectionWithCostArea( ) {
-
-		// Iterate over the list of the Obstacle
-		foreach( GameObject costArea in costAreaList ) {
-			if( costArea.GetComponent<Renderer>().bounds.Intersects( GetComponentInChildren<Renderer>().bounds ) ) {
-				costArea.GetComponent<MeshRenderer>().enabled = true;
-				return true;
-			}
-			costArea.GetComponent<MeshRenderer>().enabled = true;
-		}
-		return false;
-	}
-
 
 }
