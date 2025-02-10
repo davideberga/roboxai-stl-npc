@@ -62,7 +62,6 @@ class RoverNavigation(gym.Env):
             np.array([1 for _ in range(self.scan_number)] + [1, 1, 1, 1, 10000, 5]),
             dtype=np.float64,
         )
-        print("HELLO GUYS")
 
     def reset(self):
         # Reset the counter for the maximum step counter and battery status
