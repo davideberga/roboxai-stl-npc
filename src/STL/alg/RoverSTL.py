@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+from .utils import EtaEstimator
+from .lib_stl_core import AP, Always, Eventually, Imply, ListAnd, Or
 from .stl_network import RoverSTLPolicy
 from .log_utils import create_logger
 from torch.optim import Adam
@@ -14,31 +16,43 @@ warnings.filterwarnings("ignore")
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-def update_head_distance_after_motion(d, alpha, v, theta, t=1):
+def update_head_distance_after_motion(d, alpha, v, theta, device, t=1):
     """
-    Calculate the new relative distance and angle of a point from the robot after motion.
+    Calculate the new relative distance and angle of a point from the robot after motion,
+    using PyTorch tensors.
 
     Parameters:
-    d (float): Initial distance of the point from the robot
-    alpha (float): Initial angle of the point relative to the robot (in radians)
-    v (float): Velocity of the robot
-    theta (float): Motion direction of the robot relative to its heading (in radians)
-    t (float): Time duration of motion
+        d (torch.Tensor): Initial distance of the point from the robot.
+        alpha (torch.Tensor): Initial angle of the point relative to the robot (in radians).
+        v (torch.Tensor): Velocity of the robot.
+        theta (torch.Tensor): Motion direction of the robot relative to its heading (in radians).
+        t (float or torch.Tensor, optional): Time duration of motion. Default is 1.
 
     Returns:
-    tuple: (new distance, new angle in radians)
+        tuple: (new_distance, new_angle) as torch.Tensors.
     """
+
+    theta = torch.as_tensor(theta, dtype=torch.float32).to(device)
+    t = torch.as_tensor(t, dtype=torch.float32).to(device)
+
+    # Ensure v and theta have the right dimensions (batch_size, 1)
+
     # Initial relative position of the point
-    x_p, y_p = d * np.cos(alpha), d * np.sin(alpha)
+    alpha = alpha.squeeze()
+
+    x_p = d * torch.cos(alpha)
+    y_p = d * torch.sin(alpha)
 
     # Robot displacement
     s = v * t  # Distance traveled by the robot
-    delta_x_r, delta_y_r = s * np.cos(theta), s * np.sin(theta)
+    delta_x_r = s * torch.cos(theta)
+    delta_y_r = s * torch.sin(theta)
 
-    # New relative position of the point
-    x_p_new, y_p_new = x_p - delta_x_r, y_p - delta_y_r
-    d_new = np.sqrt(x_p_new**2 + y_p_new**2)
-    alpha_new = np.arctan2(y_p_new, x_p_new)
+    x_p_new = x_p - delta_x_r
+    y_p_new = y_p - delta_y_r
+
+    d_new = torch.sqrt(x_p_new**2 + y_p_new**2)
+    alpha_new = torch.atan2(y_p_new, x_p_new)
 
     return d_new, alpha_new
 
@@ -65,107 +79,78 @@ class RoverSTL:
         self.tau = args.tau
         self.layers = args.n_layers
         self.nodes = args.layer_size
+        self.smoothing_factor = 500.0
+        self.print_freq = 5
 
+        self.predict_steps_ahead = 10
         self.rover_policy = RoverSTLPolicy().to(self.device)
         self.optimizer = Adam(self.rover_policy.parameters(), lr=args.lr)
-        
-        
+        self.relu = torch.nn.ReLU()
+        self.sample_batch = 10
+
+        # Task specific
+        self.safe_distance = 0.1
+        self.enough_close_to = 0.01
+        self.wait_for_charging = 5
+
         self.rover_vmax = 0
         self.rover_vmin = 1
-        self.lidar_angles = [
-            -np.pi / 2,
-            -np.pi / 3,
-            -np.pi / 6,
-            0,
-            np.pi / 6,
-            np.pi / 3,
-            np.pi / 2,
-        ]
+        angles = np.array([-np.pi / 2, -np.pi / 3, -np.pi / 6, 0, np.pi / 6, np.pi / 3, np.pi / 2])
+        self.lidar_angles = torch.tensor(np.tile(angles, (self.sample_batch, 1))).unsqueeze(0).to(self.device)
 
     def loop(self, args):
         # Initialize the logger
+        eta = EtaEstimator(0, args.n_total_epochs, self.print_freq)
         logger = create_logger(self.run_name, args)
         logger_dict = {"reward": [], "success": [], "step": [], "cost": []}
 
         # Reset to start a new training
-        state = self.env.reset()
+
+        battery_limit = self.predict_steps_ahead
+        stl = self.generateSTL(self.predict_steps_ahead, battery_limit)
 
         # Iterate the training loop over multiple episodes
         for step in range(args.n_total_epochs):
-            state_torch = torch.tensor([state]).float().to(self.device).detach()
+            eta.update()
+            states = []
+            for sample in range(self.sample_batch):
+                state = self.env.reset()  # Assume state is a list or a NumPy array
+                states.append(state)  # Append the state itself
+
+            # Create a tensor from the list of states
+            state_torch = torch.tensor(states, dtype=torch.float32).to(self.device).detach()
+
             # tensor([8.5000e-01, 9.8150e-01, 1.0000e+00, 1.0000e+00, 1.0000e+00, 9.8150e-01,
             #     8.5000e-01, 4.5211e-01, 6.2520e-01, 6.2964e-01, 5.4233e-01, 5.0000e+02,
             #     5.0000e+00], dtype=torch.float64)
-            u = self.rover_policy(state_torch)
-            seg = self.dynamics(state_torch.cpu(), u.detach().cpu().numpy(), include_first=True)
-            print(seg)
-            return
+            control = self.rover_policy(state_torch)
+            estimated_next_states = self.dynamics(state_torch, control, include_first=False)
 
-            # # Initialize the values for the logger
-            # logger_dict["reward"].append(0)
-            # logger_dict["success"].append(0)
-            # logger_dict["step"].append(0)
-            # logger_dict["cost"].append(0)
+            # STL score on the estimated next states
+            score = stl(estimated_next_states, self.smoothing_factor)[:, :1]
+            acc = (stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
+            acc_avg = torch.mean(acc)
 
-            # # Main loop of the current episode
-            # while True:
-            #     # Select the action, perform the action and save the returns in the memory buffer
-            #     action, action_prob = self.get_action(state)
-            #     new_state, reward, done, info = self.env.step(action)
-            #     self.memory_buffer.append(
-            #         [state, action, action_prob, reward, new_state, done]
-            #     )
+            small_charge = (state_torch[..., 11:12] <= battery_limit).float()
+            # Initial distance - final distance
+            # At the end of the planned steps the distance should be decreased
+            dist_charger = state_torch[ :, 10] - estimated_next_states[:, :, 10]
+            dist_target = state_torch[ :, 8] - estimated_next_states[:, :, 8]
 
-            #     # Update the dictionaries for the logger and the trajectory
-            #     logger_dict["reward"][-1] += reward
-            #     logger_dict["step"][-1] += 1
-            #     logger_dict["success"][-1] = 1 if info["target_reached"] else 0
+            # TODO: Check this loss
+            dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
+            # head_target_loss = - torch.abs(state_torch[:, -1, 7] -  estimated_next_states[:, -1, 7])
 
-            #     # Call the update rule of the algorithm
-            #     self.network_update_rule(done)
+            loss = torch.mean(self.relu(0.5 - score)) + dist_target_charger_loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
 
-            #     # Exit if terminal state and eventually update the state
-            #     if done:
-            #         break
-            #     state = new_state
-
-            # # after each episode log and print information
-            # last_n = min(len(logger_dict["reward"]), 100)
-            # reward_last_100 = logger_dict["reward"][-last_n:]
-            # cost_last_100 = logger_dict["cost"][-last_n:]
-            # step_last_100 = logger_dict["step"][-last_n:]
-            # success_last_100 = logger_dict["success"][-last_n:]
-
-            # record = {
-            #     "Episode": episode,
-            #     "Step": int(np.mean(step_last_100)),
-            #     "Avg_Cost": int(np.mean(cost_last_100) * 100),
-            #     "Avg_Success": int(np.mean(success_last_100) * 100),
-            #     "Avg_Reward": np.mean(reward_last_100),
-            # }
-            # logger.write(record)
-
-            # print(f"(DDQN) Ep: {episode:5}", end=" ")
-            # print(
-            #     f"reward: {logger_dict['reward'][-1]:5.2f} (last_100: {np.mean(reward_last_100):5.2f})",
-            #     end=" ",
-            # )
-            # print(f"cost_last_100: {int(np.mean(cost_last_100))}", end=" ")
-            # print(f"step_last_100 {int(np.mean(step_last_100)):3d}", end=" ")
-            # if "eps_greedy" in self.__dict__.keys():
-            #     print(f"eps: {self.eps_greedy:3.2f}", end=" ")
-            # if "sigma" in self.__dict__.keys():
-            #     print(f"sigma: {self.sigma:3.2f}", end=" ")
-            # print(f"success_last_100 {int(np.mean(success_last_100) * 100):4d}%")
-
-            # if args.wandb_log:
-            #     wandb.log(record)
-
-            # # save model if we reach avg_success greater than 78%
-            # if int(np.mean(success_last_100) * 100) >= 79:
-            #     self.actor.save(
-            #         f"models/DDQN_id{self.seed}_ep{episode}_success{int(np.mean(success_last_100) * 100)}.h5"
-            #     )
+            if step % 5 == 0:
+                print(
+                    "%s > %03d  loss:%.3f acc:%.3f dist:%.3f dT:%s T:%s ETA:%s"
+                    % ("STL TRAINING ", step, loss.item(), acc_avg.item(), dist_target_charger_loss.item(), eta.interval_str(), eta.elapsed_str(), eta.eta_str())
+                )
 
     def dynamics(self, x0, es_trajectories, include_first=False):
         """Estimate planning of T steps ahead
@@ -182,7 +167,7 @@ class RoverSTL:
         t = es_trajectories.shape[1]  # Extract actions predicted
         x = x0.clone()
         segs = [x0] if include_first else []
-        
+
         for ti in range(t):
             new_x = self.dynamics_per_step(x, es_trajectories[:, ti])
             segs.append(new_x)
@@ -209,34 +194,28 @@ class RoverSTL:
         predicted_velocity = es_trajectories[:, 0]
         predicted_theta = es_trajectories[:, 1]
         # Normalize velocity to the rover safe range
-        predicted_velocity = (
-            predicted_velocity * (self.rover_vmax - self.rover_vmin) + self.rover_vmin
-        )
+        predicted_velocity = predicted_velocity * (self.rover_vmax - self.rover_vmin) + self.rover_vmin
 
         # Estimate new lidar distances
         lidar_distances = x[:, :7]
-        es_lidar_distances, _ = update_head_distance_after_motion(
-            lidar_distances, self.lidar_angles, predicted_velocity, predicted_theta
-        )
-        
+        es_lidar_distances, _ = update_head_distance_after_motion(lidar_distances, self.lidar_angles, predicted_velocity.view(-1,1), predicted_theta.view(-1, 1), self.device)
+
         # Estimate new target head and distance
-        es_target_dist, es_target_head = update_head_distance_after_motion(
-            x[:, 8], x[:, 7], predicted_velocity, predicted_theta
-        )
-        
+        es_target_dist, es_target_head = update_head_distance_after_motion(x[:, 8], x[:, 7], predicted_velocity, predicted_theta, self.device)
+
         # Estimate new nearest charger head and distance
-        es_charger_dist, es_charger_head = update_head_distance_after_motion(
-            x[:, 10], x[:, 9], predicted_velocity, predicted_theta
-        )
-        
+        es_charger_dist, es_charger_head = update_head_distance_after_motion(x[:, 10], x[:, 9], predicted_velocity, predicted_theta, self.device)
+
         # Estimate new battery level and hold time
         es_charger_time = 5
-        es_battery_time = x[:, 11] -1
-        # If near charger:
-        if es_charger_dist < 0.1:
-            es_battery_time = x[:, 11] + 10
-            es_charger_time = x[:, 12] - 1
-             
+        es_battery_time = x[:, 11] - 1
+
+        # Create a mask where the condition is met
+        mask = es_charger_dist < 0.1
+
+        # Update the battery time and charger time where the mask is True
+        es_battery_time = torch.where(mask, x[:, 11] + 10, x[:, 11])
+        es_charger_time = torch.where(mask, x[:, 12] - 1, x[:, 12])
 
         new_x[:, 0:7] = es_lidar_distances
         new_x[:, 7] = es_target_head
@@ -245,79 +224,41 @@ class RoverSTL:
         new_x[:, 10] = es_charger_dist
         new_x[:, 11] = es_battery_time
         new_x[:, 12] = es_charger_time
-         
+
         return new_x
 
-    def generateSTL():
-        avoid_func = lambda y, y1, y2: Always(
-            0,
-            args.nt,
-            And(
-                AP(lambda x: -pts_in_poly(x[..., :2], y, args, obses_1=y1, obses_2=y2)),
-                AP(
-                    lambda x: args.seg_gain
-                    * -seg_int_poly(x[..., :2], y, args, device, obses_1=y1, obses_2=y2)
-                ),
-            ),
+    def lidar_obs_avoidance_robustness(self, x):
+        def smooth_min(lidar_values, alpha=10.0):
+            # Computes a smooth approximation of the minimum.
+            # To ensure smooth differentiability
+            return -(1 / alpha) * torch.log(torch.sum(torch.exp(-alpha * lidar_values), dim=-1))
+
+        lidar_values = x[..., 0:7]
+        min_lidar = smooth_min(lidar_values)
+        return min_lidar - self.safe_distance
+
+    def generateSTL(self, steps_ahead: int, battery_limit: int):
+        avoid = Always(0, steps_ahead, AP(lambda x: self.lidar_obs_avoidance_robustness(x), comment="Lidar safety"))
+        at_dest = AP(lambda x: self.enough_close_to - x[..., 8], comment="Distance to destination")
+        at_charger = AP(lambda x: self.enough_close_to - x[..., 10], comment="Distance to charger")
+
+        if_enough_battery_go_destiantion = Imply(AP(lambda x: x[..., 11] - battery_limit), Eventually(0, steps_ahead, at_dest))
+        if_low_battery_go_charger = Imply(AP(lambda x: battery_limit - x[..., 11]), Eventually(0, steps_ahead, at_charger))
+        always_have_battery = Always(0, steps_ahead, AP(lambda x: x[..., 11]))
+
+        stand_by = AP(lambda x: x[..., 10] - self.enough_close_to, comment="Stand by: agent remains close to charger")
+        enough_stay = AP(lambda x: -x[..., 12], comment=f"Stay>{self.wait_for_charging} steps")
+        charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
+
+        return ListAnd(
+            [
+                avoid,
+                if_enough_battery_go_destiantion,
+                charging,
+                always_have_battery,
+                if_low_battery_go_charger,
+            ]
         )
-
-        avoids = []
-        for obs, obs1, obs2 in zip(objs[1:], objs_t1[1:], objs_t2[1:]):
-            avoids.append(avoid_func(obs, obs1, obs2))
-        if args.norm_ap:
-            at_dest = AP(
-                lambda x: args.close_thres
-                - torch.norm(x[..., 0:2] - x[..., 2:4], dim=-1)
-            )
-            at_charger = AP(
-                lambda x: args.close_thres
-                - torch.norm(x[..., 0:2] - x[..., 4:6], dim=-1)
-            )
-        else:
-            at_dest = AP(
-                lambda x: -((x[..., 0] - x[..., 2]) ** 2)
-                - (x[..., 1] - x[..., 3]) ** 2
-                + args.close_thres**2
-            )
-            at_charger = AP(
-                lambda x: -((x[..., 0] - x[..., 4]) ** 2)
-                - (x[..., 1] - x[..., 5]) ** 2
-                + args.close_thres**2
-            )
-
-        battery_limit = args.dt * args.nt
-
-        reach0 = Imply(
-            AP(lambda x: x[..., 6] - battery_limit), Eventually(0, args.nt, at_dest)
-        )
-        battery = Always(0, args.nt, AP(lambda x: x[..., 6]))
-
-        reaches = [reach0]
-        emergency = Imply(
-            AP(lambda x: battery_limit - x[..., 6]), Eventually(0, args.nt, at_charger)
-        )
-        if args.hold_t > 0:
-            if args.norm_ap:
-                stand_by = AP(
-                    lambda x: 0.1 - torch.norm(x[..., 0:2] - x[..., 0:1, 0:2], dim=-1),
-                    comment="Stand by",
-                )
-            else:
-                stand_by = AP(
-                    lambda x: 0.1**2
-                    - (x[..., 0] - x[..., 0:1, 0]) ** 2
-                    - (x[..., 1] - x[..., 0:1, 1]) ** 2,
-                    comment="Stand by",
-                )
-            enough_stay = AP(lambda x: -x[..., 7], comment="Stay>%d" % (args.hold_t))
-            hold_cond = Imply(
-                at_charger, Always(0, args.hold_t, Or(stand_by, enough_stay))
-            )
-            hold_cond = [hold_cond]
-        else:
-            hold_cond = []
-        stl = ListAnd([in_map] + avoids + reaches + hold_cond + [battery, emergency])
-        return stl
 
     def seed_everything(self, seed: int):
         random.seed(seed)

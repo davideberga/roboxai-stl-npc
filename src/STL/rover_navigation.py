@@ -100,9 +100,6 @@ class RoverNavigation(gym.Env):
         else: 
             self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
         # ------ / HANDLE BATTERY -----
-        
-        print(env_var)
-        print(done)
 
         if not done:
             new_distance = state[-1]

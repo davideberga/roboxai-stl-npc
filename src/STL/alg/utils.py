@@ -1,0 +1,52 @@
+import time
+
+def time_format(secs):
+    _s = secs % 60 
+    _m = secs % 3600 // 60
+    _h = secs % 86400 // 3600
+    _d = secs // 86400
+    if _d != 0:
+        return "%02dD%02dh%02dm%02ds"%(_d, _h, _m, _s)
+    else:
+        if _h != 0:
+            return "%02dH%02dm%02ds"%(_h, _m, _s)
+        else:
+            if _m != 0:
+                return "%02dm%02ds"%(_m, _s)
+            else:
+                return "%05.2fs"%(_s)
+
+class EtaEstimator():
+    def __init__(self, start_iter, end_iter, check_freq, num_workers=1):
+        self.start_iter = start_iter
+        num_workers = 1 if num_workers is None else num_workers
+        self.end_iter = end_iter//num_workers
+        self.check_freq = check_freq
+        self.curr_iter = start_iter
+        self.start_timer = None
+        self.interval = 0
+        self.eta_t = 0
+        self.num_workers = num_workers
+
+    def update(self):
+        if self.start_timer is None:
+            self.start_timer = time.time()
+        self.curr_iter += 1
+        if self.curr_iter % (max(1,self.check_freq//self.num_workers)) == 0:
+            self.interval = self.elapsed() / (self.curr_iter - self.start_iter)        
+            self.eta_t = self.interval * (self.end_iter - self.curr_iter)
+    
+    def elapsed(self):
+        return time.time() - self.start_timer
+    
+    def eta(self):
+        return self.eta_t
+    
+    def elapsed_str(self):
+        return time_format(self.elapsed())
+    
+    def interval_str(self):
+        return time_format(self.interval)
+
+    def eta_str(self):
+        return time_format(self.eta_t)
