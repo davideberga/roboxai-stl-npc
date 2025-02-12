@@ -1,5 +1,6 @@
+import traceback
 from rover_navigation import RoverNavigation
-from alg.DDQN import DDQN
+from alg.RoverSTL import RoverSTL
 import time
 import tensorflow as tf
 import config
@@ -13,12 +14,12 @@ for device in physical_devices:
 def train(env, args):
     # Execution of the training loop
     try:
-        algo = DDQN(env, args)
+        algo = RoverSTL(env, args)
         algo.loop(args)
 
     # Listener for errors and print of the eventual error message
     except Exception as e:
-        print(e)
+        raise e
 
     # In any case, close the Unity3D environment
     finally:
