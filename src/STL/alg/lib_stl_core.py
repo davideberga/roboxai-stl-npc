@@ -87,7 +87,8 @@ class AP:
         self.apid = AP.n_aps
         AP.n_aps += 1
 
-    def __call__(self, x, tau, d=None):  # compute the robustness score
+    def __call__(self, x, tau, d=None): 
+        # compute the robustness score
         s = self.expression(x)
         if d is not None and "idx" in d:
             print(self.__str__(), "input", x[d["idx"]], "out", s[d["idx"]])

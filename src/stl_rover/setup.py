@@ -13,7 +13,7 @@ setup(
         ("share/" + package_name, ["package.xml"]),
         (
             os.path.join("share", package_name, "model_trained"),
-            glob("model_trained/*.h5"),
+            glob("model_trained/*"),
         ),
     ],
     install_requires=["setuptools"],
@@ -25,6 +25,6 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            'DQN = stl_rover.turtlebot3_DQN:main'],
+            'STL = stl_rover.turtlebot3_STL:main'],
     },
 )

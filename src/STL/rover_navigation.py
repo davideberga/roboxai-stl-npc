@@ -17,19 +17,25 @@ class RoverNavigation(gym.Env):
         step_limit=300,
         worker_id=0,
         random_seed=0,
-        battery_time=100,
-        charger_hold_time=5,
+        battery_time=1,
+        charger_hold_time=1,
+        is_training=False
     ):
         # Load the scan number given in input
         self.scan_number = 7
-
+        
         env_path = None
-        worker_id = 0
 
-        unity_env = UnityEnvironment(env_path, worker_id=worker_id, seed=random_seed)
+        if is_training:
+            env_path = "env/training_rover/training_rover"
+        else:
+            worker_id = 0
+        
+        unity_env = UnityEnvironment(env_path, worker_id=worker_id, seed=random_seed, no_graphics=True, additional_args=["--num-envs=10"])
         self.env = UnityToGymWrapper(unity_env, flatten_branched=True)
 
         self.action_space = self.env.action_space
+        print(self.action_space)
 
         # Override the state_size
         state_size = self.env.observation_space.shape[0] - self.scan_number
@@ -81,7 +87,7 @@ class RoverNavigation(gym.Env):
         info = {}
         state, reward, a, b = self.env.step(action)
         # Decrease the battery at every step
-        self.battery_time -= 1
+        self.battery_time -= 0.01
         state = self.fix_state(state)
         env_var = self.extactValues(state)
         
@@ -92,8 +98,8 @@ class RoverNavigation(gym.Env):
         
         # ------ HANDLE BATTERY -----
         # If near charger
-        if env_var["d_n_charger"] < 0.1:
-            self.charger_hold_time = max(0, self.charger_hold_time - 1)
+        if env_var["d_n_charger"] < 0.01:
+            self.charger_hold_time = max(0, self.charger_hold_time - 1/self.FULL_CHARGER_HOLD_TIME)
         elif self.charger_hold_time == 0:
             self.battery_time = self.FULL_BATTERY_TIME
             self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
@@ -124,12 +130,12 @@ class RoverNavigation(gym.Env):
         
     def extactValues(self, state):
         non_lidar_state = {}
-        non_lidar_state["bat_hold"] = state[-1]
-        non_lidar_state["bat_time"] = state[-2]
-        non_lidar_state["d_n_charger"] = state[-3]
-        non_lidar_state["h_n_charger"] = state[-4]
-        non_lidar_state["d_n_target"] = state[-5]
-        non_lidar_state["h_n_target"] = state[-6]
+        non_lidar_state["bat_hold"] = state[12]
+        non_lidar_state["bat_time"] = state[11]
+        non_lidar_state["d_n_charger"] = state[10]
+        non_lidar_state["h_n_charger"] = state[9]
+        non_lidar_state["d_n_target"] = state[8]
+        non_lidar_state["h_n_target"] = state[7]
         return non_lidar_state
 
     def fix_state(self, state):

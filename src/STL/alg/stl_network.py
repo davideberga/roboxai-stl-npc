@@ -35,3 +35,9 @@ class RoverSTLPolicy(nn.Module):
         control1 = torch.tanh(control[..., 1]) * np.pi
         control_final = torch.stack([control0, control1], dim=-1)
         return control_final
+    
+    def save(self, path: str):
+        torch.save(self.net.state_dict(), path)
+        
+    def load_eval(self, path: str):
+        self.net.load_state_dict(torch.load(path, weights_only=True))
