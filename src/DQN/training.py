@@ -1,11 +1,19 @@
-from env.robotic_navigation import RoboticNavigation
+from env.rover_navigation_DQN import RoverNavigation
 from alg.DDQN import DDQN
 import time, sys, argparse
 import tensorflow as tf
 import config
-physical_devices = tf.config.list_physical_devices('GPU') 
-for device in physical_devices:
-    tf.config.experimental.set_memory_growth(device, True)
+import os
+
+# Check if a GPU is available
+physical_devices = tf.config.list_physical_devices('GPU')
+
+if physical_devices:
+    for device in physical_devices:
+        tf.config.experimental.set_memory_growth(device, True)
+else:
+    print("Nessuna GPU trovata. Uso CPU.")
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # Disabilita GPU
 
 
 def train(env, args):
@@ -23,10 +31,9 @@ def train(env, args):
 	finally:
 		env.close()
 
-def generate_environment(editor_build, env_type):
-
+def generate_environment():
 	worker_id = int(round(time.time() % 1, 4)*10000)
-	return RoboticNavigation( editor_build=editor_build, worker_id=worker_id, env_type=env_type )
+	return RoverNavigation( worker_id=worker_id )
 
 
 # Call the main function
@@ -39,7 +46,7 @@ if __name__ == "__main__":
 	env_type = "training"
 
 	print( "Mobile Robotics Lecture on ML-agents and DDQN! \n")
-	env = generate_environment(editor_build, env_type)
+	env = generate_environment()
 	train(env, args)
 
 
