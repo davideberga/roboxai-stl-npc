@@ -1,6 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import math
 
 
 class DynamicsSimulator:
@@ -9,35 +10,38 @@ class DynamicsSimulator:
         self.invalid_attempts = []
 
     def predict_lidar_scan_from_motion(self, old_pose, v, theta_motion, beam_angles, world_objects,
-                                         area_width, area_height, robot_radius, max_range=10.0):
+                                     area_width, area_height, robot_radius, max_range=10.0):
         """
-        Given the robot's old pose and a motion command (translation v and rotation theta_motion),
-        compute the new pose and simulate the lidar scan using PyTorch.
-        If the new pose would result in a collision or leave the environment bounds,
-        the attempted move (pose and lidar scan) is stored (stacked) and the robot remains at the old pose.
+        Given the robot's old pose (tensor of shape (3,)) and a motion command (scalar v and theta_motion),
+        compute the new pose and simulate the lidar scan.
+        If the new pose results in a collision or falls outside the environment, the move is rejected and
+        the old pose (with its corresponding lidar scan) is returned.
 
         Parameters:
-            old_pose    : Tuple (x, y, heading)
-            v           : Translation distance along the current heading.
-            theta_motion: Rotation angle (radians) to be added.
-            beam_angles : torch.Tensor of beam angles (relative to robot forward)
-            world_objects: List of obstacle objects (dictionaries) or torch.Tensors.
+            old_pose    : torch.Tensor of shape (3,) representing [x, y, heading].
+            v           : torch.Tensor or scalar (linear velocity).
+            theta_motion: torch.Tensor or scalar (rotation angle in radians).
+            beam_angles : torch.Tensor of lidar beam angles (relative to robot's forward).
+            world_objects: List of obstacles (each as a dictionary).
             area_width  : Width of the environment.
             area_height : Height of the environment.
             robot_radius: Robot's collision radius.
             max_range   : Maximum lidar range.
 
         Returns:
-            new_pose: Updated robot pose (x, y, heading)
+            new_pose: torch.Tensor of shape (3,) [x, y, heading].
             new_scan: torch.Tensor of normalized lidar distances.
         """
-        x, y, heading = old_pose
-        # Compute the new pose using PyTorch.
-        new_x = x + v * torch.cos(torch.tensor(heading))
-        new_y = y + v * torch.sin(torch.tensor(heading))
-        new_heading = heading + theta_motion
-        new_pose = (new_x.item(), new_y.item(), new_heading)
+        # Unpack old_pose (assumed to be a tensor).
+        x, y, heading = old_pose[0], old_pose[1], old_pose[2]
 
+        # Compute new pose using tensor operations.
+        new_x = x + v * torch.cos(heading)
+        new_y = y + v * torch.sin(heading)
+        new_heading = heading + theta_motion
+        new_pose = torch.stack([new_x, new_y, new_heading])
+
+        # Compute the new lidar scan.
         new_scan = self.simulate_lidar_scan(new_pose, beam_angles, world_objects, max_range)
 
         # Check for border violations.
@@ -52,10 +56,9 @@ class DynamicsSimulator:
                 invalid = True
                 break
 
+        # If the move is invalid, revert to the old pose.
         if invalid:
-            # Stack the attempted (invalid) move.
             self.invalid_attempts.append((new_pose, new_scan))
-            # Revert to the old pose and recompute the lidar scan at the old pose.
             new_pose = old_pose
             new_scan = self.simulate_lidar_scan(old_pose, beam_angles, world_objects, max_range)
 
@@ -106,6 +109,8 @@ class DynamicsSimulator:
                               (circle_center_tensor[1] - closest_y) ** 2)
         return distance.item() < circle_radius
 
+    import torch
+
     def generate_random_environment(self, n_objects, area_width, area_height, min_size, max_size,
                                     target_size, charger_size, robot_radius, obstacles=None, max_attempts=1000):
         """
@@ -115,13 +120,11 @@ class DynamicsSimulator:
             - A charger destination (green square as a torch.Tensor: [cx, cy, width, height])
             - A robot starting pose (blue circle) that does not collide with any object.
 
-        All random generation uses PyTorch.
-
         Returns:
-            world_objects: List of obstacle dictionaries.
-            target       : Target destination as a torch.Tensor.
-            charger      : Charger destination as a torch.Tensor.
-            robot_pose   : Tuple (x, y, heading) for the robot.
+            world_objects: Tensor of shape (n_objects, 4) with [cx, cy, width, height].
+            target       : Tensor [cx, cy, width, height].
+            charger      : Tensor [cx, cy, width, height].
+            robot_pose   : Tensor [x, y, heading].
         """
         world_objects = []
         if obstacles is not None:
@@ -141,48 +144,48 @@ class DynamicsSimulator:
                 attempts += 1
             if attempts >= max_attempts:
                 print("Warning: maximum attempts reached while generating obstacles.")
-
+                
         def generate_square(square_size):
             for _ in range(max_attempts):
-                cx = torch.rand(1).item() * (area_width - square_size) + square_size / 2
-                cy = torch.rand(1).item() * (area_height - square_size) + square_size / 2
-                # Create square as a torch tensor: [center_x, center_y, width, height]
-                square = torch.tensor([cx, cy, square_size, square_size], dtype=torch.float32)
+                cx = torch.rand(1) * (area_width - square_size) + square_size / 2
+                cy = torch.rand(1) * (area_height - square_size) + square_size / 2
+                square = torch.tensor([cx.item(), cy.item(), square_size, square_size], dtype=torch.float32)
                 if any(self.check_overlap(square, obj) for obj in world_objects):
                     continue
                 return square
-            return None
+            return torch.tensor([float("nan")] * 4)  # Return NaN tensor if placement fails
 
         target = generate_square(target_size)
         charger = generate_square(charger_size)
 
-        if target is None or charger is None:
+        if torch.isnan(target).any() or torch.isnan(charger).any():
             print("Warning: Could not place target or charger without overlap.")
 
-        robot_pose = None
+        robot_pose = torch.tensor([float("nan"), float("nan"), float("nan")], dtype=torch.float32)
         for _ in range(max_attempts):
-            rx = torch.rand(1).item() * (area_width - 2 * robot_radius) + robot_radius
-            ry = torch.rand(1).item() * (area_height - 2 * robot_radius) + robot_radius
-            heading = torch.rand(1).item() * 2 * torch.pi  # torch.pi is available in recent versions
+            rx = torch.rand(1) * (area_width - 2 * robot_radius) + robot_radius
+            ry = torch.rand(1) * (area_height - 2 * robot_radius) + robot_radius
+            heading = torch.rand(1) * 2 * torch.pi
             collision = False
-            # Check collision with obstacles.
+
+            # Check collision with obstacles, target, and charger
             for obj in world_objects:
-                if self.circle_rect_collision((rx, ry), robot_radius, obj):
+                if self.circle_rect_collision((rx.item(), ry.item()), robot_radius, obj):
                     collision = True
                     break
-            # Check collision with target.
-            if target is not None and self.circle_rect_collision((rx, ry), robot_radius, target):
+            if target is not None and self.circle_rect_collision((rx.item(), ry.item()), robot_radius, target):
                 collision = True
-            # Check collision with charger.
-            if charger is not None and self.circle_rect_collision((rx, ry), robot_radius, charger):
+            if charger is not None and self.circle_rect_collision((rx.item(), ry.item()), robot_radius, charger):
                 collision = True
             if not collision:
-                robot_pose = (rx, ry, heading)
+                robot_pose = torch.tensor([rx.item(), ry.item(), heading.item()], dtype=torch.float32)
                 break
-        if robot_pose is None:
+
+        if torch.isnan(robot_pose).any():
             print("Warning: Could not place robot without collision after maximum attempts.")
 
         return world_objects, target, charger, robot_pose
+
     
     def softmin2(self, a, b, beta=100.0):
         """
@@ -229,12 +232,12 @@ class DynamicsSimulator:
         heading = robot_pose[2]
         scan_vals = []
         if not isinstance(beam_angles, torch.Tensor):
-            beam_angles = torch.tensor(beam_angles, dtype=robot_pose.dtype, device=robot_pose.device)
+            beam_angles = torch.tensor(beam_angles, dtype=beam_angles.dtype, device=beam_angles.device)
         for beam in beam_angles:
             global_angle = heading + beam
             ray_direction = torch.stack((torch.cos(global_angle), torch.sin(global_angle)))
             ray_direction = ray_direction / torch.norm(ray_direction)
-            min_distance = max_range * torch.ones(1, dtype=robot_pose.dtype, device=robot_pose.device)
+            min_distance = max_range * torch.ones(1, dtype=beam_angles.dtype, device=beam_angles.device)
             for rect in world_objects:
                 t = self.ray_rect_intersection(ray_origin, ray_direction, rect, max_range)
                 min_distance = torch.min(min_distance, t)
@@ -260,7 +263,7 @@ class DynamicsSimulator:
         intersection_time : a differentiable scalar tensor approximating the intersection distance.
         """
         # Convert rectangle center to a tensor.
-        center = torch.tensor(rect["center"], dtype=ray_origin.dtype, device=ray_origin.device)
+        center = torch.tensor(rect["center"], dtype=ray_direction.dtype, device=ray_direction.device)
         w = rect["width"]
         h = rect["height"]
         min_x = center[0] - w / 2.0
@@ -355,8 +358,11 @@ class DynamicsSimulator:
         es_battery_time = torch.max(state[:, 11] - 0.1, torch.full_like(state[:, 11], 0))
         es_charger_time = state[:, 12]
         mask = c_norm_tensor < 0.1
+        mask_not_at_charger = c_norm_tensor > 0.1
+        
         es_battery_time = torch.where(mask, torch.min(state[:, 11] + 1, torch.full_like(state[:, 11], 1)), es_battery_time)
         es_charger_time = torch.where(mask, torch.max(state[:, 12] - 1, torch.full_like(state[:, 12], 0)), es_charger_time)
+        es_charger_time = torch.where(mask_not_at_charger, 1 , es_charger_time)
 
         new_state = torch.cat([new_lidar, t_angle_tensor, t_norm_tensor, c_angle_tensor, c_norm_tensor,
                                  es_battery_time[0].unsqueeze(1), es_charger_time[0].unsqueeze(1)], dim=1)
@@ -467,82 +473,103 @@ class DynamicsSimulator:
 
         return new_state, new_pose
 
+
+
     def visualize_environment(self, robot_pose, beam_angles, lidar_scan, world_objects,
-                              target, charger, area_width, area_height, max_range=10.0):
+                                target, charger, area_width, area_height, max_range=10.0, ax=None):
         """
         Draw the environment including obstacles (gray), target (yellow square),
         charger (green square), robot (blue circle with arrow), and lidar beams.
-        Note: The drawing part still uses matplotlib (and Python floats); however,
-              all computations used for the transformation come from PyTorch.
-        The lidar_scan is assumed to be normalized (in [0,1]); for drawing, it is multiplied by max_range.
+        
+        The lidar_scan is assumed to be normalized (in [0,1]); it is multiplied by max_range
+        for drawing. The function accepts an optional axis (ax); if not provided, a new figure
+        is created.
         """
-        fig, ax = plt.subplots(figsize=(8, 8))
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(8,8))
+        
         ax.set_xlim(0, area_width)
         ax.set_ylim(0, area_height)
 
         # Draw obstacles.
         for obj in world_objects:
-            cx, cy = obj["center"]
-            w, h = obj["width"], obj["height"]
-            lower_left = (cx - w / 2, cy - h / 2)
+            if isinstance(obj, dict):
+                cx, cy = obj["center"]
+                w, h = obj["width"], obj["height"]
+            else:
+                cx, cy, w, h = obj[0].item(), obj[1].item(), obj[2].item(), obj[3].item()
+            lower_left = (cx - w/2, cy - h/2)
             rect_patch = patches.Rectangle(lower_left, w, h, linewidth=1,
-                                           edgecolor="black", facecolor="gray", alpha=0.5)
+                                        edgecolor="black", facecolor="gray", alpha=0.5)
             ax.add_patch(rect_patch)
 
-        # Draw target destination (yellow square).
+        # Draw target.
         if target is not None:
             if isinstance(target, torch.Tensor):
                 cx, cy, w, h = target[0].item(), target[1].item(), target[2].item(), target[3].item()
             else:
                 cx, cy = target["center"]
                 w, h = target["width"], target["height"]
-            lower_left = (cx - w / 2, cy - h / 2)
+            lower_left = (cx - w/2, cy - h/2)
             target_patch = patches.Rectangle(lower_left, w, h, linewidth=2,
-                                             edgecolor="orange", facecolor="yellow", alpha=0.8, label="Target")
+                                            edgecolor="orange", facecolor="yellow", alpha=0.8, label="Target")
             ax.add_patch(target_patch)
 
-        # Draw charger destination (green square).
+        # Draw charger.
         if charger is not None:
             if isinstance(charger, torch.Tensor):
                 cx, cy, w, h = charger[0].item(), charger[1].item(), charger[2].item(), charger[3].item()
             else:
                 cx, cy = charger["center"]
                 w, h = charger["width"], charger["height"]
-            lower_left = (cx - w / 2, cy - h / 2)
+            lower_left = (cx - w/2, cy - h/2)
             charger_patch = patches.Rectangle(lower_left, w, h, linewidth=2,
-                                              edgecolor="green", facecolor="lightgreen", alpha=0.8, label="Charger")
+                                            edgecolor="green", facecolor="lightgreen", alpha=0.8, label="Charger")
             ax.add_patch(charger_patch)
 
         # Draw robot.
-        rx, ry, rtheta = robot_pose
+        if isinstance(robot_pose, torch.Tensor):
+            rx, ry, rtheta = robot_pose[0].item(), robot_pose[1].item(), robot_pose[2].item()
+        else:
+            rx, ry, rtheta = robot_pose
         ax.plot(rx, ry, "bo", markersize=8, label="Robot")
         arrow_length = 0.5
         ax.arrow(rx, ry,
-                 arrow_length * torch.cos(torch.tensor(rtheta)).item(),
-                 arrow_length * torch.sin(torch.tensor(rtheta)).item(),
-                 head_width=0.2, head_length=0.2, fc="blue", ec="blue")
+                arrow_length * math.cos(rtheta),
+                arrow_length * math.sin(rtheta),
+                head_width=0.2, head_length=0.2, fc="blue", ec="blue")
 
         # Ensure beam_angles is a torch tensor.
         if not isinstance(beam_angles, torch.Tensor):
             beam_angles = torch.tensor(beam_angles, dtype=torch.float32)
-        # Draw lidar beams (convert normalized scan back to actual length by multiplying with max_range).
+        
+        # Draw lidar beams.
         for beam, dist in zip(beam_angles, lidar_scan):
-            global_angle = rtheta + (beam.item() if isinstance(beam, torch.Tensor) else beam)
-            actual_dist = dist.item() * max_range
-            end_x = rx + actual_dist * torch.cos(torch.tensor(global_angle)).item()
-            end_y = ry + actual_dist * torch.sin(torch.tensor(global_angle)).item()
-            # Use a dashed line if the beam reaches maximum range (normalized value == 1).
-            style = "-" if dist.item() < 1.0 else "--"
+            # Convert beam angle to a float.
+            beam_val = beam.item() if isinstance(beam, torch.Tensor) else beam
+            # Compute the global angle: robot heading + beam relative angle.
+            global_angle = rtheta + beam_val
+            
+            # Clamp the normalized distance to [0,1] and compute the actual distance.
+            norm_dist = max(0.0, min(dist.item(), 1.0))
+            actual_dist = norm_dist * max_range
+            
+            # Compute the end point using math.cos and math.sin.
+            end_x = rx + actual_dist * math.cos(global_angle)
+            end_y = ry + actual_dist * math.sin(global_angle)
+            
+            # Use a dashed line if the beam reading is 1 (i.e. no hit).
+            style = "-" if norm_dist < 1.0 else "--"
             ax.plot([rx, end_x], [ry, end_y], style, color="red", linewidth=1)
             ax.plot(end_x, end_y, "ro", markersize=3)
-
+            
         ax.set_aspect("equal")
         ax.set_title("Environment with Obstacles, Target, Charger, Robot, and Lidar Scan")
         ax.set_xlabel("X")
         ax.set_ylabel("Y")
         ax.legend(loc="upper right")
-        plt.grid(True)
-        plt.show()
+        ax.grid(True)
+
 
 
 

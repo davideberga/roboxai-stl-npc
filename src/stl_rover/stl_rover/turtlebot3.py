@@ -25,8 +25,8 @@ class TurtleBot3:
         self.lidar_msg = LaserScan()
         self.odom_msg = Odometry()
         # set your desired goal:
-        self.goal_x, self.goal_y = -1.868001, -3.722999  # this is for simulation change for real robot
-        self.charger_x, self.charger_y = -1.932, -1.701999  # this is for simulation change for real robot
+        self.goal_x, self.goal_y = -1.868001, 3.722999,    # this is for simulation change for real robot
+        self.charger_x, self.charger_y = -2.139001, -0.2830013  # this is for simulation change for real robot
 
         # linear velocity is costant set your value
         self.linear_velocity = 0.2  # to comment
@@ -120,11 +120,12 @@ class TurtleBot3:
         
         return distance / 5,  heading
 
-    def move(self, action, pub):
+    def move(self, linear_vel, angular_vel, pub):
+        print(linear_vel)
         twist = Twist()
         
-        linear_vel = min(float(action[0]), 0.2)
-        angular_vel = -float(action[1])
+        linear_vel = min(float(linear_vel), 0.2)
+        angular_vel = float(angular_vel)
 
         twist.linear.x = linear_vel
         twist.linear.y = 0.0
@@ -135,5 +136,18 @@ class TurtleBot3:
         twist.angular.z = angular_vel
         
         print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
+
+        pub.publish(twist)
+        
+    def stop(self, pub):
+        twist = Twist()
+
+        twist.linear.x =0.0
+        twist.linear.y = 0.0
+        twist.linear.z = 0.0
+
+        twist.angular.x = 0.0
+        twist.angular.y = 0.0
+        twist.angular.z = 0.0
 
         pub.publish(twist)

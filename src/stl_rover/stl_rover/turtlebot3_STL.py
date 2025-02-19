@@ -33,7 +33,7 @@ class turtlebot3DQN(Node):
         
         # number of attempts, the network could be fail if you set a number greater than 1 the robot try again to reach the goal
         self.n_episode_test = 1
-        self.timer_period = 1# 0.25 seconds
+        self.timer_period = 0.25 # 0.25 seconds
         time.sleep(1)
         self.timer = self.create_timer(self.timer_period, self.control_loop)
         
@@ -55,28 +55,34 @@ class turtlebot3DQN(Node):
         #print(f"Dist: {dist}, Head: {heading}")
         
         # if the robot reach the goal or to close at the obstalce, stop
-        if dist < 0.1:
+        if dist < 0.05:
             print("Goal reached")
-            self.turtlebot3.move(-1, self.pub)
+            self.turtlebot3.stop(self.pub)
             quit()
             
         
         scan = self.turtlebot3.get_scan()
         # print(f"Scan: {scan[3]}")
+        
+        self.battery = self.battery - 0.01
+        
+        if(dist_charger < 0.1):
+            self.battery = 1
+            print("Recharged")
 
         state = np.concatenate((scan, [heading, dist, heading_charger, dist_charger,  self.battery, self.charger_time]))
         
-        print(state)
-        
         # print(state)
-        print([heading, dist ])
+        
+        # # print(state)
+        # print([heading, dist ])
         state = self.agent.normalize_state(state)
         state_torch = torch.tensor([state], dtype=torch.float32).to(self.device)
-        planning = self.agent.plan(state_torch)[0].detach().cpu().numpy()
+        linear_vel, angular_vel = self.agent.plan(state_torch, self.timer_period)
         
-        self.battery = self.battery - 0.01
+        
         # The the first action planned
-        self.turtlebot3.move(planning[0], self.pub)
+        self.turtlebot3.move(linear_vel, angular_vel, self.pub)
         
         # for step_planned in planning:
         #     self.battery = self.battery - 0.01

@@ -2,6 +2,8 @@
 **/build
 **/log
 
+**/STL/exap_model_*.pth
+
 **/images
 
 .fleet/
