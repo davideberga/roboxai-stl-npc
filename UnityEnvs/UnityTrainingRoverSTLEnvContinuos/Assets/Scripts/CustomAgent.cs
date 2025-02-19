@@ -11,9 +11,9 @@ public class CustomAgent : Agent {
     public float linearStep;
 
     // Flags for randomization
-    public bool randomizeAgentRotation = false;
-    public bool randomizeAgentPosition = false;
-    public bool randomizeTarget = false;
+    public bool randomizeAgentRotation = true;
+    public bool randomizeAgentPosition = true;
+    public bool randomizeTarget = true;
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 5f;
 
@@ -58,8 +58,8 @@ public class CustomAgent : Agent {
     }
 
     private void randomizeEnv() {
-
-        randomizeTarget = false;
+        Random.InitState(System.Environment.TickCount);
+        randomizeTarget = true;
         // --- Randomize the target position ---
         if (randomizeTarget) {
             do {
@@ -73,23 +73,23 @@ public class CustomAgent : Agent {
 
         // --- Randomize charger positions ---
         // Randomize each charger so that they do not overlap obstacles or each other.
-        // foreach (GameObject charger in chargerList) {
-        //     do {
-        //         charger.transform.position = new Vector3(
-        //             Random.Range(-targetRandomArea, targetRandomArea),
-        //             0f,
-        //             Random.Range(-targetRandomArea, targetRandomArea)
-        //         );
-        //     } while (VerifyIntersectionWithObstacles(charger));
-        // }
+        foreach (GameObject charger in chargerList) {
+            do {
+                charger.transform.position = new Vector3(
+                    Random.Range(-targetRandomArea, targetRandomArea),
+                    0f,
+                    Random.Range(-targetRandomArea, targetRandomArea)
+                );
+            } while (VerifyIntersectionWithObstacles(charger));
+        }
 
         // --- Reset the agent ---
         // Reset agent's position and rotation to their starting values
         transform.position = startingPos;
         transform.rotation = startingRot;
 
-		randomizeAgentRotation = false;
-		randomizeAgentPosition = false;
+		randomizeAgentRotation = true;
+		randomizeAgentPosition = true;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {

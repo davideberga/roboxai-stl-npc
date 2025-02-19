@@ -49,7 +49,7 @@ def parse_args():
 
     # Update
     parser.add_argument("--n_epochs", type=int, default=40, help="Number of epochs for policy update")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate for the optimizer")
+    parser.add_argument("--lr", type=float, default=1e-4, help="Learning rate for the optimizer")
 
     # Cuda 
     parser.add_argument("--cuda", type=str, default="0", help="-1 to disable cuda")

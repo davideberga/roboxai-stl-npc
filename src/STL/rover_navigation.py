@@ -62,10 +62,10 @@ class RoverNavigation(gym.Env):
         # lidar_scan + 6 elements,
         # - normalized in [0, 1] ==> heading (first) + distance (second) of the TARGET
         # - normalized in [0, 1] ==> heading (first) + distance (second) of the NEAREST CHARGER
-        # - Battery time (number of steps) [0, 10000], Charger hold time (number of steps) [0,5]
+        # - Battery time (number of steps) [0, 1], Charger hold time (number of steps) [0,1]
         self.observation_space = gym.spaces.Box(
             np.array([0 for _ in range(self.scan_number)] + [0, 0, 0, 0, 0, 0]),
-            np.array([1 for _ in range(self.scan_number)] + [1, 1, 1, 1, 10000, 5]),
+            np.array([1 for _ in range(self.scan_number)] + [1, 1, 1, 1, 1, 1]),
             dtype=np.float64,
         )
 
