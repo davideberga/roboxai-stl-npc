@@ -91,14 +91,14 @@ class RoverNavigation(gym.Env):
             print("\n Batteria esaurita! Episodio terminato.\n")
 
         # Decrease the battery at every step
-        self.battery_time -= 1
+        self.battery_time -= 0.001
         state = self.fix_state(state)
         env_var = self.extactValues(state)
         
         info["target_reached"] = reward == 1
         info["collision"] = reward == -1
 
-        done = reward == -1 or self.battery_time == 0
+        done = reward == -1 or self.battery_time <= 0
         
         # ------ HANDLE BATTERY -----
         # If near charger

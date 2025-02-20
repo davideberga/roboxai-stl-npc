@@ -188,14 +188,13 @@ class DDQN():
 
 				# Select the action, perform the action and save the returns in the memory buffer
 				action, action_prob = self.get_action(state)
-				new_state, reward, done, info = self.env.step(action)
+				new_state, reward, done, info = self.env.step(3)
 				self.memory_buffer.append([state, action, action_prob, reward, new_state, done])
 
 				# Update the dictionaries for the logger and the trajectory
 				logger_dict['reward'][-1] += reward	
 				logger_dict['step'][-1] += 1	
-				logger_dict['cost'][-1] += info['cost']
-				logger_dict['success'][-1] = 1 if info['goal_reached'] else 0
+				logger_dict['success'][-1] = 1 if info['target_reached'] else 0
 
 				# Call the update rule of the algorithm
 				self.network_update_rule(done)

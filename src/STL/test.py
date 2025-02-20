@@ -80,14 +80,14 @@ if __name__ == "__main__":
 
     sim = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("exap_model_0.1600000113248825.pth")
+    model.load_eval("exap_model_0.2240000069141388.pth")
     model.eval()
 
     beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
 
     area_width = 10
     area_height = 10
-    n_objects = 5
+    n_objects = 3
     n_states = 1
 
     world_objects, state, robot_pose, target, charger = generate_env_with_starting_states(area_width, area_height, n_objects, n_states, beam_angles, device)
@@ -117,7 +117,8 @@ if __name__ == "__main__":
 
             control = model(state)
             robot_pose, lidar_scan = sim.predict_lidar_scan_from_motion(
-                robot_pose, control[0][0][0], control[0][0][1], beam_angles, world_objects, area_width=area_width, area_height=area_height, robot_radius=robot_radius, max_range=10.0
+                robot_pose, control[0][0][0], control[0][0][1], beam_angles, world_objects, area_width=area_width, area_height=area_height, robot_radius=robot_radius, 
+                max_range=10.0, use_perfection=True
             )
 
             target_distance, target_angle = sim.estimate_destination(robot_pose, target, max_distance=10.0)

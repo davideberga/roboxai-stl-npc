@@ -48,8 +48,8 @@ class RoverSTL:
         self.sample_batch = 10000
 
         # Task specific
-        self.safe_distance = 0.1
-        self.enough_close_to = 0.1
+        self.safe_distance = 0.05
+        self.enough_close_to = 0.05
         self.wait_for_charging = 1
 
         self.rover_vmax = 0
@@ -248,7 +248,7 @@ class RoverSTL:
                     acc_avg = torch.mean(acc)
 
                     if acc_avg > 0.1:
-                        self.rover_policy.save(f"exap_model_{acc_avg.item()}.pth")
+                        self.rover_policy.save(f"exap_model_only_score_{acc_avg.item()}.pth")
                         print(f"Saving with: {acc_avg.item()}")
 
                     small_charge = (states[..., 11:12] <= battery_limit).float()
@@ -264,7 +264,7 @@ class RoverSTL:
 
                     # old_params = {name: param.clone().detach() for name, param in self.rover_policy.named_parameters()}
                     
-                    loss = torch.mean(self.relu(0.5 - score)) + dist_target_charger_loss
+                    loss = torch.mean(self.relu(0.5 - score)) # + dist_target_charger_loss
 
                     loss.backward()
                     # Update parameters

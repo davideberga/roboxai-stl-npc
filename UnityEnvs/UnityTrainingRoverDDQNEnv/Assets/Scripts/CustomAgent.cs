@@ -11,9 +11,9 @@ public class CustomAgent : Agent {
     public float linearStep;
 
     // Flags for randomization
-    public bool randomizeAgentRotation = true;
-    public bool randomizeAgentPosition = true;
-    public bool randomizeTarget = true;
+    public bool randomizeAgentRotation = false;
+    public bool randomizeAgentPosition = false;
+    public bool randomizeTarget = false;
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
@@ -55,6 +55,7 @@ public class CustomAgent : Agent {
     // Called at the beginning of each episode
     public override void OnEpisodeBegin() {
         Debug.Log("Episode Begin: Resetting Environment");
+        randomizeTarget = false;
 
         // --- Randomize the target position ---
         if (randomizeTarget) {
@@ -69,23 +70,23 @@ public class CustomAgent : Agent {
 
         // --- Randomize charger positions ---
         // Randomize each charger so that they do not overlap obstacles or each other.
-        foreach (GameObject charger in chargerList) {
-            do {
-                charger.transform.position = new Vector3(
-                    Random.Range(-targetRandomArea, targetRandomArea),
-                    0f,
-                    Random.Range(-targetRandomArea, targetRandomArea)
-                );
-            } while (VerifyIntersectionWithObstacles(charger));
-        }
+        // foreach (GameObject charger in chargerList) {
+        //     do {
+        //         charger.transform.position = new Vector3(
+        //             Random.Range(-targetRandomArea, targetRandomArea),
+        //             0f,
+        //             Random.Range(-targetRandomArea, targetRandomArea)
+        //         );
+        //     } while (VerifyIntersectionWithObstacles(charger));
+        // }
 
         // --- Reset the agent ---
         // Reset agent's position and rotation to their starting values
         transform.position = startingPos;
         transform.rotation = startingRot;
 
-		randomizeAgentRotation = true;
-		randomizeAgentPosition = true;
+		randomizeAgentRotation = false;
+		randomizeAgentPosition = false;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -122,6 +123,10 @@ public class CustomAgent : Agent {
         if (actionBuffer[0] == 2) { // turn left
             angularVelocity = -angularStep;
             linearVelocity = 0f;
+        }
+        if (actionBuffer[0] == 3) { // turn right
+            angularVelocity = 0f;
+            linearVelocity = 0.1f;
         }
 
         transform.Rotate(Vector3.up * angularVelocity);
