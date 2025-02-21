@@ -237,7 +237,7 @@ class DynamicsSimulator:
             scan_vals.append(min_distance)
         return torch.stack(scan_vals).squeeze() / max_range
 
-    def ray_rect_intersection(self, ray_origin, ray_direction, rect, max_range, beta=1.0, beta2=1.0, epsilon=1e-6):
+    def ray_rect_intersection(self, ray_origin, ray_direction, rect, max_range, beta=10.0, beta2=10.0, epsilon=1e-6):
         """
         Differentiable approximation to the ray–axis-aligned rectangle intersection.
 
@@ -435,8 +435,8 @@ class DynamicsSimulator:
         # Assume state[:, 11] is battery time and state[:, 12] is charger time.
         es_battery_time = torch.max(state[:, 11] - 0.1, torch.full_like(state[:, 11], 0))
         es_charger_time = state[:, 12]
-        mask = c_norm_tensor < 0.1
-        mask_not_at_charger = c_norm_tensor > 0.1
+        mask = c_norm_tensor < 0.05
+        mask_not_at_charger = c_norm_tensor > 0.05
 
         es_battery_time = torch.where(mask, torch.min(state[:, 11] + 1, torch.full_like(state[:, 11], 1)), es_battery_time)
         es_charger_time = torch.where(mask, torch.max(state[:, 12] - 1, torch.full_like(state[:, 12], 0)), es_charger_time)

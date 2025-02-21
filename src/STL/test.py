@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     sim = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("exap_model_0.2240000069141388.pth")
+    model.load_eval("exap_model_0.1680000126361847.pth")
     model.eval()
 
     beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
@@ -116,9 +116,11 @@ if __name__ == "__main__":
             # Define 7 lidar beam angles (radians) relative to robot forward.
 
             control = model(state)
+            v = torch.max(control[0][0][0], torch.tensor(0.2))
+            theta =  control[0][0][1]
             robot_pose, lidar_scan = sim.predict_lidar_scan_from_motion(
-                robot_pose, control[0][0][0], control[0][0][1], beam_angles, world_objects, area_width=area_width, area_height=area_height, robot_radius=robot_radius, 
-                max_range=10.0, use_perfection=True
+                robot_pose, v, theta, beam_angles, world_objects, area_width=area_width, area_height=area_height, robot_radius=robot_radius, 
+                max_range=10.0, use_perfection=False
             )
 
             target_distance, target_angle = sim.estimate_destination(robot_pose, target, max_distance=10.0)

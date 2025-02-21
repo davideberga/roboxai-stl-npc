@@ -48,7 +48,7 @@ class RoverSTL:
         self.sample_batch = 10000
 
         # Task specific
-        self.safe_distance = 0.05
+        self.safe_distance = 0.03
         self.enough_close_to = 0.05
         self.wait_for_charging = 1
 
@@ -220,7 +220,8 @@ class RoverSTL:
             
             import glob
 
-            files = glob.glob("dataset/*.npz")  # Change `.txt` to your desired extension
+            files = glob.glob("dataset/*.npz") 
+            counter = 0
             for path in files:
                 dataset = np.load(path, allow_pickle=True)
                 print('Loaded')
@@ -247,15 +248,13 @@ class RoverSTL:
                     acc = (stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
                     acc_avg = torch.mean(acc)
 
-                    if acc_avg > 0.1:
-                        self.rover_policy.save(f"exap_model_only_score_{acc_avg.item()}.pth")
-                        print(f"Saving with: {acc_avg.item()}")
+                    
 
                     small_charge = (states[..., 11:12] <= battery_limit).float()
                     # Initial distance - final distance
                     # At the end of the planned steps the distance should be decreased
-                    dist_charger = estimated_next_states[:, 9, 10]
-                    dist_target = estimated_next_states[:, 9, 8]
+                    dist_charger = estimated_next_states[:, :, 10]
+                    dist_target = estimated_next_states[:, :, 8]
 
                     # TODO: Check this loss
                     dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
@@ -264,33 +263,23 @@ class RoverSTL:
 
                     # old_params = {name: param.clone().detach() for name, param in self.rover_policy.named_parameters()}
                     
-                    loss = torch.mean(self.relu(0.5 - score)) # + dist_target_charger_loss
+                    loss = torch.mean(self.relu(0.5 - score)) + dist_target_charger_loss
+
+
+                    if counter % 10 == 0:
+                        self.rover_policy.save(f"model_testing/exap_model_test_1_{acc_avg.item()}_{counter}.pth")
+                        print(f"Saving with: {acc_avg.item()}")
 
                     loss.backward()
                     # Update parameters
                     self.optimizer.step()
                     
-                    
-                    # print("\nParameter updates (difference after update):")
-                    # for name, param in self.rover_policy.named_parameters():
-                    #     update = old_params[name] - param.data
-                    #     print(f"{name}: {update}")
-
-                    
-                    
-                    # ray_origin = torch.tensor([1.0, 1.0], requires_grad=True)
-                    # ray_direction = torch.tensor([1.0, 0.0], requires_grad=True)  # assume normalized
-                    # # Use one of your obstacles
-                    # dummy_rect = {"center": [5.0, 5.0], "width": 2.0, "height": 2.0}
-                    # t = self.simulator.ray_rect_intersection(ray_origin, ray_direction, dummy_rect, max_range=10.0)
-                    # t.backward()
-                    # print("Gradient of intersection time w.r.t. ray_origin:", ray_origin.grad)
-                    # print("Gradient of intersection time w.r.t. ray_direction:", ray_direction.grad)
 
                     print(
                         "%s > %03d  loss:%.3f acc:%.20f dist:%.3f dT:%s T:%s ETA:%s"
                         % ("STL TRAINING ", step, loss.item(), acc_avg.item(), dist_target_charger_loss.item(), eta.interval_str(), eta.elapsed_str(), eta.eta_str())
                     )
+                    counter = counter + 1
 
     def print_beautified_state(self, x0):
         x0 = x0.cpu().detach().tolist()
@@ -349,7 +338,9 @@ class RoverSTL:
         lidar_values = x[..., 0:7]
         min_lidar = smooth_min(lidar_values)
         # print(f"Lidar robustness: ${min_lidar - self.safe_distance}")
-        return min_lidar - self.safe_distance
+        
+        # Rescale lidar values to give them more importance
+        return 5 * (min_lidar - self.safe_distance)
     
     
 
@@ -361,10 +352,8 @@ class RoverSTL:
             return value
 
         avoid = Always(0, steps_ahead, AP(lambda x: debug_print("Lidar safety", self.lidar_obs_avoidance_robustness, x), comment="Lidar safety"))
-
-
-        at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: (self.enough_close_to - x[..., 8]) / self.enough_close_to, x), comment="Distance to destination")
-        at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: (self.enough_close_to - x[..., 10]) / self.enough_close_to, x), comment="Distance to charger")
+        at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: self.enough_close_to - x[..., 8], x), comment="Distance to destination")
+        at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: self.enough_close_to - x[..., 10], x), comment="Distance to charger")
 
         if_enough_battery_go_destiantion = Imply(
             AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)),
@@ -383,7 +372,7 @@ class RoverSTL:
 
         charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
-        return ListAnd([avoid, always_have_battery, charging, if_low_battery_go_charger, if_enough_battery_go_destiantion])
+        return ListAnd([avoid, always_have_battery, if_low_battery_go_charger, if_enough_battery_go_destiantion])
 
 
         return ListAnd(
