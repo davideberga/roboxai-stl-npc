@@ -104,3 +104,9 @@ This repo contains the code for the project of Robotics in AI and XAI courses.
 >     Distance to destination: tensor([[-2.5858, -2.1320, -1.6630, -1.2241, -0.8193, -0.4360, -0.0295,  0.1106,
 >               0.0547, -0.1086, -0.5540]], device='cuda:0', grad_fn=<DivBackward0>)
 > ```
+
+### Config
+
+- self.safe_distance = 0.12 # Inferred from ros experiments in unity
+- self.enough_close_to = 0.05
+- max_range = 5.0 # Simulate a similar lidar wrt unity env

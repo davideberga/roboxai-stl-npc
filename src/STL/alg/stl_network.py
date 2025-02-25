@@ -27,6 +27,7 @@ class RoverSTLPolicy(nn.Module):
         #
         # output (rover v theta; astro v theta)
         self.steps_ahead = steps_ahead
+        self.dropout = nn.Dropout(0.5)
         self.net = build_relu_nn( 7 + 2 + 2 + 2, self.steps_ahead * 2, [256, 256, 256], activation_fn=nn.ReLU)
     
     def forward(self, x):     

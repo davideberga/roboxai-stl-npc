@@ -1,4 +1,4 @@
-from alg.RoverSTL import RoverSTL
+from alg.RoverSTL_old import RoverSTL
 import config
 
 

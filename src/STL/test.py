@@ -1,13 +1,29 @@
 import torch
 from alg.dynamics import DynamicsSimulator
 from alg.stl_network import RoverSTLPolicy
+import numpy as np
+
+# From paper code
+objs_np = [np.array([[0.0, 0.0], [10, 0], [10, 10], [0, 10]])]  # map
+objs_np.append(np.array([[0.0, 0.0], [3.0, 0], [3.0, 3.0], [0, 3.0]]))  # first obstacle
+objs_np.append(objs_np[1] + np.array([[5 - 3.0 / 2, 10 - 3.0]]))  # second obstacle (top-center)
+objs_np.append(objs_np[1] + np.array([[10 - 3.0, 0]]))  # third obstacle (bottom-right)
+objs_np.append(objs_np[1] / 2 + np.array([[5 - 3.0 / 4, 5 - 3.0 / 4]]))  # forth obstacle (center-center, shrinking)
+
+
+obstacles = [
+    {"center": [2, 1.5], "width": 4.0, "height": 3.0},
+    {"center": [8, 1.5], "width": 4.0, "height": 3.0},
+    {"center": [5, 8.5], "width": 4.0, "height": 3.0},
+    {"center": [5, 5], "width": 1.0, "height": 1.0},
+]
 
 
 def generate_env_with_starting_states(area_width: int, area_height: int, n_objects: int, n_states: int, beam_angles, device):
     sim = DynamicsSimulator()
 
     min_size = 0.5  # minimum obstacle size.
-    max_size = 2.0  # maximum obstacle size.
+    max_size = 10.0  # maximum obstacle size.
     target_size = 0.2  # size of target square.
     charger_size = 0.2  # size of charger square.
     robot_radius = 0.3  # robot's radius.
@@ -19,8 +35,8 @@ def generate_env_with_starting_states(area_width: int, area_height: int, n_objec
         max_size,
         target_size,
         charger_size,
-        robot_radius,
-        obstacles=None,  # or pass a list of obstacles to override random generation.
+        0.5,
+        obstacles=obstacles + sim.walls(10),  # obstacles,
         max_attempts=1000,
     )
 
@@ -80,7 +96,7 @@ if __name__ == "__main__":
 
     sim = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("exap_model_0.1680000126361847.pth")
+    model.load_eval("model_testing/exap_model_test_1_0.5982199907302856_0.pth")
     model.eval()
 
     beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
@@ -92,12 +108,14 @@ if __name__ == "__main__":
 
     world_objects, state, robot_pose, target, charger = generate_env_with_starting_states(area_width, area_height, n_objects, n_states, beam_angles, device)
 
+    print(world_objects)
+
     robot_radius = 0.3
 
     robot_pose = robot_pose[0]
     target = target[0]
     charger = charger[0]
-    
+
     import matplotlib.pyplot as plt
     import matplotlib.animation as animation
 
@@ -105,22 +123,22 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(8, 8))
 
     # Create an FFMpeg writer (make sure you have ffmpeg installed).
-    writer = animation.FFMpegWriter(
-        fps=5,
-        codec="libx264",
-        extra_args=["-pix_fmt", "yuv420p"]
-    )
-    
+    writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
+
     with writer.saving(fig, "simulation_video.mp4", dpi=100):
-        for frame in range(100):  
+        for frame in range(100):
             # Define 7 lidar beam angles (radians) relative to robot forward.
 
+            print(state)
             control = model(state)
+            print(control[0])
+            exit(0) 
             v = torch.max(control[0][0][0], torch.tensor(0.2))
-            theta =  control[0][0][1]
+            theta = control[0][0][1]
             robot_pose, lidar_scan = sim.predict_lidar_scan_from_motion(
-                robot_pose, v, theta, beam_angles, world_objects, area_width=area_width, area_height=area_height, robot_radius=robot_radius, 
-                max_range=10.0, use_perfection=False
+                robot_pose, v, theta, beam_angles, world_objects, area_width=area_width, 
+                area_height=area_height, robot_radius=robot_radius, max_range=5.0, 
+                use_perfection=False
             )
 
             target_distance, target_angle = sim.estimate_destination(robot_pose, target, max_distance=10.0)
@@ -128,22 +146,30 @@ if __name__ == "__main__":
 
             # Visualize the initial environment.
             ax.clear()
-            sim.visualize_environment(robot_pose, beam_angles, lidar_scan, world_objects, target, charger, area_width, area_height, max_range=10.0, ax=ax)
-            
-            
-            
+            sim.visualize_environment(robot_pose, beam_angles, lidar_scan, world_objects, target, charger, area_width, area_height, max_range=5.0, ax=ax)
+
             if state[0][11].item() < 0:
                 print("Battery finished")
                 break
 
-            if target_distance < 0.05:
+            if target_distance < 0.01:
                 print("Goal reached")
                 break
 
-            state = torch.cat([lidar_scan, target_angle.unsqueeze(0), target_distance.unsqueeze(0), target_angle.unsqueeze(0), target_distance.unsqueeze(0), state[0][11].unsqueeze(0) - 0.01, state[0][12].unsqueeze(0)])
+            state = torch.cat(
+                [
+                    lidar_scan,
+                    target_angle.unsqueeze(0),
+                    target_distance.unsqueeze(0),
+                    target_angle.unsqueeze(0),
+                    target_distance.unsqueeze(0),
+                    state[0][11].unsqueeze(0) - 0.01,
+                    state[0][12].unsqueeze(0),
+                ]
+            )
             print(f"Battery: {state[11].item()}")
             state = state.unsqueeze(0)
-            
+
             writer.grab_frame()
 
         # Update the robot pose and lidar scan for the next iteration.

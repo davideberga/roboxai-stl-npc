@@ -62,7 +62,7 @@ class turtlebot3DQN(Node):
             
         
         scan = self.turtlebot3.get_scan()
-        # print(f"Scan: {scan[3]}")
+        # print(f"Scan: {scan}")
         
         self.battery = self.battery - 0.01
         
@@ -82,7 +82,7 @@ class turtlebot3DQN(Node):
         
         
         # The the first action planned
-        self.turtlebot3.move(linear_vel, angular_vel, self.pub)
+        # self.turtlebot3.move(linear_vel, angular_vel, self.pub)
         
         # for step_planned in planning:
         #     self.battery = self.battery - 0.01
