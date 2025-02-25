@@ -12,8 +12,8 @@ import multiprocessing as mp
 
 class DynamicsSimulator:
     def __init__(self):
-        self.beta = 10  # 1
-        self.beta2 = 50  # 5
+        self.beta = 20  # 1
+        self.beta2 = 100  # 5
         self.epsilon = 1e-4
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -848,7 +848,7 @@ class DynamicsSimulator:
         # Update robot pose.
 
         # No rescale velocity
-        # v = v * (self.rover_max_velocity - self.rover_min_velocity) + self.rover_min_velocity
+        v = v * (self.rover_max_velocity - self.rover_min_velocity) + self.rover_min_velocity
         new_x = robot_pose[:, 0] + v * torch.cos(robot_pose[:, 2])
         new_y = robot_pose[:, 1] + v * torch.sin(robot_pose[:, 2])
         new_heading = robot_pose[:, 2] + theta

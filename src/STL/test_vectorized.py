@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # Initialize model
     sim: DynamicsSimulator = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("model_testing/model_correct_dynamics_training_0.6885819420814514_2.pth")
+    model.load_eval("model_testing/model_correct_dynamics_training_0.8883600461483002_51.pth")
     model.eval()
 
     area_width = 10
@@ -86,14 +86,16 @@ if __name__ == "__main__":
                 new_lidar = sim.simulate_lidar_scan_vectorized(new_pose, beam_angles, world_objects)
                 target_distance, target_angle = sim.estimate_destination_vectorized(new_pose, target.unsqueeze(0))
                 charger_distance, charger_angle = sim.estimate_destination_vectorized(new_pose, charger.unsqueeze(0))
-                # battery -= 0.01
-                # new_state[..., 11] = battery
+                battery -= 0.01
+                new_state[..., 11] = battery
                 
-                near_charger = (torch.tanh(1000 * (0.05 * (0.05 - new_state[..., 10]))) + 1) / 2
-                # Update the battery
-                new_state[..., 11] = (new_state[..., 11].unsqueeze(1) - 0.01) * (1 - near_charger) + 1 * near_charger
-                new_state[..., 12] = state[..., 12].unsqueeze(1) - 0.2 * near_charger
+                # near_charger = (torch.tanh(1000 * (0.05 * (0.05 - new_state[..., 10]))) + 1) / 2
+                # # Update the battery
+                # new_state[..., 11] = (new_state[..., 11].unsqueeze(1) - 0.01) * (1 - near_charger) + 1 * near_charger
+                # new_state[..., 12] = state[..., 12].unsqueeze(1) - 0.2 * near_charger
 
+                #new_state[..., 11] -= battery
+                
                 # Visualize the initial environment.
                 ax.clear()
                 sim.visualize_environment(
