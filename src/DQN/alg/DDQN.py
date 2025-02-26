@@ -169,8 +169,6 @@ class DDQN():
 
 		logger_dict = { "reward": [], "success": [], "step": [], "cost": []}
 		
-		
-
 		# Iterate the training loop over multiple episodes
 		for episode in range(args.n_episode):
 
@@ -188,7 +186,7 @@ class DDQN():
 
 				# Select the action, perform the action and save the returns in the memory buffer
 				action, action_prob = self.get_action(state)
-				new_state, reward, done, info = self.env.step(3)
+				new_state, reward, done, info = self.env.step(action)
 				self.memory_buffer.append([state, action, action_prob, reward, new_state, done])
 
 				# Update the dictionaries for the logger and the trajectory

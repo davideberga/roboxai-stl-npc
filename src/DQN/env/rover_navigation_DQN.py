@@ -34,8 +34,8 @@ class RoverNavigation(gym.Env):
         # Override the state_size
         state_size = self.env.observation_space.shape[0] - self.scan_number
 
-        print(f"State size: {state_size}")
-        print(f"Scan size: {self.scan_number}")
+        #print(f"State size: {state_size}")
+        #print(f"Scan size: {self.scan_number}")
 
         # Sanity check for the scan number
         assert_messages = "Mismatching between the given scan number and the observations (check the cost value)"
@@ -79,84 +79,113 @@ class RoverNavigation(gym.Env):
 
     def step(self, action):
         info = {}
+        done = False
         state, reward, a, b = self.env.step(action)
-        print('Reward: ', reward)
+        print(f'Batteria prima dello step: {self.battery_time}')
+        print('Reward prima dello step: ', reward)
 
-        # Debugging prints
-        if reward == 1:
-            print("\n Target raggiunto! Episodio terminato.\n")
-        if reward == -1:
-            print("\n Collisione rilevata! Episodio terminato.\n")
-        if self.battery_time == 0:
-            print("\n Batteria esaurita! Episodio terminato.\n")
-
-        # Decrease the battery at every step
-        self.battery_time -= 0.001
         state = self.fix_state(state)
-        env_var = self.extactValues(state)
-        
-        info["target_reached"] = reward == 1
-        info["collision"] = reward == -1
+        env_var = self.extractValues(state)
 
-        done = reward == -1 or self.battery_time <= 0
+        info["target_reached"] = False
+        info["collision"] = False
+
+        if reward == -1:
+            done = True
+            info["collision"] = True
+            print("\n Collisione rilevata! Episodio terminato.\n")
+        elif reward == 1:
+            done = True
+            info["target_reached"] = True
+            print("\n Target raggiunto! Episodio terminato.\n")
         
         # ------ HANDLE BATTERY -----
         # If near charger
-        if env_var["d_n_charger"] < 0.1:
-            self.charger_hold_time = max(0, self.charger_hold_time - 1)
-        elif self.charger_hold_time == 0:
-            self.battery_time = self.FULL_BATTERY_TIME
-            self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
-        else: 
-            self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
+        if env_var["d_n_charger"] < 0.1 and self.battery_time > 0:  # close to charger
+            if self.charger_hold_time > 0:
+                print(f'before charger_hold_time: {self.charger_hold_time}')
+                self.battery_time = min(self.FULL_BATTERY_TIME, self.battery_time + 0.1)  # Recharge
+                self.charger_hold_time -= 1
+                print(f'before charger_hold_time: {self.charger_hold_time}')
+                print(f'Il robot si sta ricaricando. Batteria: {self.battery_time}')
+            elif self.charger_hold_time == 0:
+                self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
+                print(f'Il robot ha finito di caricarsi. Batteria: {self.battery_time} e Charger_hold_time: {self.charger_hold_time}')
+        else:
+            if self.battery_time > 0:
+                self.battery_time -= 0.1  # Discharge when not near charger                print(f'Batteria dopo lo step: {self.battery_time} perchè non vicino al charger')
+            else:
+                done = True
+                print("\n Batteria esaurita! Episodio terminato.\n")
         # ------ / HANDLE BATTERY -----
         
-        print(f"Stato attuale: {env_var}")
-        print(f"Episodio terminato: {done}\n")
+        #print(f"env_var: {env_var}")
+        print(f"Step terminato: {done}\n")
 
-        if not done:
-            new_distance = state[-1]
-            # reward = (self.target_distance - new_distance) * reward_multiplier - step_penalty
+        if not done: # if done=False
+            new_distance = env_var['d_n_target'] # update target distance
+            reward = self.override_reward2(state, reward, action, done)
             self.target_distance = new_distance
+        else:
+            reward = self.override_reward2(state, reward, action, done)
 
-        reward = self.override_reward(state, reward, action, done)
-
+        print(f'Reward dopo lo step: {reward}')
         return state, reward, done, info
 
-    def override_reward(self, state, reward, action, done):
-        # target_distance: goal position
-        # new_distance: actua position
+    def override_reward2(self, state, reward, action, done):
+        env_var = self.extractValues(state)
+        new_distance = env_var['d_n_target']
+        reward_multiplier = 3
+        step_penalty = 0.0001
+        reward = -(abs(env_var['h_n_target'] + env_var['h_n_charger'])) + self.battery_time + (self.target_distance - new_distance) * reward_multiplier - step_penalty
 
-        """
-        Reward:
-        - Reward fo reaching the target.
-        - Positive reward for decreasing distance to charger when battery is low
-        - Negative reward for collision and battery drain.
-        """
-
-        reward_multiplier, step_penalty = 3, 0.0001
-        new_distance = state[-1]
-        # reward function
-        #self.target_distance = new_distance
-        battery_penalty = 0
-
-        if self.battery_time == 0:
-            battery_penalty = -10
-        elif self.battery_time < 20 and state[-3] < 0.1:
-            battery_penalty = 1
-
-        reward = (self.target_distance - new_distance) * reward_multiplier - step_penalty 
-        reward += battery_penalty
-
-        if done:
-            if reward == -1:
-                reward -= 10
-            elif reward == 1:
-                reward += 10
-        
         return reward
+
+    def override_reward1(self, state, reward, action, done):
+        # Dati estratti dallo stato
+        env_var = self.extractValues(state)
         
-    def extactValues(self, state):
+        #--------------------------------------------------------------
+        #---------------------REWARD_1---------------------------------
+        #--------------------------------------------------------------
+        # Parametri
+        MIN_BATTERY_THRESHOLD = 30.0  # Batteria minima per considerare il robot a corto di batteria
+        COLLISION_PENALTY = -100  # Penalità per collisioni
+        CHARGER_REWARD = 10  # Ricompensa per avvicinarsi al charger
+        TARGET_REWARD = 15  # Ricompensa per avvicinarsi al target
+        LOW_BATTERY = -100  # Ricompensa per mantenere una batteria alta
+
+        # Distanze dagli oggetti (target, charger, ostacoli)
+        d_n_target = env_var["d_n_target"]
+        d_n_charger = env_var["d_n_charger"]
+        h_n_target = env_var["h_n_target"]
+        h_n_charger = env_var["h_n_charger"]
+        
+        # Se la batteria è troppo bassa, il robot dovrebbe andare verso il charger
+        if self.battery_time < MIN_BATTERY_THRESHOLD:
+            # Incoraggia il robot ad avvicinarsi al charger
+            if d_n_charger < 0.5:  # Il robot è vicino al charger
+                reward += CHARGER_REWARD
+        else:
+            # Se la batteria è alta, il robot dovrebbe andare verso il target
+            if d_n_target < 0.5:  # Il robot è vicino al target
+                reward += TARGET_REWARD
+
+        if self.battery_time < 1.0:
+            reward += LOW_BATTERY
+                
+        # Se il robot ha avuto una collisione, penalizzare fortemente
+        if done and reward == -1:  # Se reward è -1, c'è stata una collisione
+            reward += COLLISION_PENALTY
+        
+        if self.battery_time < 1.0:
+            reward += LOW_BATTERY
+        
+        # Restituisci la ricompensa modificata
+        return reward
+
+        
+    def extractValues(self, state):
         non_lidar_state = {}
         non_lidar_state["bat_hold"] = state[-1]
         non_lidar_state["bat_time"] = state[-2]
@@ -188,8 +217,8 @@ class RoverNavigation(gym.Env):
         )
 
         state_fixed = np.array(state_fixed)
-        print('state_fixed: ', state_fixed)
-        print('len(state_fixed): ', len(state_fixed))
+        
+        #print('len(state_fixed): ', len(state_fixed))
         return state_fixed
 
     # Override the "close" function
