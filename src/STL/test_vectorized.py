@@ -47,7 +47,8 @@ if __name__ == "__main__":
     # Initialize model
     sim: DynamicsSimulator = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
+    # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
+    model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
     model.eval()
 
     area_width = 10

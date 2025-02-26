@@ -1,4 +1,5 @@
 import time
+import torch
 
 def time_format(secs):
     _s = secs % 60 
@@ -50,3 +51,16 @@ class EtaEstimator():
 
     def eta_str(self):
         return time_format(self.eta_t)
+    
+    
+def stable_softmin(a, b, beta):
+        x = -beta * a
+        y = -beta * b
+        stacked = torch.stack([x, y], dim=0)
+        return -(1 / beta) * torch.logsumexp(stacked, dim=0)
+
+def stable_softmax(a, b, beta):
+    x = beta * a
+    y = beta * b
+    stacked = torch.stack([x, y], dim=0)
+    return (1 / beta) * torch.logsumexp(stacked, dim=0)

@@ -68,10 +68,11 @@ class turtlebot3DQN(Node):
             print("Recharged")
 
         # Update scan to match the stl rule in training
-        scan = np.array(scan)
-        scan += 0.1
-        scan = np.clip(scan, a_min=0, a_max=1.0)
-        print(scan)
+        # print(scan)
+        # scan = np.array(scan)
+        # scan -= 0.02
+        # scan = np.clip(scan, a_min=0, a_max=1.0)
+        # print(scan)
 
         state = np.concatenate((scan, [heading, dist, heading_charger, dist_charger, self.battery, self.charger_time]))
 
