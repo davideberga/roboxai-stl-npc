@@ -51,7 +51,7 @@ class Agent:
     def __init__(self, verbose, device):
 
         package_dir = get_package_share_directory("stl_rover")
-        model_path = package_dir + "/model_trained/exap_model_0.1680000126361847.pth"
+        model_path = package_dir + "/model_trained/model_0.903_395.pth"
         # load weights of pretrained model
         self.model = RoverSTLPolicy().to(device)
         self.model.load(model_path)
@@ -66,7 +66,7 @@ class Agent:
         control = self.model(state)
         # Take the first planned state
         control = control[0][0].detach().cpu().numpy()
-        linear_velocity = control[0]
+        linear_velocity = control[0] * 0.2
         angular_velocity = control[1] / delta_t
         return linear_velocity, angular_velocity
 

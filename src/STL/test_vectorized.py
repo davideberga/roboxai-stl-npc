@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # Initialize model
     sim: DynamicsSimulator = DynamicsSimulator()
     model = RoverSTLPolicy(steps_ahead).to(device)
-    model.load_eval("model_testing/model_correct_dynamics_training_0.8883600461483002_51.pth")
+    model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     model.eval()
 
     area_width = 10
@@ -80,6 +80,8 @@ if __name__ == "__main__":
                 theta = control[0][0][1]
 
                 new_state, new_pose = sim.update_state_batch_vectorized(state, v, theta, robot_pose.unsqueeze(0), beam_angles, world_objects, target.unsqueeze(0), charger.unsqueeze(0), device)
+                
+                
 
                 # print(new_pose[0].cpu().tolist())
 

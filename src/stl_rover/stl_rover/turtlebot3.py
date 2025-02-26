@@ -95,8 +95,6 @@ class TurtleBot3:
         # for i in range(0, rays):
         #     scan_val.append(min(acceptable[i * step: (i+1) *step]))
 
-        print(scan_val)
-
         return scan_val
 
     def get_goal_info(self, tb3_pos):

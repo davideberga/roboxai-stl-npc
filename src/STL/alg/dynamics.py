@@ -214,7 +214,7 @@ class DynamicsSimulator:
             robot_poses.append(robot_pose)
 
             # Compute LiDAR scan values, distances, etc.
-            scan = self.simulate_lidar_scan_vectorized(robot_pose.unsqueeze(0), beam_angles, world_objects, max_range)
+            scan = self.simulate_lidar_scan_vectorized(robot_pose.unsqueeze(0), beam_angles, world_objects, 5.0)
             dist_target, angle_target = self.estimate_destination_vectorized(robot_pose.unsqueeze(0), target.unsqueeze(0), max_range)
             dist_charger, angle_charger = self.estimate_destination_vectorized(robot_pose.unsqueeze(0), charger.unsqueeze(0), max_range)
             es_battery_time = torch.full_like(dist_target, fill_value=1.0)
@@ -778,7 +778,7 @@ class DynamicsSimulator:
         intersections = valid_indicator * t_intermediate + (1 - valid_indicator) * max_range
         return intersections
 
-    def simulate_lidar_scan_vectorized(self, robot_pose, beam_angles, world_objects, max_range=10.0, use_perfection=False):
+    def simulate_lidar_scan_vectorized(self, robot_pose, beam_angles, world_objects, max_range=5.0, use_perfection=False):
         B = robot_pose.shape[0]
         num_beams = beam_angles.shape[0]
         global_angles = robot_pose[:, 2].unsqueeze(1) + beam_angles.unsqueeze(0)
@@ -878,7 +878,7 @@ class DynamicsSimulator:
         # ADAPTED From the paper code
         near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - c_norm))) + 1) / 2
         # Update the battery
-        es_battery_time = (state[:, 11].unsqueeze(1) - 0.05) * (1 - near_charger) + self.battery_charge * near_charger
+        es_battery_time = (state[:, 11].unsqueeze(1) - 0.1) * (1 - near_charger) + self.battery_charge * near_charger
         es_charger_time = state[:, 12].unsqueeze(1) - 0.2 * near_charger
 
         new_state = torch.cat(

@@ -54,7 +54,7 @@ class RoverSTL:
         self.safe_distance = 0.05
         self.enough_close_to = 0.05
         self.wait_for_charging = 1
-        self.battery_limit = 0.3
+        self.battery_limit = 0.5
 
         self.rover_vmax = 0
         self.rover_vmin = 1
@@ -274,7 +274,7 @@ class RoverSTL:
 
         charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
-        return ListAnd([avoid, always_have_battery, if_low_battery_go_charger]) # ListAnd([avoid])# if_enough_battery_go_destiantion, always_have_battery, if_low_battery_go_charger]) # missing charging
+        return ListAnd([avoid, always_have_battery, if_low_battery_go_charger, charging]) # ListAnd([avoid])# if_enough_battery_go_destiantion, always_have_battery, if_low_battery_go_charger]) # missing charging
 
         return ListAnd(
             [
