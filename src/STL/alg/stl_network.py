@@ -33,8 +33,8 @@ class RoverSTLPolicy(nn.Module):
     def forward(self, x):     
         num_samples = x.shape[0]
         control = self.net(x).reshape(num_samples, self.steps_ahead, -1)
-        control0 = torch.tanh(control[..., 0]) * 0.5 + 0.5
-        control1 = torch.tanh(control[..., 1]) * np.pi
+        control0 = torch.clip(control[..., 0], 0, 1)
+        control1 = torch.clip(control[..., 1], -np.pi, np.pi)
         control_final = torch.stack([control0, control1], dim=-1)
         return control_final
     
@@ -43,3 +43,8 @@ class RoverSTLPolicy(nn.Module):
         
     def load_eval(self, path: str):
         self.net.load_state_dict(torch.load(path, weights_only=True))
+        
+    def load_eval_paper(self, path: str):
+        checkpoint = torch.load(path)
+        state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
+        self.net.load_state_dict(state_dict_parsed)

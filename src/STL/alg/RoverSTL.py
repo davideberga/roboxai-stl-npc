@@ -26,9 +26,7 @@ class RoverSTL:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.env = env
-        self.run_name = (
-            f"{args.alg}__{args.tag if args.tag != '' else ''}__{args.seed}__{int(time.time())}"
-        )
+        self.run_name = f"{args.alg}__{args.tag if args.tag != '' else ''}__{args.seed}__{int(time.time())}"
 
         # Training hyperparameters
         self.memory_size = args.memory_size
@@ -44,17 +42,14 @@ class RoverSTL:
 
         self.predict_steps_ahead = 10
         self.sample_batch = 1000
-
         self.visit_same_states_for = 100
 
         # Task specific
         self.safe_distance = 0.12  # From unity
-        self.enough_close_to = 0.05
-        self.wait_for_charging = 1
-        self.battery_limit = 0.4
+        self.enough_close_to = 0.1
+        self.wait_for_charging = 3
+        self.battery_limit = 2
 
-        self.rover_vmax = 0
-        self.rover_vmin = 1
         self.beam_angles = torch.tensor(
             [
                 -torch.pi / 2,
@@ -72,11 +67,13 @@ class RoverSTL:
         self.relu = torch.nn.ReLU()
         self.simulator = DynamicsSimulator(
             wait_for_charging=self.wait_for_charging,
-            area_h=10,
-            area_w=10,
+            steps_ahead=self.predict_steps_ahead,
+            area_h=5,
+            area_w=5,
             squared_area=True,
             beam_angles=self.beam_angles,
             device=self.device,
+            close_thres=self.enough_close_to,
         )
 
     def to_obs_tensor(self, world_objects):
@@ -92,14 +89,12 @@ class RoverSTL:
             )
         return torch.tensor(tmp).float().to(self.device)
 
-    def generate_env_with_starting_states(
-        self, area_width: int, area_height: int, n_objects: int, n_states: int
-    ):
+    def generate_env_with_starting_states(self, area_width: int, area_height: int, n_objects: int, n_states: int):
         obstacles = [
-            {"center": [1.5, 1.5], "width": 3.0, "height": 3.0},
-            {"center": [8.5, 1.5], "width": 3.0, "height": 3.0},
-            {"center": [5, 8.5], "width": 4.0, "height": 3.0},
-            {"center": [5, 5], "width": 1.0, "height": 1.0},
+            {"center": [0.75, 0.75], "width": 1.5, "height": 1.5},
+            {"center": [4.25, 0.75], "width": 1.5, "height": 1.5},
+            {"center": [2.5, 4.25], "width": 2, "height": 1.5},
+            {"center": [2.5, 2.5], "width": 0.5, "height": 0.5},
         ]
         obstacles = obstacles + self.simulator.walls()
         obstacles_tensor = self.to_obs_tensor(obstacles)
@@ -116,7 +111,7 @@ class RoverSTL:
             max_size,
             target_size,
             charger_size,
-            0.4,
+            0.2,
             obstacles=obstacles_tensor,
             num_chargers=1,
             max_attempts=1,
@@ -133,16 +128,12 @@ class RoverSTL:
         area_width = 10
         area_height = 10
         n_objects = 5
-        n_states = 500
 
+        best_accuracy = 0
         for step in range(args.n_total_epochs):
             eta.update()
 
-            world_objects, states, robot_poses, targets, chargers = (
-                self.generate_env_with_starting_states(
-                    area_width, area_height, n_objects, self.sample_batch
-                )
-            )
+            world_objects, states, robot_poses, targets, chargers = self.generate_env_with_starting_states(area_width, area_height, n_objects, self.sample_batch)
 
             # Mini loop to reuse the generated states multiple times
             complete_loss, stl_accuracy, task_loss = [], [], []
@@ -159,10 +150,10 @@ class RoverSTL:
                     include_first=True,
                 )
                 score = stl(estimated_next_states, self.smoothing_factor)[:, :1]
-                acc = (
-                    stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0
-                ).float()
+                acc = (stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
                 acc_avg = torch.mean(acc)
+                # no mask
+                acc = 1
 
                 small_charge = (states[..., 11:12] <= self.battery_limit).float()
                 # Initial distance - final distance
@@ -171,15 +162,18 @@ class RoverSTL:
                 dist_target = estimated_next_states[:, :, 8]
 
                 # TODO: Check this loss
-                dist_target_charger_loss = torch.mean(
-                    (dist_charger * small_charge + dist_target * (1 - small_charge)) * acc
-                )
-                dist_target_charger_loss = dist_target_charger_loss
+                dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
+                dist_target_charger_loss = dist_target_charger_loss * 0.01
                 # head_target_loss = - torch.abs(state_torch[:, -1, 7] -  estimated_next_states[:, -1, 7])
 
                 # old_params = {name: param.clone().detach() for name, param in self.rover_policy.named_parameters()}
 
                 loss = torch.mean(self.relu(0.5 - score)) + dist_target_charger_loss
+
+                if acc_avg.item() > best_accuracy:
+                    self.rover_policy.save(f"model_testing/env_gen_random_from_paper_{acc_avg.item()}_{step}.pth")
+                    print(f"Saving with: {acc_avg.item()}")
+                    best_accuracy = acc_avg.item()
 
                 complete_loss.append(loss.item())
                 stl_accuracy.append(acc_avg.item())
@@ -197,12 +191,12 @@ class RoverSTL:
                 targets = targets[indices]
                 chargers = chargers[indices]
 
-            mean_acc = np.mean(stl_accuracy)
-            if mean_acc > 0.1:
-                self.rover_policy.save(
-                    f"model_testing/model_correct_dynamics_training_{mean_acc}_{step}.pth"
-                )
-                print(f"Saving with: {mean_acc}")
+            # TODO: Print best accuracy in the previouss loop
+            # TODO: more chargers in training
+            # TODO: more steps ahead
+            # TODO: remove squared from the distance
+            # TODO: smaller map
+            # TODO: scale or not velocity
 
             print(
                 "%s > %04d loss:%.3f acc:%.20f dist:%.3f dT:%s T:%s ETA:%s"
@@ -246,9 +240,7 @@ class RoverSTL:
         segs = [states] if include_first else []
 
         for ti in range(t):
-            new_x, new_poses = self.dynamics_per_step(
-                x, world_objects, poses, tgs, chrs, es_trajectories[:, ti]
-            )
+            new_x, new_poses = self.dynamics_per_step(x, world_objects, poses, tgs, chrs, es_trajectories[:, ti])
             segs.append(new_x)
             x = new_x
             poses = new_poses
@@ -289,7 +281,7 @@ class RoverSTL:
         # print(f"Lidar robustness: ${min_lidar - self.safe_distance}")
 
         # Rescale lidar values to give them more importance
-        return min_lidar - self.safe_distance
+        return (min_lidar - self.safe_distance) * 100
 
     def generateSTL(self, steps_ahead: int, battery_limit: float):
         def debug_print(label, func, x):
@@ -311,65 +303,58 @@ class RoverSTL:
 
         # charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
-        avoid = Always(
-            0,
-            steps_ahead,
-            AP(
-                lambda x: debug_print("Lidar safety", self.lidar_obs_avoidance_robustness, x),
-                comment="Lidar safety",
-            ),
-        )
-        at_dest = AP(
-            lambda x: debug_print(
-                "Distance to destination", lambda x: self.enough_close_to - x[..., 8], x
-            ),
-            comment="Distance to destination",
-        )
-        at_charger = AP(
-            lambda x: debug_print(
-                "Distance to charger", lambda x: self.enough_close_to - x[..., 10], x
-            ),
-            comment="Distance to charger",
+        avoid0 = AP(lambda x: x[..., 0] - self.safe_distance)
+        avoid1 = AP(lambda x: x[..., 1] - self.safe_distance)
+        avoid2 = AP(lambda x: x[..., 2] - self.safe_distance)
+        avoid3 = AP(lambda x: x[..., 3] - self.safe_distance)
+        avoid4 = AP(lambda x: x[..., 4] - self.safe_distance)
+        avoid5 = AP(lambda x: x[..., 5] - self.safe_distance)
+        avoid6 = AP(lambda x: x[..., 6] - self.safe_distance)
+
+        avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
+
+        avoid = Always(0, steps_ahead, ListAnd(avoid_list))
+
+        at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: self.enough_close_to - x[..., 8], x), comment="Distance to destination")
+        at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: self.enough_close_to - x[..., 10], x), comment="Distance to charger")
+
+        if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
+        if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
+
+        always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
+
+        stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: self.enough_close_to - x[..., 10], x), comment="Stand by: agent remains close to charger")
+        enough_stay = AP(lambda x: debug_print(f"Stay > {self.wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{self.wait_for_charging} steps")
+        charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
+
+        # stl = if_enough_battery_go_destiantion
+        return ListAnd(
+            [
+                avoid,
+                always_have_battery,
+                if_low_battery_go_charger,
+                charging,
+                if_enough_battery_go_destiantion,
+            ]
         )
 
-        if_enough_battery_go_destiantion = Imply(
-            AP(
-                lambda x: debug_print(
-                    "Battery level > limit", lambda x: x[..., 11] - battery_limit, x
-                )
-            ),
-            Eventually(0, steps_ahead, at_dest),
-        )
-        if_low_battery_go_charger = Imply(
-            AP(
-                lambda x: debug_print(
-                    "Battery level < limit", lambda x: battery_limit - x[..., 11], x
-                )
-            ),
-            Eventually(0, steps_ahead, at_charger),
-        )
+        avoid = Always(0, steps_ahead, AP(lambda x: debug_print("Lidar safety", self.lidar_obs_avoidance_robustness, x), comment="Lidar safety"))
 
-        always_have_battery = Always(
-            0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x))
-        )
+        at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: (self.enough_close_to - x[..., 8]) * 10, x), comment="Distance to destination")
+        at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: (self.enough_close_to - x[..., 10]) * 10, x), comment="Distance to charger")
 
-        stand_by = AP(
-            lambda x: debug_print(
-                "Stand by (distance from charger)", lambda x: x[..., 10] - self.enough_close_to, x
-            ),
-            comment="Stand by: agent remains close to charger",
-        )
-        enough_stay = AP(
-            lambda x: debug_print(
-                f"Stay > {self.wait_for_charging} steps", lambda x: -x[..., 12], x
-            ),
-            comment=f"Stay>{self.wait_for_charging} steps",
-        )
+        if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
+        if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
+
+        always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
+
+        stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: (self.enough_close_to - x[..., 10]) * 10, x), comment="Stand by: agent remains close to charger")
+        enough_stay = AP(lambda x: debug_print(f"Stay > {self.wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{self.wait_for_charging} steps")
 
         charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
         return ListAnd(
-            [avoid, always_have_battery, if_low_battery_go_charger, charging]
+            [avoid, always_have_battery, if_low_battery_go_charger, charging, if_enough_battery_go_destiantion]
         )  # ListAnd([avoid])# if_enough_battery_go_destiantion, always_have_battery, if_low_battery_go_charger]) # missing charging
 
         return ListAnd(
