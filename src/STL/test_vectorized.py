@@ -38,6 +38,7 @@ def generate_env_with_starting_states(sim, area_width: int, area_height: int, n_
         charger_size,
         0.05,
         obstacles=obstacles_tensor,
+        num_chargers=4,
         max_attempts=100,
     )
 
@@ -135,47 +136,36 @@ def generateSTL(steps_ahead: int, battery_limit: float):
     # enough_stay = AP(lambda x: debug_print(f"Stay > {self.wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{self.wait_for_charging} steps")
 
     # charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
-    
-    avoid0 = AP(lambda x: x[..., 0] - safe_distance)
-    avoid1 = AP(lambda x: x[..., 1] - safe_distance)
-    avoid2 = AP(lambda x: x[..., 2] - safe_distance)
-    avoid3 = AP(lambda x: x[..., 3] - safe_distance)
-    avoid4 = AP(lambda x: x[..., 4] - safe_distance)
-    avoid5 = AP(lambda x: x[..., 5] - safe_distance)
-    avoid6 = AP(lambda x: x[..., 6] - safe_distance)
-    
+
+    avoid0 = Always(0, steps_ahead, AP(lambda x: x[..., 0] - safe_distance))
+    avoid1 = Always(0, steps_ahead, AP(lambda x: x[..., 1] - safe_distance))
+    avoid2 = Always(0, steps_ahead, AP(lambda x: x[..., 2] - safe_distance))
+    avoid3 = Always(0, steps_ahead, AP(lambda x: x[..., 3] - safe_distance))
+    avoid4 = Always(0, steps_ahead, AP(lambda x: x[..., 4] - safe_distance))
+    avoid5 = Always(0, steps_ahead, AP(lambda x: x[..., 5] - safe_distance))
+    avoid6 = Always(0, steps_ahead, AP(lambda x: x[..., 6] - safe_distance))
+
     avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
-    
+
+    avoid = ListAnd(avoid_list)
+
     avoid = Always(0, steps_ahead, ListAnd(avoid_list))
-    
 
     at_dest = AP(
-        lambda x: debug_print(
-            "Distance to destination", lambda x: enough_close_to - x[..., 8], x
-        ),
+        lambda x: debug_print("Distance to destination", lambda x: enough_close_to - x[..., 8], x),
         comment="Distance to destination",
     )
     at_charger = AP(
-        lambda x: debug_print(
-            "Distance to charger", lambda x: enough_close_to - x[..., 10], x
-        ),
+        lambda x: debug_print("Distance to charger", lambda x: enough_close_to - x[..., 10], x),
         comment="Distance to charger",
     )
 
     if_enough_battery_go_destiantion = Imply(
-        AP(
-            lambda x: debug_print(
-                "Battery level > limit", lambda x: x[..., 11] - battery_limit, x
-            )
-        ),
+        AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)),
         Eventually(0, steps_ahead, at_dest),
     )
     if_low_battery_go_charger = Imply(
-        AP(
-            lambda x: debug_print(
-                "Battery level < limit", lambda x: battery_limit - x[..., 11], x
-            )
-        ),
+        AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)),
         Eventually(0, steps_ahead, at_charger),
     )
 
@@ -252,27 +242,24 @@ if __name__ == "__main__":
     model = RoverSTLPolicy(steps_ahead).to(device)
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
-    model.load_eval("model_testing/env_gen_random_from_paper_0.3320000171661377_22.pth")
+    model.load_eval("model_testing/model_0.8981999754905701_8500.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
     model.eval()
-
-    area_width = 10
-    area_height = 10
-    n_objects = 3
-    n_states = 1
-
-    # Create first random env
-    world_objects, state, robot_pose, target, charger = generate_env_with_starting_states(sim, area_width, area_height, n_objects, n_states)
-    print(state)
-    world_objects = world_objects[0]
+    
+    _, obstacles, _, _ = sim.generate_objects()
+    state, obstacles_t, robot_pose, target, charger = sim.initialize_x(1, obstacles)
+    obstacles_t = obstacles_t[1:]
+    
+    world_objects = obstacles_t
     robot_radius = 0.3
     # robot_pose = robot_pose[0]
     battery = 5
+    hold_time = 1
 
     fig, ax = plt.subplots(figsize=(8, 8))
     writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
-    
-    stl = generateSTL(10, 2)
+
+    stl = generateSTL(10, 3.0)
 
     with writer.saving(fig, "simulation_video.mp4", dpi=100):
         for _ in range(5):
@@ -280,6 +267,7 @@ if __name__ == "__main__":
             # target = target[0]
             # charger = charger[0]
 
+            episode_finished = False
             for frame in range(100):
                 # Define 7 lidar beam angles (radians) relative to robot forward.
 
@@ -292,12 +280,10 @@ if __name__ == "__main__":
                 stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
                 stl_max_i = torch.argmax(stl_score, dim=0)
                 safe_control = control[stl_max_i : stl_max_i + 1]
-                
-                
-                
+
                 for ctl in safe_control[0]:
-                    v = ctl[0]
-                    theta = ctl[1]
+                    v = ctl[0] * 10 * 0.2
+                    theta = ctl[1].unsqueeze(0)
 
                     new_state, new_pose = sim.update_state_batch(
                         state,
@@ -307,30 +293,47 @@ if __name__ == "__main__":
                         world_objects,
                         target,
                         charger,
+                        collision_enabled=True
                     )
 
                     # print(new_pose[0].cpu().tolist())
 
                     new_lidar = sim.simulate_lidar_scan(new_pose, world_objects)
                     target_distance, target_angle = sim.estimate_destination(new_pose, target)
-                    charger_distance, charger_angle = sim.estimate_destination(new_pose, charger[0])
-                   
+                    charger_distance, charger_angle = sim.estimate_destination(new_pose, charger)
 
-                    near_charger = (torch.tanh(1000 * (0.05 * (0.8 - new_state[..., 10]))) + 1) / 2
-                    # Update the battery
-                    new_state[..., 11] = (new_state[..., 11].unsqueeze(1) - 0.01) * (1 - near_charger) + 1 * near_charger
-                    new_state[..., 12] = state[..., 12].unsqueeze(1) - 0.2 * near_charger
+                    # near_charger = (torch.tanh(1000 * (0.05 * (0.8 - new_state[..., 10]))) + 1) / 2
+                    # # Update the battery
+                    # new_state[..., 11] = (new_state[..., 11].unsqueeze(1) - 0.01) * (1 - near_charger) + 1 * near_charger
+                    # new_state[..., 12] = state[..., 12].unsqueeze(1) - 0.2 * near_charger
 
-                    # new_state[..., 11] -= battery
+                    # Manual handling
+                    new_state[..., 11] = battery
+                    new_state[..., 12] = hold_time
+                    
+                    # print(new_state[..., :])
+
+                    if new_state[..., 10].item() < 0.1:
+                        battery = min(battery + 0.5, 5)
+                        hold_time = max(0, hold_time - 0.3)
+                    else:
+                        battery -= 0.05
+
+                    if hold_time < 0.1:
+                        hold_time = 1
 
                     # Visualize the initial environment.
                     ax.clear()
+                    extra = torch.full_like(target, 0.4)  # Create zeros of required shape
+                    targets_expanded = torch.cat([target, extra], dim=1)
+                    extra = torch.full_like(charger, 0.4)
+                    chargers_expanded = torch.cat([charger, extra], dim=1).unsqueeze(1)
                     sim.visualize_environment(
                         new_pose.squeeze(),
                         new_lidar.squeeze(),
                         world_objects,
-                        target.squeeze(),
-                        charger[0],
+                        targets_expanded[0],
+                        chargers_expanded[0],
                         battery_level=new_state[..., 11].item(),
                         ax=ax,
                     )
@@ -339,21 +342,29 @@ if __name__ == "__main__":
 
                     if target_distance.item() < 0.05:
                         print("Goal reached")
-                        plt.close(fig)
-                        exit(0)
+                        episode_finished = True
+                        break
+                        # plt.close(fig)
+                        # exit(0)
 
                     if new_state[..., 11].item() <= 0:
                         print("Battery finished")
-                        plt.close(fig)
-                        exit(0)
+                        episode_finished = True
+                        break
+                        # plt.close(fig)
+                        # exit(0)
 
-                new_state[0, 11] = torch.clamp(new_state[0, 11], 0, 25 * 0.2)
-                new_state[0, 12] = torch.clamp(new_state[0, 12], -0.2, 3  * 0.2)
-                state = new_state
-                robot_pose = new_pose
+                    # new_state[0, 11] = torch.clamp(new_state[0, 11], 0, 25 * 0.2)
+                    # new_state[0, 12] = torch.clamp(new_state[0, 12], -0.2, 3  * 0.2)
+                    state = new_state
+                    robot_pose = new_pose
+
+                if episode_finished:
+                    break
 
             # Randomize new env
-            _, _, _, target, charger = generate_env_with_starting_states(sim, area_width, area_height, n_objects, n_states)
+            _, _, _, target, charger = sim.initialize_x(1, obstacles)
+            obstacles_t = obstacles_t[1:]
 
         # Update the robot pose and lidar scan for the next iteration.
     plt.close(fig)

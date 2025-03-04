@@ -1,5 +1,6 @@
 import time
 import torch
+import numpy as np
 
 def time_format(secs):
     _s = secs % 60 
@@ -64,3 +65,14 @@ def stable_softmax(a, b, beta):
     y = beta * b
     stacked = torch.stack([x, y], dim=0)
     return (1 / beta) * torch.logsumexp(stacked, dim=0)
+
+def soft_step_hard(x):
+    hard = (x>=0).float()
+    soft = (torch.tanh(500 * x) + 1)/2
+    return soft + (hard - soft).detach()
+
+def uniform_tensor(amin, amax, size):
+    return torch.rand(size) * (amax - amin) + amin
+
+def rand_choice_tensor(choices, size):
+    return torch.from_numpy(np.random.choice(choices, size)).float()

@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--metrics", type=object, default=["Episode", "Step", "Avg_Success", "Avg_Reward", "Avg_Cost"], help="List of desired metrics")
      
     # Episode length
-    parser.add_argument("--n_total_epochs", type=int, default=100000, help="Experiment total timesteps")
+    parser.add_argument("--n_total_epochs", type=int, default=250000, help="Experiment total timesteps")
    
     # Algorithm
     parser.add_argument("--alg", type=str, default='DDQN', help="Training algorithm")
