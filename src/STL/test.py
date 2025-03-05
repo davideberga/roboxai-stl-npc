@@ -1,7 +1,15 @@
 import torch
 from alg.dynamics import DynamicsSimulator
 from alg.stl_network import RoverSTLPolicy
+import random
+import numpy as np
 
+seed = 42 
+
+np.random.seed(seed)  
+random.seed(seed)  
+torch.manual_seed(seed)  
+torch.cuda.manual_seed_all(seed) 
 
 def generate_env_with_starting_states(area_width: int, area_height: int, n_objects: int, n_states: int, beam_angles, device):
     sim = DynamicsSimulator()
