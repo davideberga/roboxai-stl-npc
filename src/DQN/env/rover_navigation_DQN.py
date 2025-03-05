@@ -17,8 +17,8 @@ class RoverNavigation(gym.Env):
         step_limit=300,
         worker_id=0,
         random_seed=0,
-        battery_time=100,
-        charger_hold_time=5,
+        battery_time=1,
+        charger_hold_time=1,
     ):
         # Load the scan number given in input
         self.scan_number = 7
@@ -132,59 +132,131 @@ class RoverNavigation(gym.Env):
         print(f'Reward dopo lo step: {reward}')
         return state, reward, done, info
 
-    def override_reward2(self, state, reward, action, done):
-        env_var = self.extractValues(state)
-        new_distance = env_var['d_n_target']
-        reward_multiplier = 3
-        step_penalty = 0.0001
-        reward = -(abs(env_var['h_n_target'] + env_var['h_n_charger'])) + self.battery_time + (self.target_distance - new_distance) * reward_multiplier - step_penalty
+
+    def override_reward3(self, state, reward, action, done):
+        env_var = self.extractValues
+
+        collision_penalty = -100
+        #out_of_map_penalty = -100
+        out_of_battery_penalty = -100
+        reach_station_reward = 10
+        reach_dest_reward = 10
+        stay_station_reward = 10
+        reward = 0
+        security_threshold = 0.1
+
+        lidar1 = state[0]
+        lidar2 = state[1]
+        lidar3 = state[2]
+        lidar4 = state[3]
+        lidar5 = state[4]
+        lidar6 = state[5]
+        lidar7 = state[6]
+        
+        lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
+
+        min_lidar = min(lidar)
+
+        # Se il robot ha avuto una collisione, penalizzare fortemente
+        if (done and reward == -1) or min_lidar < security_threshold:  # Se reward è -1, c'è stata una collisione
+            reward += collision_penalty
+
+        if done and reward == 1:  # Se reward è 1; il target è stato raggiunto
+            reward += reach_dest_reward
+
+        if self.battery_time < 0:
+            reward += out_of_battery_penalty
+
+        if env_var["h_n_charger"] < 1: # il robot si sta caricando
+            reward += stay_station_reward 
+
+        if env_var["d_n_charger"] < 0.3: # il robot è vicino al target
+            reward  += reach_station_reward
 
         return reward
+
+
+    def override_reward2(self, state, reward, action, done):
+        env_var = self.extractValues(state)
+        step_penalty = 0.0001
+        collision_penalty = -30
+        out_of_battery_penalty = -30
+        security_threshold = 0.1
+        reach_dest_reward = 10
+
+        lidar1 = state[0]
+        lidar2 = state[1]
+        lidar3 = state[2]
+        lidar4 = state[3]
+        lidar5 = state[4]
+        lidar6 = state[5]
+        lidar7 = state[6]
+        
+        lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
+
+        min_lidar = min(lidar)
+
+        if (done and reward == -1) or min_lidar < security_threshold:
+            reward += collision_penalty
+
+        if done and reward == 1: 
+            reward += reach_dest_reward
+
+        if self.battery_time > 0.5:
+            reward += self.battery_time -(abs(env_var['d_n_target'])) - step_penalty
+        elif self.battery_time < 0:
+            reward += out_of_battery_penalty
+        else:
+            reward += self.battery_time -(abs(env_var['d_n_charger'])) - step_penalty
+        
+        if done and reward == -1:
+            reward += collision_penalty
+        
+        return reward 
 
     def override_reward1(self, state, reward, action, done):
         # Dati estratti dallo stato
         env_var = self.extractValues(state)
-        
-        #--------------------------------------------------------------
-        #---------------------REWARD_1---------------------------------
-        #--------------------------------------------------------------
-        # Parametri
-        MIN_BATTERY_THRESHOLD = 30.0  # Batteria minima per considerare il robot a corto di batteria
-        COLLISION_PENALTY = -100  # Penalità per collisioni
-        CHARGER_REWARD = 10  # Ricompensa per avvicinarsi al charger
-        TARGET_REWARD = 15  # Ricompensa per avvicinarsi al target
-        LOW_BATTERY = -100  # Ricompensa per mantenere una batteria alta
 
-        # Distanze dagli oggetti (target, charger, ostacoli)
-        d_n_target = env_var["d_n_target"]
-        d_n_charger = env_var["d_n_charger"]
-        h_n_target = env_var["h_n_target"]
-        h_n_charger = env_var["h_n_charger"]
+        lidar1 = state[0]
+        lidar2 = state[1]
+        lidar3 = state[2]
+        lidar4 = state[3]
+        lidar5 = state[4]
+        lidar6 = state[5]
+        lidar7 = state[6]
         
-        # Se la batteria è troppo bassa, il robot dovrebbe andare verso il charger
-        if self.battery_time < MIN_BATTERY_THRESHOLD:
-            # Incoraggia il robot ad avvicinarsi al charger
-            if d_n_charger < 0.5:  # Il robot è vicino al charger
-                reward += CHARGER_REWARD
-        else:
-            # Se la batteria è alta, il robot dovrebbe andare verso il target
-            if d_n_target < 0.5:  # Il robot è vicino al target
-                reward += TARGET_REWARD
+        lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
 
-        if self.battery_time < 1.0:
-            reward += LOW_BATTERY
-                
+        min_lidar = min(lidar)
+
+        collision_penalty = -30
+        out_of_battery_penalty = -30
+        reach_station_reward = 10
+        reach_dest_reward = 10
+        stay_station_reward = 10
+        security_threshold = 0.1
+
+        reward = 0
+
         # Se il robot ha avuto una collisione, penalizzare fortemente
-        if done and reward == -1:  # Se reward è -1, c'è stata una collisione
-            reward += COLLISION_PENALTY
-        
-        if self.battery_time < 1.0:
-            reward += LOW_BATTERY
-        
-        # Restituisci la ricompensa modificata
+        if (done and reward == -1) or min_lidar < security_threshold:  # Se reward è -1, c'è stata una collisione
+            reward += collision_penalty
+        elif done and reward == 1: 
+            reward += reach_dest_reward
+        elif min_lidar > security_threshold:  
+            reward += min_lidar
+
+        if self.battery_time < 0:
+            reward += out_of_battery_penalty
+        elif self.battery_time > 0.5: # Se la batteria è carica abbastanza, vai al target
+            reward -= env_var["d_n_target"]
+        elif self.battery_time <= 0.5: # Se la batteria è scarica, vai alla stazione di ricarica
+            reward += reach_station_reward - env_var["d_n_charger"] 
+
+
         return reward
 
-        
     def extractValues(self, state):
         non_lidar_state = {}
         non_lidar_state["bat_hold"] = state[-1]
