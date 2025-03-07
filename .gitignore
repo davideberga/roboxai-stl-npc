@@ -5,8 +5,6 @@
 **/STL/exap_model_*.pth
 **/STL/model_testing/model_correct*.pth
 
-**/images
-
 .fleet/
 
 # Byte-compiled / optimized / DLL files

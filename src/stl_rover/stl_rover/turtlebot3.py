@@ -119,10 +119,11 @@ class TurtleBot3:
         return distance / 5,  heading
 
     def move(self, linear_vel, angular_vel, pub):
-        print(linear_vel)
+        # print(linear_vel)
         twist = Twist()
         
-        linear_vel = min(float(linear_vel), 0.2)
+        # linear_vel = min(float(linear_vel), 0.2)
+        linear_vel = float(linear_vel)
         angular_vel = float(angular_vel)
 
         twist.linear.x = linear_vel
@@ -133,7 +134,7 @@ class TurtleBot3:
         twist.angular.y = 0.0
         twist.angular.z = angular_vel
         
-        print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
+        # print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
 
         pub.publish(twist)
         

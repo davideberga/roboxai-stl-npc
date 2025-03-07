@@ -9,8 +9,8 @@ import numpy as np
 device = "cuda" if torch.cuda.is_available() else "cpu"
 beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
 
-enough_close_to = 0.05
-safe_distance = 0.12
+enough_close_to = 0.08
+safe_distance = 0.05
 wait_for_charging = 3
 
 
@@ -123,97 +123,28 @@ def generateSTL(steps_ahead: int, battery_limit: float):
         # print(f"{label}: {value}")
         return value
 
-    # avoid = Always(0, steps_ahead, AP(lambda x: debug_print("Lidar safety", self.lidar_obs_avoidance_robustness, x), comment="Lidar safety"))
-    # at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: (self.enough_close_to**2) - (x[..., 8] ** 2), x), comment="Distance to destination")
-    # at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: (self.enough_close_to**2) - (x[..., 10] ** 2), x), comment="Distance to charger")
-
-    # if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
-    # if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
-
-    # always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
-
-    # stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: (x[..., 10]**2) - (self.enough_close_to**2), x), comment="Stand by: agent remains close to charger")
-    # enough_stay = AP(lambda x: debug_print(f"Stay > {self.wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{self.wait_for_charging} steps")
-
-    # charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
-
-    avoid0 = Always(0, steps_ahead, AP(lambda x: x[..., 0] - safe_distance))
-    avoid1 = Always(0, steps_ahead, AP(lambda x: x[..., 1] - safe_distance))
-    avoid2 = Always(0, steps_ahead, AP(lambda x: x[..., 2] - safe_distance))
-    avoid3 = Always(0, steps_ahead, AP(lambda x: x[..., 3] - safe_distance))
-    avoid4 = Always(0, steps_ahead, AP(lambda x: x[..., 4] - safe_distance))
-    avoid5 = Always(0, steps_ahead, AP(lambda x: x[..., 5] - safe_distance))
-    avoid6 = Always(0, steps_ahead, AP(lambda x: x[..., 6] - safe_distance))
+    avoid0 = Always(0, steps_ahead, AP(lambda x: (x[..., 0] - safe_distance) * 100))
+    avoid1 = Always(0, steps_ahead, AP(lambda x: (x[..., 1] - safe_distance) * 100))
+    avoid2 = Always(0, steps_ahead, AP(lambda x: (x[..., 2] - safe_distance) * 100))
+    avoid3 = Always(0, steps_ahead, AP(lambda x: (x[..., 3] - safe_distance) * 100))
+    avoid4 = Always(0, steps_ahead, AP(lambda x: (x[..., 4] - safe_distance) * 100))
+    avoid5 = Always(0, steps_ahead, AP(lambda x: (x[..., 5] - safe_distance) * 100))
+    avoid6 = Always(0, steps_ahead, AP(lambda x: (x[..., 6] - safe_distance) * 100))
 
     avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
 
     avoid = ListAnd(avoid_list)
 
-    avoid = Always(0, steps_ahead, ListAnd(avoid_list))
-
-    at_dest = AP(
-        lambda x: debug_print("Distance to destination", lambda x: enough_close_to - x[..., 8], x),
-        comment="Distance to destination",
-    )
-    at_charger = AP(
-        lambda x: debug_print("Distance to charger", lambda x: enough_close_to - x[..., 10], x),
-        comment="Distance to charger",
-    )
-
-    if_enough_battery_go_destiantion = Imply(
-        AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)),
-        Eventually(0, steps_ahead, at_dest),
-    )
-    if_low_battery_go_charger = Imply(
-        AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)),
-        Eventually(0, steps_ahead, at_charger),
-    )
-
-    always_have_battery = Always(
-        0,
-        steps_ahead,
-        AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)),
-    )
-
-    stand_by = AP(
-        lambda x: debug_print(
-            "Stand by (distance from charger)",
-            lambda x: enough_close_to - x[..., 10],
-            x,
-        ),
-        comment="Stand by: agent remains close to charger",
-    )
-    enough_stay = AP(
-        lambda x: debug_print(f"Stay > {wait_for_charging} steps", lambda x: -x[..., 12], x),
-        comment=f"Stay>{wait_for_charging} steps",
-    )
-
-    charging = Imply(at_charger, Always(0, wait_for_charging, Or(stand_by, enough_stay)))
-
-    # stl = if_enough_battery_go_destiantion
-    return ListAnd(
-        [
-            avoid,
-            always_have_battery,
-            if_low_battery_go_charger,
-            charging,
-            if_enough_battery_go_destiantion,
-        ]
-    )  # ListAnd([avoid])# if_enough_battery_go_destiantion, al
-
-    avoid = Always(0, steps_ahead, AP(lambda x: debug_print("Lidar safety", lidar_obs_avoidance_robustness, x), comment="Lidar safety"))
-
-    at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: (enough_close_to - x[..., 8]) * 10, x), comment="Distance to destination")
-    at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: (enough_close_to - x[..., 10]) * 10, x), comment="Distance to charger")
+    at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: enough_close_to - x[..., 8], x), comment="Distance to destination")
+    at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: enough_close_to - x[..., 10], x), comment="Distance to charger")
 
     if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
     if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
 
     always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
 
-    stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: (enough_close_to - x[..., 10]) * 10, x), comment="Stand by: agent remains close to charger")
+    stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: enough_close_to - x[..., 10], x), comment="Stand by: agent remains close to charger")
     enough_stay = AP(lambda x: debug_print(f"Stay > {wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{wait_for_charging} steps")
-
     charging = Imply(at_charger, Always(0, wait_for_charging, Or(stand_by, enough_stay)))
 
     return ListAnd(
@@ -242,7 +173,8 @@ if __name__ == "__main__":
     model = RoverSTLPolicy(steps_ahead).to(device)
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
-    model.load_eval("model_testing/model_0.8981999754905701_8500.pth")
+    # 172000
+    model.load_eval("model_testing/model_0.9167999625205994_102500.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
     model.eval()
     
@@ -259,7 +191,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(8, 8))
     writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
 
-    stl = generateSTL(10, 3.0)
+    stl = generateSTL(10, 2.0)
 
     with writer.saving(fig, "simulation_video.mp4", dpi=100):
         for _ in range(5):
@@ -282,7 +214,7 @@ if __name__ == "__main__":
                 safe_control = control[stl_max_i : stl_max_i + 1]
 
                 for ctl in safe_control[0]:
-                    v = ctl[0] * 10 * 0.2
+                    v = ctl[0] * 10 * 0.5
                     theta = ctl[1].unsqueeze(0)
 
                     new_state, new_pose = sim.update_state_batch(
@@ -363,7 +295,7 @@ if __name__ == "__main__":
                     break
 
             # Randomize new env
-            _, _, _, target, charger = sim.initialize_x(1, obstacles)
+            _, _, _, target, _ = sim.initialize_x(1, obstacles)
             obstacles_t = obstacles_t[1:]
 
         # Update the robot pose and lidar scan for the next iteration.
