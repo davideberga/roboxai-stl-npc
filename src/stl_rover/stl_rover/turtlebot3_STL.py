@@ -27,13 +27,13 @@ class turtlebot3DQN(Node):
 
         self.verbose = True
         self.agent = Agent(self.verbose, self.device)
-        self.battery = 5
+        self.battery = 1
         self.hold_time = 1
-        # self.turtlebot3 = TurtleBot3()
-
-        # number of attempts, the network could be fail if you set a number greater than 1 the robot try again to reach the goal
+        
+        self.action_sequence = []
+        
         self.n_episode_test = 1
-        self.timer_period = 0.25  # 0.25 seconds
+        self.timer_period = 0.25 # 0.25 seconds
         time.sleep(1)
         self.timer = self.create_timer(self.timer_period, self.control_loop_one)
 
@@ -44,67 +44,65 @@ class turtlebot3DQN(Node):
         self.turtlebot3.SetOdom(msg)
 
     def control_loop(self):
+        # Get the current state information.
         pos, rot = self.turtlebot3.get_odom()
         dist, heading = self.turtlebot3.get_goal_info(pos)
         dist_charger, heading_charger = self.turtlebot3.get_charger_info(pos)
-        scan = self.turtlebot3.get_scan()
-        
-        scan = np.array(scan)
-        scan -= 0.07
+        scan = np.array(self.turtlebot3.get_scan())
+        scan = scan - 0.7
         scan = np.clip(scan, a_min=0, a_max=1.0)
-        
+        scan = scan[::-1]
 
-        state = np.concatenate((scan, [heading, dist, heading_charger, dist_charger, self.battery, self.hold_time]))
-
+        # Build the state vector.
+        state = np.concatenate((
+            scan,
+            [heading, dist, heading_charger, dist_charger, self.battery, self.hold_time]
+        ))
         state = self.agent.normalize_state(state)
         state_torch = torch.tensor([state], dtype=torch.float32).to(self.device)
-        linear_vel, angular_vel = self.agent.plan(state_torch, self.timer_period)
 
-        # The the first action planned
-           
-        for v, theta in zip(linear_vel, angular_vel):
+        # If there is no pending sequence, plan a new one.
+        # Note: We do not execute an action in the same tick when planning,
+        # ensuring a 0.25-second delay before executing the first action.
+        if not self.action_sequence:
+            linear_vel, angular_vel = self.agent.plan(state_torch, self.timer_period)
+            # Convert tensor outputs to lists, if necessary.
+            if isinstance(linear_vel, torch.Tensor):
+                linear_vel = linear_vel.tolist()[0]
+            if isinstance(angular_vel, torch.Tensor):
+                angular_vel = angular_vel.tolist()[0]
+            self.action_sequence = list(zip(linear_vel, angular_vel))
+            self.get_logger().info(f"New action sequence planned: {len(self.action_sequence)} actions")
+            return  # Exit this tick; next tick will execute the first action.
 
-        # if the robot reach the goal or to close at the obstalce, stop
-            if dist < 0.05:
-                print("Goal reached")
-                self.turtlebot3.stop(self.pub)
-                quit(0)
+        # Pop and execute the next action from the sequence.
+        v, theta = self.action_sequence.pop(0)
 
-            
-            # print(f"Scan: {scan}")
-            
-            if dist_charger < 0.1:
-                self.battery = min(self.battery + 0.5, 5)
-                self.hold_time = max(0, self.hold_time - 0.3)
-            else:
-                self.battery -= 0.001
+        # Check if the goal has been reached.
+        if dist < 0.05:
+            self.get_logger().info("Goal reached")
+            self.turtlebot3.stop(self.pub)
+            rclpy.shutdown()
+            return
 
-            if self.hold_time < 0.1:
-                self.hold_time = 1
-            
-            print(self.battery)
+        # Update battery and hold time based on charger distance.
+        if dist_charger < 0.1:
+            self.battery = min(self.battery + 0.5, 5)
+            self.hold_time = max(0, self.hold_time - 0.3)
+        else:
+            self.battery -= 0.001
 
-            if dist_charger < 0.1:
-                self.battery = 5
-                print("Recharged")
-                
-            self.turtlebot3.move(v, theta, self.pub)
-            time.sleep(self.timer_period)
+        if self.hold_time < 0.1:
+            self.hold_time = 1
 
-        # Update scan to match the stl rule in training
-        # print(scan)
-        
+        if dist_charger < 0.1:
+            self.battery = 5
+            self.get_logger().info("Recharged")
 
-        # print(state)
+        # Execute the action.
+        self.turtlebot3.move(v, theta, self.pub)
+        # self.get_logger().info(f"Executing action: linear_vel = {v}, angular_vel = {theta}")
 
-        # # print(state)
-        # print([heading, dist ])
-        
-
-        # for step_planned in planning:
-        #     self.battery = self.battery - 0.01
-        #     self.turtlebot3.move(step_planned, self.pub)
-        #     time.sleep(1)
         
     def control_loop_one(self):
         pos, rot = self.turtlebot3.get_odom()
@@ -120,6 +118,7 @@ class turtlebot3DQN(Node):
         scan = self.turtlebot3.get_scan()
         # print(f"Scan: {scan}")
         scan = np.array(scan)
+        scan = scan[::-1]
         scan -= 0.07
         scan = np.clip(scan, a_min=0, a_max=1.0)
 
@@ -127,7 +126,7 @@ class turtlebot3DQN(Node):
                 self.battery = min(self.battery + 0.5, 5)
                 self.hold_time = max(0, self.hold_time - 0.3)
         else:
-            self.battery -= 0.001
+            self.battery -= 0.01
 
         if self.hold_time < 0.1:
             self.hold_time = 1

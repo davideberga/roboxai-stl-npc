@@ -212,6 +212,8 @@ if __name__ == "__main__":
                 stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
                 stl_max_i = torch.argmax(stl_score, dim=0)
                 safe_control = control[stl_max_i : stl_max_i + 1]
+                
+                print(len(safe_control))
 
                 for ctl in safe_control[0]:
                     v = ctl[0] * 10 * 0.5

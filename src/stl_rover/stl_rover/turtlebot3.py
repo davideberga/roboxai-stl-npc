@@ -122,8 +122,8 @@ class TurtleBot3:
         # print(linear_vel)
         twist = Twist()
         
-        # linear_vel = min(float(linear_vel), 0.2)
-        linear_vel = float(linear_vel)
+        linear_vel = min(float(linear_vel), 0.2)
+        # linear_vel = float(linear_vel)
         angular_vel = float(angular_vel)
 
         twist.linear.x = linear_vel

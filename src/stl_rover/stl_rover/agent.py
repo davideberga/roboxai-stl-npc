@@ -149,7 +149,7 @@ class Agent:
     def __init__(self, verbose, device):
 
         package_dir = get_package_share_directory("stl_rover")
-        model_path = package_dir + "/model_trained/model_0.9167999625205994_102500.pth"
+        model_path = package_dir + "/model_trained/model_0.9865999817848206_172000.pth"
         # load weights of pretrained model
         beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
         self.sim: DynamicsSimulator = DynamicsSimulator(wait_for_charging=4, steps_ahead=100, area_h=10, area_w=10, squared_area=True, beam_angles=beam_angles, device=device, close_thres=0.05)
@@ -168,26 +168,29 @@ class Agent:
         # Take the first planned state
         #print(control[0])
         
-        # estimated = dynamics(self.sim, world_objects, state, robot_pose, target, charger, control)
-        # stl_score = self.stl(estimated, 500, d={"hard": False})[:, :1]
-        # stl_max_i = torch.argmax(stl_score, dim=0)
-        # safe_control = control[stl_max_i : stl_max_i + 1]
+        
+        
+        estimated = dynamics(self.sim, world_objects, state, robot_pose, target, charger, control)
+        stl_score = self.stl(estimated, 500, d={"hard": False})[:, :1]
+        stl_max_i = torch.argmax(stl_score, dim=0)
+        safe_control = control[stl_max_i : stl_max_i + 1]
 
-        # for ctl in safe_control[0]:
-        #     v = ctl[0] * 10 * 0.5
-        #     theta = ctl[1].unsqueeze(0)
+        for ctl in safe_control[0]:
+            v = ctl[0] * 10 * 0.5
+            theta = ctl[1].unsqueeze(0)
 
         control = control[0].detach().cpu().numpy()
-        linear_velocity = control[:5, 0] * 0.2 # 10 * delta_t
-        angular_velocity = control[:5, 1] / delta_t
+        actions = 5
+        linear_velocity = control[1:actions, 0] * 10 * delta_t
+        angular_velocity = control[1:actions, 1] / delta_t
         return linear_velocity, angular_velocity
     
     def plan_one(self, state, delta_t: float):
         control = self.model(state)
         # Take the first planned state
-        control = control[0][5].detach().cpu().numpy()
-        linear_velocity = control[0] * 2 * delta_t
-        angular_velocity = control[1] / delta_t
+        control = control[0][3].detach().cpu().numpy()
+        linear_velocity = control[0] * 5 * delta_t
+        angular_velocity = control[1] #/ delta_t
         return linear_velocity, angular_velocity
 
     def normalize_state(self, state):
