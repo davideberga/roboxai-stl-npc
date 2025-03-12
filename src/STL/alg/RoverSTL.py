@@ -159,6 +159,8 @@ class RoverSTL:
             # no mask
             acc = 1
             small_charge = (states[..., 11:12] <= self.battery_limit).float()
+            # print(states[..., 11:12])
+            # print(f"{torch.sum(small_charge)} / {states[..., 11:12].shape[0]}")
 
             import torch.nn.functional as F
 
@@ -185,11 +187,11 @@ class RoverSTL:
             dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
             dist_target_charger_loss = dist_target_charger_loss * 0.1
 
-            loss = torch.mean(F.relu(0.4 - score)) + dist_target_charger_loss
+            loss = torch.mean(F.relu(0.5 - score)) + dist_target_charger_loss
 
             if acc_avg.item() > best_accuracy:
                 print(f"Increased accuracy: {acc_avg.item()}")
-                self.rover_policy.save(f"model_testing/env_gen_random_from_paper_{acc_avg.item()}_{step}.pth")
+                # self.rover_policy.save(f"model_testing/env_gen_random_from_paper_{acc_avg.item()}_{step}.pth")
                 best_accuracy = acc_avg.item()
 
             self.optimizer.zero_grad()
@@ -226,9 +228,9 @@ class RoverSTL:
                 )
                 
                 print(f"Saving with: {acc_avg.item()}")
-                self.rover_policy.save(f"model_testing/model_{acc_avg.item()}_{step}.pth")
+                self.rover_policy.save(f"model_testing/model-closeness-beta-increased_{acc_avg.item()}_{step}.pth")
 
-                col = 3
+                col = 3 * 2
                 row = 3 * 2
                 bloat = 0.5
 

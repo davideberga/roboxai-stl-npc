@@ -26,16 +26,16 @@ class turtlebot3DQN(Node):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.verbose = True
-        self.agent = Agent(self.verbose, self.device)
-        self.battery = 1
-        self.hold_time = 1
+        self.agent = Agent(self.verbose, 'model-closeness-beta-increased_0.5871999859809875_112000.pth', False,  self.device)
+        self.battery = 5
+        self.hold_time = 0.6
         
         self.action_sequence = []
         
         self.n_episode_test = 1
-        self.timer_period = 0.25 # 0.25 seconds
+        self.timer_period = 1 # 0.25 seconds
         time.sleep(1)
-        self.timer = self.create_timer(self.timer_period, self.control_loop_one)
+        self.timer = self.create_timer(self.timer_period, self.control_loop)
 
     def callback_lidar(self, msg):
         self.turtlebot3.SetLaser(msg)
@@ -46,10 +46,16 @@ class turtlebot3DQN(Node):
     def control_loop(self):
         # Get the current state information.
         pos, rot = self.turtlebot3.get_odom()
+        heading_rover = self.turtlebot3.get_yaw_radiants()
         dist, heading = self.turtlebot3.get_goal_info(pos)
         dist_charger, heading_charger = self.turtlebot3.get_charger_info(pos)
+        print(pos.x, pos.y)
+        
+        # print("Charger: ", dist_charger, heading_charger)
+        # print("Goal: ", dist, heading)
+        # print(self.battery)
         scan = np.array(self.turtlebot3.get_scan())
-        scan = scan - 0.7
+        scan = scan - 0.07
         scan = np.clip(scan, a_min=0, a_max=1.0)
         scan = scan[::-1]
 
@@ -65,13 +71,16 @@ class turtlebot3DQN(Node):
         # Note: We do not execute an action in the same tick when planning,
         # ensuring a 0.25-second delay before executing the first action.
         if not self.action_sequence:
-            linear_vel, angular_vel = self.agent.plan(state_torch, self.timer_period)
+            linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading_rover, self.timer_period)
             # Convert tensor outputs to lists, if necessary.
             if isinstance(linear_vel, torch.Tensor):
                 linear_vel = linear_vel.tolist()[0]
             if isinstance(angular_vel, torch.Tensor):
                 angular_vel = angular_vel.tolist()[0]
-            self.action_sequence = list(zip(linear_vel, angular_vel))
+                
+            for v, theta in zip(linear_vel, angular_vel):
+                self.action_sequence.append((0.0, theta))
+                self.action_sequence.append((v, 0.0))
             self.get_logger().info(f"New action sequence planned: {len(self.action_sequence)} actions")
             return  # Exit this tick; next tick will execute the first action.
 
@@ -84,20 +93,30 @@ class turtlebot3DQN(Node):
             self.turtlebot3.stop(self.pub)
             rclpy.shutdown()
             return
+        
+        if self.battery < 0:
+            self.get_logger().info("Battery ended")
+            self.turtlebot3.stop(self.pub)
+            rclpy.shutdown()
+            return
 
         # Update battery and hold time based on charger distance.
-        if dist_charger < 0.1:
+        if dist_charger < 0.12:
             self.battery = min(self.battery + 0.5, 5)
             self.hold_time = max(0, self.hold_time - 0.3)
         else:
-            self.battery -= 0.001
+            self.battery -= 0.01
 
         if self.hold_time < 0.1:
             self.hold_time = 1
 
         if dist_charger < 0.1:
-            self.battery = 5
+            self.battery = min(self.battery + 0.5, 5)
             self.get_logger().info("Recharged")
+        
+        # TODO Handle battery as in the paper
+            
+        
 
         # Execute the action.
         self.turtlebot3.move(v, theta, self.pub)

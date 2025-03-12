@@ -29,8 +29,7 @@ class DynamicsSimulator:
         self.area_w = area_w
         self.max_range_destination = area_h if squared_area else max(area_h, area_w)
         self.max_range_lidar = area_h / 2 if squared_area else min(area_h, area_w)
-        print(self.max_range_destination)
-
+        
         # Task config
         self.hold_t = wait_for_charging
         self.close_thres = close_thres
@@ -514,7 +513,7 @@ class DynamicsSimulator:
         dy = cy - ry
         distance = torch.norm(torch.stack([dx, dy], dim=-1), dim=-1)
         normalized_distance = torch.clamp(distance / self.max_range_destination, max=1.0)
-        angle = torch.atan2(dy, dx + self.epsilon) - rtheta
+        angle = torch.atan2(dy, dx + self.epsilon) # - rtheta
         angle = torch.atan2(torch.sin(angle), torch.cos(angle) + self.epsilon)
         return normalized_distance, angle
 
@@ -528,9 +527,14 @@ class DynamicsSimulator:
 
         # --- Update robot pose linearly ---
         # Predict angle displacement
-        new_x = robot_pose[:, 0] + (v * torch.cos(robot_pose[:, 2] + theta) * self.dt)
-        new_y = robot_pose[:, 1] + (v * torch.sin(robot_pose[:, 2] + theta) * self.dt)
-        new_heading = robot_pose[:, 2] + theta
+        # new_x = robot_pose[:, 0] + (v * torch.cos(robot_pose[:, 2] + theta) * self.dt)
+        # new_y = robot_pose[:, 1] + (v * torch.sin(robot_pose[:, 2] + theta) * self.dt)
+        # new_heading = robot_pose[:, 2] + theta
+        
+        # Predict absolute value
+        new_x = robot_pose[:, 0] + (v * torch.cos(theta) * self.dt)
+        new_y = robot_pose[:, 1] + (v * torch.sin(theta) * self.dt)
+        new_heading = theta
 
         # new_x = robot_pose[:, 0] + v * torch.cos(theta)
         # new_y = robot_pose[:, 1] + v * torch.sin(theta)
@@ -839,11 +843,12 @@ class DynamicsSimulator:
         charger_x = uniform_tensor(0, 10, (n, 1))
         charger_y = uniform_tensor(0, 10, (n, 1))
 
+        closeness = 0.8
         MAX_BATTERY_N = 25
         battery_t = rand_choice_tensor([self.dt * nn for nn in range(MAX_BATTERY_N + 1)], (n, 1))
         rover_theta = uniform_tensor(-np.pi, np.pi, (n, 1))
         rover_rho = uniform_tensor(0, 1, (n, 1)) * (battery_t * self.rover_max_velocity)
-        rover_rho = torch.clamp(rover_rho, self.close_thres, 14.14)
+        rover_rho = torch.clamp(rover_rho, closeness, 14.14)
 
         rover_x = charger_x + rover_rho * torch.cos(rover_theta)
         rover_y = charger_y + rover_rho * torch.sin(rover_theta)
@@ -855,11 +860,12 @@ class DynamicsSimulator:
         ratio = 0.25
         rand_mask = uniform_tensor(0, 1, (n, 1))
         rand = rand_mask > 1 - ratio
-        ego_rho = uniform_tensor(0, self.close_thres, (n, 1))
+        ego_rho = uniform_tensor(0, closeness, (n, 1))
         rover_x[rand] = (charger_x + ego_rho * torch.cos(rover_theta))[rand]
         rover_y[rand] = (charger_y + ego_rho * torch.sin(rover_theta))[rand]
-        battery_t[rand] = self.dt * MAX_BATTERY_N
-
+        # battery_t[rand] = np.random.random() * (2 - 0.2) + 0.2
+        battery_t[rand] = self.dt * MAX_BATTERY_N # np.random.random() * (2.5 - 1.5) + 1.5
+        
         hold_t = 0 * dest_x + self.dt * self.hold_t
         hold_t[rand] = rand_choice_tensor([self.dt * nn for nn in range(self.hold_t + 1)], (n, 1))[rand]
 
@@ -931,8 +937,8 @@ class DynamicsSimulator:
                     else:  # avoid obstacles
                         val = torch.logical_not(
                             torch.logical_and(
-                                (x - (xmin - 1.2)) * ((xmax + 1.2) - x) >= 0,
-                                (y - (ymin - 1.2)) * ((ymax + 1.2) - y) >= 0,
+                                (x - xmin) * (xmax - x) >= 0,
+                                (y - ymin) * (ymax - y) >= 0,
                             )
                         )
                     valids.append(val)
@@ -946,7 +952,15 @@ class DynamicsSimulator:
 
         x_list = torch.cat(x_list, dim=0)[:n]
         x_theta = torch.cat(x_theta, dim=0)[:n]
+        
+        
+        
         tensor_objs_cx_cy_w_h = torch.tensor(self.transform_objects(objs)).float().to(self.device)
+        
+        # Reduce dimension of objects, distance from objects
+        tensor_objs_cx_cy_w_h[:, 2] -= 0.5
+        tensor_objs_cx_cy_w_h[:, 3] -= 0.5
+        
         # Remove map from obstacles
         obstacles = tensor_objs_cx_cy_w_h[1:]
 

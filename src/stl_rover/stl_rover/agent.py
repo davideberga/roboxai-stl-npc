@@ -2,16 +2,10 @@ from collections import deque
 import numpy as np
 import tensorflow as tf
 
-from .dynamics import DynamicsSimulator
-from .lib_stl_core import AP, Always, Eventually, Imply, ListAnd, Or
 from ament_index_python.packages import get_package_share_directory
 import torch
 import torch.nn as nn
 import numpy as np
-
-enough_close_to = 0.08
-safe_distance = 0.12
-wait_for_charging = 3
 
 def build_relu_nn(input_dim, output_dim, hiddens, activation_fn, last_fn=None):
     n_neurons = [input_dim] + hiddens + [output_dim]
@@ -59,103 +53,41 @@ class RoverSTLPolicy(nn.Module):
         state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
         self.net.load_state_dict(state_dict_parsed)
         
-def generateSTL(steps_ahead: int, battery_limit: float):
-    def debug_print(label, func, x):
-        value = func(x)
-        # print(f"{label}: {value}")
-        return value
+class PolicyPaper(nn.Module):
+    def __init__(self):
+        super(PolicyPaper, self).__init__()
+        # input  (rover xy; dest xy; charger xy; battery t; hold_t)
+        # output (rover v theta)
+        self.net = build_relu_nn(
+            2 + 2 + 2 + 2, 2 * 10, [256, 256, 256], activation_fn=nn.ReLU
+        )
 
-    avoid0 = Always(0, steps_ahead, AP(lambda x: (x[..., 0] - safe_distance) * 100))
-    avoid1 = Always(0, steps_ahead, AP(lambda x: (x[..., 1] - safe_distance) * 100))
-    avoid2 = Always(0, steps_ahead, AP(lambda x: (x[..., 2] - safe_distance) * 100))
-    avoid3 = Always(0, steps_ahead, AP(lambda x: (x[..., 3] - safe_distance) * 100))
-    avoid4 = Always(0, steps_ahead, AP(lambda x: (x[..., 4] - safe_distance) * 100))
-    avoid5 = Always(0, steps_ahead, AP(lambda x: (x[..., 5] - safe_distance) * 100))
-    avoid6 = Always(0, steps_ahead, AP(lambda x: (x[..., 6] - safe_distance) * 100))
-
-    avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
-
-    avoid = ListAnd(avoid_list)
-
-    at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: enough_close_to - x[..., 8], x), comment="Distance to destination")
-    at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: enough_close_to - x[..., 10], x), comment="Distance to charger")
-
-    if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
-    if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
-
-    always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
-
-    stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: enough_close_to - x[..., 10], x), comment="Stand by: agent remains close to charger")
-    enough_stay = AP(lambda x: debug_print(f"Stay > {wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{wait_for_charging} steps")
-    charging = Imply(at_charger, Always(0, wait_for_charging, Or(stand_by, enough_stay)))
-
-    return ListAnd(
-        [avoid, always_have_battery, if_low_battery_go_charger, charging, if_enough_battery_go_destiantion]
-    )  # ListAnd([avoid])# if_enough_battery_go_destiantion, always_have_battery, if_low_battery_go_charger]) # missing charging
-
-
-def dynamics(
-    sim,
-    world_objects,
-    states,
-    robot_poses,
-    targets,
-    chargers,
-    es_trajectories,
-    include_first=False,
-):
-    """Estimate planning of T steps ahead"""
-
-    t = es_trajectories.shape[1]  # Extract actions predicted
-    x = states.clone()
-    poses = robot_poses.clone()
-    tgs = targets.clone()
-    chrs = chargers.clone()
-
-    segs = [states] if include_first else []
-
-    for ti in range(t):
-        new_x, new_poses = dynamics_per_step(sim, x, world_objects, poses, tgs, chrs, es_trajectories[:, ti])
-        segs.append(new_x)
-        x = new_x
-        poses = new_poses
-
-    return torch.stack(segs, dim=1)
-
-
-def dynamics_per_step(sim, x, world_objects, poses, tgs, chrs, es_trajectories):
-    """Computes how the system state changes in one time step given the current state x
-    and a single es_trajectories  u
-    """
-
-    # The new state must have these values estimated
-    # [LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, HEAD_TARGET, DIST_TARGET, HEAD_N_CHARGER, DIST_N_CHARGER, B_TIME, C_TIME]
-
-    predicted_velocity = es_trajectories[:, 0]
-    predicted_theta = es_trajectories[:, 1]
-
-    return sim.update_state_batch(
-        x,
-        predicted_velocity,
-        predicted_theta,
-        poses,
-        world_objects,
-        tgs,
-        chrs,
-    )
-
+    def forward(self, x):
+        num_samples = x.shape[0]
+        u = self.net(x).reshape(num_samples, 10, -1)
+        u0 = torch.clip(u[..., 0], 0, 1)
+        u1 = torch.clip(u[..., 1], -np.pi, np.pi)
+        uu = torch.stack([u0, u1], dim=-1)
+        return uu
+    
+    def load_eval_paper(self, path: str):
+        checkpoint = torch.load(path)
+        state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
+        self.net.load_state_dict(state_dict_parsed)
 
 class Agent:
-    def __init__(self, verbose, device):
+    def __init__(self, verbose, model_name: str, is_paper: bool,  device):
 
         package_dir = get_package_share_directory("stl_rover")
-        model_path = package_dir + "/model_trained/model_0.9865999817848206_172000.pth"
+        # model_path = package_dir + f"/model_trained/model_0.9865999817848206_172000.pth"
+        model_path = package_dir + f"/model_trained/{model_name}"
         # load weights of pretrained model
-        beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
-        self.sim: DynamicsSimulator = DynamicsSimulator(wait_for_charging=4, steps_ahead=100, area_h=10, area_w=10, squared_area=True, beam_angles=beam_angles, device=device, close_thres=0.05)
-        self.stl = generateSTL(steps_ahead=10, battery_limit=2)
-        self.model = RoverSTLPolicy(10).to(device)
-        self.model.load_eval(model_path)
+        if not is_paper:
+            self.model = RoverSTLPolicy(10).to(device)
+            self.model.load_eval(model_path)
+        else:
+            self.model = PolicyPaper().to(device)
+            self.model.load_eval_paper(model_path)
         self.model.eval()
         
         if verbose:
@@ -165,24 +97,36 @@ class Agent:
 
     def plan(self, state, delta_t: float):
         control = self.model(state)
-        # Take the first planned state
-        #print(control[0])
-        
-        
-        
-        estimated = dynamics(self.sim, world_objects, state, robot_pose, target, charger, control)
-        stl_score = self.stl(estimated, 500, d={"hard": False})[:, :1]
-        stl_max_i = torch.argmax(stl_score, dim=0)
-        safe_control = control[stl_max_i : stl_max_i + 1]
-
-        for ctl in safe_control[0]:
-            v = ctl[0] * 10 * 0.5
-            theta = ctl[1].unsqueeze(0)
 
         control = control[0].detach().cpu().numpy()
-        actions = 5
-        linear_velocity = control[1:actions, 0] * 10 * delta_t
-        angular_velocity = control[1:actions, 1] / delta_t
+ 
+        linear_velocity = control[:, 0] * 0.2 * delta_t
+        angular_velocity = control[:, 1] / delta_t
+        return linear_velocity, angular_velocity
+    
+    def plan_absolute_theta(self, state, heading, delta_t: float):
+        print("State:", state)
+        
+        # Get control output from model and convert to numpy array.
+        control = self.model(state)
+        # Assuming control is a batch; extract first sample.
+        control = control[0].detach().cpu().numpy()
+        
+        # Calculate linear velocity. Adjust the multiplier as needed.
+        linear_velocity = control[:, 0] * 0.4 # * delta_t
+
+        # Proportional gain for angular control.
+        Kp = 0.2
+        print("Current Heading:", heading)
+        
+        # Compute the angular error between the predicted angle and current heading.
+        angle_diff = control[:, 1] - heading
+        # Normalize the error to be within [-pi, pi]
+        normalized_angle_diff = (angle_diff + np.pi) % (2 * np.pi) - np.pi
+        
+        # Apply the proportional gain to the normalized angular error.
+        angular_velocity = Kp * normalized_angle_diff
+
         return linear_velocity, angular_velocity
     
     def plan_one(self, state, delta_t: float):
@@ -192,6 +136,7 @@ class Agent:
         linear_velocity = control[0] * 5 * delta_t
         angular_velocity = control[1] #/ delta_t
         return linear_velocity, angular_velocity
+    
 
     def normalize_state(self, state):
         return np.around(state,3)

@@ -174,7 +174,7 @@ if __name__ == "__main__":
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
     # 172000
-    model.load_eval("model_testing/model_0.9167999625205994_102500.pth")
+    model.load_eval("model_testing/model-no-12_0.8791999816894531_71500.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
     model.eval()
     
@@ -208,14 +208,14 @@ if __name__ == "__main__":
                 v = control[0][0]
                 theta = control[0][0][1]
 
-                estimated = dynamics(sim, world_objects, state, robot_pose, target, charger, control)
-                stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
-                stl_max_i = torch.argmax(stl_score, dim=0)
-                safe_control = control[stl_max_i : stl_max_i + 1]
+                # estimated = dynamics(sim, world_objects, state, robot_pose, target, charger, control)
+                # stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
+                # stl_max_i = torch.argmax(stl_score, dim=0)
+                # safe_control = control[stl_max_i : stl_max_i + 1]
                 
-                print(len(safe_control))
+                # print(len(safe_control))
 
-                for ctl in safe_control[0]:
+                for ctl in control[0]:
                     v = ctl[0] * 10 * 0.5
                     theta = ctl[1].unsqueeze(0)
 
