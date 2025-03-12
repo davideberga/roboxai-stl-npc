@@ -3,6 +3,8 @@ from alg.dynamics import DynamicsSimulator
 from alg.stl_network import RoverSTLPolicy
 import random
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 seed = 42 
 
@@ -105,9 +107,6 @@ if __name__ == "__main__":
     robot_pose = robot_pose[0]
     target = target[0]
     charger = charger[0]
-    
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation
 
     # Create a figure and axes.
     fig, ax = plt.subplots(figsize=(8, 8))

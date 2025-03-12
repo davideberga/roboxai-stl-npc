@@ -1,10 +1,12 @@
-from env.rover_navigation_DQN import RoverNavigation
 from alg.DDQN import DDQN
 import time, sys, argparse
 import tensorflow as tf
 import config
 import os
 import numpy as np
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from rover_navigation import RoverNavigation
 
 seed = 40
 
@@ -37,9 +39,9 @@ def train(env, args):
 	finally:
 		env.close()
 
-def generate_environment():
+def generate_environment(env_type):
 	worker_id = int(round(time.time() % 1, 4)*10000)
-	return RoverNavigation( worker_id=worker_id )
+	return RoverNavigation( env_type, seed, worker_id=worker_id)
 
 
 # Call the main function
@@ -49,10 +51,10 @@ if __name__ == "__main__":
 	args = config.parse_args()
 	# seed = None implies random seed
 	editor_build = True
-	env_type = "training"
+	env_type = "train"
 
 	print( "Mobile Robotics Lecture on ML-agents and DDQN! \n")
-	env = generate_environment(seed)
+	env = generate_environment(env_type)
 	train(env, args)
 
 

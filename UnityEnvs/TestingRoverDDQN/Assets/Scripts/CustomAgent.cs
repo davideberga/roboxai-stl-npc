@@ -6,6 +6,8 @@ using System.Linq;
 
 public class CustomAgent : Agent {
 
+    public int seed = 50;
+
     // Robot physics parameters (angular and linear velocity constant)
     public float angularStep;
     public float linearStep;
@@ -37,6 +39,9 @@ public class CustomAgent : Agent {
 
     // Called once at the beginning
     public override void Initialize() {
+
+        Random.InitState(seed);
+
         // Find target, obstacles, and chargers via tag
         target = GameObject.FindGameObjectWithTag("Target").transform;
         obstacleList = GameObject.FindGameObjectsWithTag("Obstacle");
@@ -56,6 +61,8 @@ public class CustomAgent : Agent {
     public override void OnEpisodeBegin() {
         Debug.Log("Episode Begin: Resetting Environment");
         randomizeTarget = false;
+
+        Random.InitState(seed);
 
         // --- Randomize the target position ---
         if (randomizeTarget) {

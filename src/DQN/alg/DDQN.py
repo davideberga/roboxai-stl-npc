@@ -168,9 +168,13 @@ class DDQN():
 		if args.wandb_log: init_wandb(self.run_name, args)
 
 		logger_dict = { "reward": [], "success": [], "step": [], "cost": []}
+		reward_list = []
 		
 		# Iterate the training loop over multiple episodes
 		for episode in range(args.n_episode):
+			
+			print('---------------------------------------------------------------------------------------------------------')
+			print(f"Episode: {episode}")
 
 			# Reset the environment at each new episode
 			state = self.env.reset()
@@ -218,14 +222,20 @@ class DDQN():
 				}
 			logger.write(record)
 
-			print( f"(DDQN) Ep: {episode:5}", end=" " )
-			print( f"reward: {logger_dict['reward'][-1]:5.2f} (last_100: {np.mean(reward_last_100):5.2f})", end=" " )
-			print( f"cost_last_100: {int(np.mean(cost_last_100))}", end=" " )
-			print( f"step_last_100 {int(np.mean(step_last_100)):3d}", end=" " )
-			if 'eps_greedy' in self.__dict__.keys(): print( f"eps: {self.eps_greedy:3.2f}", end=" " )
-			if 'sigma' in self.__dict__.keys(): print( f"sigma: {self.sigma:3.2f}", end=" " )
-			print( f"success_last_100 {int(np.mean(success_last_100)*100):4d}%" )
+			#print( f"(DDQN) Ep: {episode:5}", end=" " )
+			#print( f"reward: {logger_dict['reward'][-1]:5.2f} (last_100: {np.mean(reward_last_100):5.2f})", end=" " )
+			#print( f"cost_last_100: {int(np.mean(cost_last_100))}", end=" " )
+			#print( f"step_last_100 {int(np.mean(step_last_100)):3d}", end=" " )
+			#if 'eps_greedy' in self.__dict__.keys(): print( f"eps: {self.eps_greedy:3.2f}", end=" " )
+			#if 'sigma' in self.__dict__.keys(): print( f"sigma: {self.sigma:3.2f}", end=" " )
+			#print( f"success_last_100 {int(np.mean(success_last_100)*100):4d}%" )
+			
+			reward_list.append(reward)
 
+			if episode % 20 == 0:
+				print('Mean_Reward:', np.mean(reward_list))
+				reward_list = []
+			
 			if args.wandb_log:
 				wandb.log(record) 
 

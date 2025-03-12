@@ -1,7 +1,7 @@
 import warnings; warnings.filterwarnings("ignore")
 import os; os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import sys; sys.path.append("./")
-from env.rover_navigation_DQN import RoverNavigation
+from src.rover_navigation import RoverNavigation
 import tensorflow as tf
 import numpy as np
 import time
@@ -47,11 +47,12 @@ def main( env, policy_network, iterations=100 ):
 
 		while True:
 			action = get_action( state, policy_network )
-			state, _, done, info = env.step(action)			
-			if done: break
+			state, reward, done, info, env_var, n_charged = env.step(action)			
+			if done: 
+				print(f'Ep: {ep}, Reward: {reward}, Batteria: {env_var["bat_time"]}, Goal_reached: {info["target_reached"]}, Collision: {info["collision"]}, Charger_reached: {n_charged}, d_n_target: {env_var["d_n_target"]}, d_n_charger: {env_var["d_n_charger"]}')	
+				break
 
-
-		if info["goal_reached"]: 
+		if info["target_reached"]: 
 			print( f"{ep:3}: Goal!" )
 			goal += 1
 
@@ -68,10 +69,10 @@ def main( env, policy_network, iterations=100 ):
 
 if __name__ == "__main__":
 
-	policy_network = tf.keras.models.load_model("model_testing/DDQN_id940_ep2666.h5")
+	policy_network = tf.keras.models.load_model("models/DDQN_id940_ep0_success100.h5")
 
 	try:
-		env = RoverNavigation(env_type= "testing", editor_build=False, seed=seed) 
+		env = RoverNavigation(env_type= "test", seed=seed, worker_id=0) 
 		success = main( env, policy_network )
 		print('\n======================================')
 		print(f'\nSuccess: {success[0]}/{success[2]}\nCrash: {success[1]}/{success[2]}\n')
