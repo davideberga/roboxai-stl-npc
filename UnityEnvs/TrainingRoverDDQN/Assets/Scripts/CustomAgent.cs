@@ -14,9 +14,9 @@ public class CustomAgent : Agent {
     public float linearStep;
 
     // Flags for randomization
-    public bool randomizeAgentRotation = false;
-    public bool randomizeAgentPosition = false;
-    public bool randomizeTarget = false;
+    public bool randomizeAgentRotation = true;
+    public bool randomizeAgentPosition = true;
+    public bool randomizeTarget = true;
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
@@ -61,9 +61,8 @@ public class CustomAgent : Agent {
     // Called at the beginning of each episode
     public override void OnEpisodeBegin() {
         Debug.Log("Episode Begin: Resetting Environment");
-        randomizeTarget = false;
-
-        Random.InitState(seed);
+        randomizeTarget = true;
+        float targetRandomArea = 1.8f;
 
         // --- Randomize the target position ---
         if (randomizeTarget) {
@@ -93,8 +92,8 @@ public class CustomAgent : Agent {
         transform.position = startingPos;
         transform.rotation = startingRot;
 
-		randomizeAgentRotation = false;
-		randomizeAgentPosition = false;
+		randomizeAgentRotation = true;
+		randomizeAgentPosition = true;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -203,7 +202,8 @@ public class CustomAgent : Agent {
     // of the other objects’ renderer bounds.
     private bool VerifyIntersectionWithObstacles(GameObject gO) {
         // Combine obstacles and chargers into one array.
-        GameObject[] allObjects = obstacleList.Concat(chargerList).ToArray();
+        //GameObject[] allObjects = obstacleList.Concat(chargerList).ToArray();
+        GameObject[] allObjects = GameObject.FindGameObjectsWithTag("Obstacle");
 
         // Get the renderer for the given object.
         Renderer myRenderer = gO.GetComponentInChildren<Renderer>();
