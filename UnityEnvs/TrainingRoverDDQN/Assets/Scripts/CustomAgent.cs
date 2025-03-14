@@ -72,7 +72,7 @@ public class CustomAgent : Agent {
                     0f,
                     Random.Range(-targetRandomArea, targetRandomArea)
                 );
-            } while (VerifyIntersectionWithObstacles(target.gameObject));
+            } while (verifyIntersectionWithObstacle(target.gameObject));
         }
 
         // --- Randomize charger positions ---
@@ -84,7 +84,7 @@ public class CustomAgent : Agent {
         //             0f,
         //             Random.Range(-targetRandomArea, targetRandomArea)
         //         );
-        //     } while (VerifyIntersectionWithObstacles(charger));
+        //     } while (verifyIntersectionWithObstacle(charger));
         // }
 
         // --- Reset the agent ---
@@ -108,7 +108,7 @@ public class CustomAgent : Agent {
                     0f,
                     Random.Range(-targetRandomArea, targetRandomArea)
                 );
-            } while (VerifyIntersectionWithObstacles(this.gameObject));
+            } while (verifyIntersectionWithObstacle(this.gameObject));
         }
 
         Debug.Log("Agent randomized position: " + transform.position);
@@ -187,6 +187,7 @@ public class CustomAgent : Agent {
 
     // When a collision with a solid object occurs
     private void OnCollisionEnter(Collision collision) {
+        Debug.Log(collision.collider.CompareTag("Obstacle"));
         if (collision.collider.CompareTag("Obstacle") || collision.collider.CompareTag("Wall"))
             SetReward(-1f);
     }
@@ -200,25 +201,13 @@ public class CustomAgent : Agent {
     // This method uses LINQ to combine the obstacles and chargers.
     // It checks if the given GameObject's renderer bounds intersect with any
     // of the other objects’ renderer bounds.
-    private bool VerifyIntersectionWithObstacles(GameObject gO) {
-        // Combine obstacles and chargers into one array.
-        //GameObject[] allObjects = obstacleList.Concat(chargerList).ToArray();
-        GameObject[] allObjects = GameObject.FindGameObjectsWithTag("Obstacle");
-
-        // Get the renderer for the given object.
-        Renderer myRenderer = gO.GetComponentInChildren<Renderer>();
-        if (myRenderer == null)
-            return false; // No renderer to check against.
-
-        foreach (GameObject obj in allObjects) {
-            // Skip self–comparison.
-            if (obj == gO)
-                continue;
-
-            Renderer otherRenderer = obj.GetComponentInChildren<Renderer>();
-            if (otherRenderer != null && myRenderer.bounds.Intersects(otherRenderer.bounds))
-                return true;
-        }
-        return false;
-    }
+    // Utility function to check if there is an intersection between the input object
+	// and one of the obstacles
+	private bool verifyIntersectionWithObstacle( GameObject gO ) {
+		// Iterate over the list of the Obstacle
+		foreach( GameObject obstacle in obstacleList )
+			if( obstacle.GetComponent<Renderer>().bounds.Intersects( gO.GetComponentInChildren<Renderer>().bounds ) ) 
+				return true;
+		return false;
+	}
 }
