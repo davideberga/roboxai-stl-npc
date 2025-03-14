@@ -14,9 +14,9 @@ public class CustomAgent : Agent {
     public float linearStep;
 
     // Flags for randomization
-    public bool randomizeAgentRotation = true;
-    public bool randomizeAgentPosition = true;
-    public bool randomizeTarget = true;
+    public bool randomizeAgentRotation = false;
+    public bool randomizeAgentPosition = false;
+    public bool randomizeTarget = false;
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
@@ -38,10 +38,22 @@ public class CustomAgent : Agent {
     // Reward support variable
     private float oldDistance;
 
+    // List of initial agent positions
+    private Vector3[] initialPositions = new Vector3[5];
+    private int currentPositionIndex = 0;  
+    private float y_pos = 0.09f; // y position of the agent (fixed)
+
     // Called once at the beginning
     public override void Initialize() {
 
         Random.InitState(seed);
+
+        // The 5 possible initial positions for the agent
+        initialPositions[0] = new Vector3(0f, y_pos, -1.85f);
+        initialPositions[1] = new Vector3(1.94f, y_pos, 1.58f);
+        initialPositions[2] = new Vector3(-1.89f, y_pos, 0.6f);
+        initialPositions[3] = new Vector3(-0.97f, y_pos, -0.47f);
+        initialPositions[4] = new Vector3(1.99f, y_pos, 0.64f);
 
         // Find target, obstacles, and chargers via tag
         target = GameObject.FindGameObjectWithTag("Target").transform;
@@ -89,11 +101,13 @@ public class CustomAgent : Agent {
 
         // --- Reset the agent ---
         // Reset agent's position and rotation to their starting values
-        transform.position = startingPos;
+        //transform.position = startingPos;
+        transform.position = initialPositions[currentPositionIndex];
+        currentPositionIndex = (currentPositionIndex + 1) % initialPositions.Length;  
         transform.rotation = startingRot;
 
-		randomizeAgentRotation = true;
-		randomizeAgentPosition = true;
+		randomizeAgentRotation = false;
+		randomizeAgentPosition = false;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {

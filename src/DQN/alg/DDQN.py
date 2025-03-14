@@ -63,6 +63,8 @@ class DDQN():
 		# optimizer for the DNN
 		self.optimizer = tf.keras.optimizers.Adam()
 
+		self.reward_history = deque(maxlen=100) # store the last 100 rewards
+
 
 
 	# Class that generate a basic neural netowrk from the given parameters.
@@ -168,7 +170,6 @@ class DDQN():
 		if args.wandb_log: init_wandb(self.run_name, args)
 
 		logger_dict = { "reward": [], "success": [], "step": [], "cost": []}
-		reward_list = []
 		
 		# Iterate the training loop over multiple episodes
 		for episode in range(args.n_episode):
@@ -213,6 +214,10 @@ class DDQN():
 			step_last_100 = logger_dict['step'][-last_n:]
 			success_last_100 = logger_dict['success'][-last_n:]
 
+			# self.reward_history.append(logger_dict['reward'][-1]) 
+			self.reward_history.append(reward) 
+			avg_reward_last_100 = np.mean(self.reward_history)
+
 			record = {
 					'Episode': episode,
 					'Step': int(np.mean(step_last_100)),
@@ -229,12 +234,8 @@ class DDQN():
 			#if 'eps_greedy' in self.__dict__.keys(): print( f"eps: {self.eps_greedy:3.2f}", end=" " )
 			#if 'sigma' in self.__dict__.keys(): print( f"sigma: {self.sigma:3.2f}", end=" " )
 			#print( f"success_last_100 {int(np.mean(success_last_100)*100):4d}%" )
-			
-			reward_list.append(reward)
 
-			if episode % 20 == 0:
-				print('Mean_Reward:', np.mean(reward_list))
-				reward_list = []
+			print(f'Mean_Reward: {avg_reward_last_100} Batteria: {info["battery"]}, Goal_reached: {info["target_reached"]}, Collision: {info["collision"]}, Charger_reached: {info["n_charged"]}, d_n_target: {info["d_n_target"]}, d_n_charger: {info["d_n_charger"]}')	
 			
 			if args.wandb_log:
 				wandb.log(record) 

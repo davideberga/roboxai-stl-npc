@@ -154,7 +154,6 @@ class RoverNavigation(gym.Env):
             info["n_charged"] = env_var["n_charged"]
             info["d_n_target"] = env_var["d_n_target"]
             info["d_n_charger"] = env_var["d_n_charger"]
-            print(f'Reward: {reward}, Batteria: {info["battery"]}, Goal_reached: {info["target_reached"]}, Collision: {info["collision"]}, Charger_reached: {info["n_charged"]}, d_n_target: {info["d_n_target"]}, d_n_charger: {info["d_n_charger"]}')	
         
         return state, reward, done, info
 
