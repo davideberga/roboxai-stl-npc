@@ -174,8 +174,8 @@ class DDQN():
 		# Iterate the training loop over multiple episodes
 		for episode in range(args.n_episode):
 			
-			print('---------------------------------------------------------------------------------------------------------')
-			print(f"Episode: {episode}")
+			# print('---------------------------------------------------------------------------------------------------------')
+			# print(f"Episode: {episode}")
 
 			# Reset the environment at each new episode
 			state = self.env.reset()

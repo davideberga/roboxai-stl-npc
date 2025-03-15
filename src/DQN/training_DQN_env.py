@@ -15,6 +15,7 @@ tf.random.set_seed(seed)
 
 # Check if a GPU is available
 physical_devices = tf.config.list_physical_devices('GPU')
+print(physical_devices)
 
 if physical_devices:
     for device in physical_devices:

@@ -21,7 +21,16 @@ class turtlebot3DQN(Node):
         super().__init__("stl_rover")
 
         self.pub = self.create_publisher(Twist, "cmd_vel", 10)
-        self.turtlebot3 = TurtleBot3()
+        
+        # set your desired goal:
+        # x: z
+        # y: -x
+
+        # -- Paper RoverEnv V1 -- 
+        self.goal_x, self.goal_y = 1.887824, 7.211161
+        self.charger_x, self.charger_y = 0.95, 6.19
+        
+        self.turtlebot3 = TurtleBot3(self.goal_x, self.goal_y, self.charger_x, self.charger_y)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self.callback_lidar, rclpy.qos.qos_profile_sensor_data)
         self.sub1 = self.create_subscription(Odometry, "/odom", self.callback_odom, 10)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -79,15 +88,15 @@ class turtlebot3DQN(Node):
 
         # If there is no pending sequence, plan a new one.
         if len(self.action_sequence) == 0 and not self.executing_action:
-            print(state_torch)
             linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading, self.timer_period)
             linear_vel = linear_vel.tolist()
             angular_vel = angular_vel.tolist()
             
             # self.action_sequence = list(zip(linear_vel, angular_vel))
             for v, theta in zip(linear_vel, angular_vel):
-                self.action_sequence.append((None, theta))
-                self.action_sequence.append((v, None))
+                if(abs(v) > 0):
+                    self.action_sequence.append((None, theta))
+                    self.action_sequence.append((v, None))
             self.get_logger().info(f"New action sequence planned: {len(self.action_sequence)} actions")
             
             
@@ -133,7 +142,7 @@ class turtlebot3DQN(Node):
             turn = 0.1
             if abs(angle_difference) > 0.2:
                 
-                print('Adjusting to angle: {:.2f} Current angle is: {:.2f}'.format(self.rotateTo, heading_deg))
+                # print('Adjusting to angle: {:.2f} Current angle is: {:.2f}'.format(self.rotateTo, heading_deg))
                 if angular_distance >= 0: self.turtlebot3.move(0.0, +turn, self.pub)
                 else: self.turtlebot3.move(0.0, -turn, self.pub)
             else:

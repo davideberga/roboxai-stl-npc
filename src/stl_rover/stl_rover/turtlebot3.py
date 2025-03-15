@@ -1,40 +1,19 @@
 import math
-import time
-
 import numpy as np
-
-
 from nav_msgs.msg import Odometry
-import rclpy
-from geometry_msgs.msg import Twist, Point
-from rclpy.qos import QoSProfile
+from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-import rclpy.qos
 import tf_transformations
-from tf2_ros import TransformException
-from tf2_ros.buffer import Buffer
-from tf2_ros.transform_listener import TransformListener
-
-from math import pi, atan2
 
 
 class TurtleBot3:
-    def __init__(self):
-        # qos = QoSProfile(depth=10)
-        # self.node = rclpy.create_node('turtlebot3_DDQN_node')
+    def __init__(self, goal_x, goal_y, charger_x, charger_y):
         self.lidar_msg = LaserScan()
         self.odom_msg = Odometry()
-        # set your desired goal:
-        # x: z
-        # y: -x
         
-        # -- Paper RoverEnv V1 -- 
-        # self.goal_x, self.goal_y = 1.717, 7.33  # this is for simulation change for real robot
-        # self.charger_x, self.charger_y = 1.79, 5.85 # this is for simulation change for real robot
-
-        # -- RoverEnv V1 -- 
-        self.goal_x, self.goal_y = -1.868001, 3.44
-        self.charger_x, self.charger_y = -2.696, 3.231999
+        # Setting goal and charger coordinates of unity env
+        self.goal_x, self.goal_y = goal_x, goal_y
+        self.charger_x, self.charger_y = charger_x, charger_y
         
         # linear velocity is costant set your value
         self.linear_velocity = 0.2  # to comment
@@ -43,7 +22,6 @@ class TurtleBot3:
         self.angular_velocity = [0.0, -2.20, 2.20]  # to comment
 
         # self.r = rclpy.spin_once(self.node,timeout_sec=0.25)
-
         print("Robot initialized")
 
     def SetLaser(self, msg):

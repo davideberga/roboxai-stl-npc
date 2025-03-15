@@ -109,11 +109,11 @@ class RoverNavigation(gym.Env):
         if reward == -1:
             done = True
             info["collision"] = True
-            print("\n Collisione rilevata! Episodio terminato.\n")
+            # print("\n Collisione rilevata! Episodio terminato.\n")
         elif reward == 1:
             done = True
             info["target_reached"] = True
-            print("\n Target raggiunto! Episodio terminato.\n")
+            # print("\n Target raggiunto! Episodio terminato.\n")
         
         # ------ HANDLE BATTERY -----
         # If near charger

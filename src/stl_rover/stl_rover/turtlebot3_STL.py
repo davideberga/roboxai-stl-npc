@@ -20,7 +20,16 @@ class turtlebot3DQN(Node):
         super().__init__("stl_rover")
 
         self.pub = self.create_publisher(Twist, "cmd_vel", 10)
-        self.turtlebot3 = TurtleBot3()
+        
+        # set your desired goal:
+        # x: z
+        # y: -x
+
+        # -- RoverEnv V1 -- 
+        self.goal_x, self.goal_y = -1.868001, 3.44
+        self.charger_x, self.charger_y = -2.696, 3.231999
+        
+        self.turtlebot3 = TurtleBot3(self.goal_x, self.goal_y, self.charger_x, self.charger_y)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self.callback_lidar, rclpy.qos.qos_profile_sensor_data)
         self.sub1 = self.create_subscription(Odometry, "/odom", self.callback_odom, 10)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -70,7 +79,7 @@ class turtlebot3DQN(Node):
         # print(self.battery)
         scan = np.array(self.turtlebot3.get_scan())
         scan = scan - 0.4
-        scan = np.clip(scan, a_min=0.05, a_max=1.0)
+        scan = np.clip(scan, a_min=0.00, a_max=1.0)
         # scan = scan[::-1]
 
         # Build the state vector.
@@ -101,8 +110,8 @@ class turtlebot3DQN(Node):
             print(state_torch.tolist())
             linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading_rover, self.timer_period)
             # Convert tensor outputs to lists, if necessary.
-            linear_vel = linear_vel.tolist()[0]
-            angular_vel = angular_vel.tolist()[0]
+            linear_vel = linear_vel.tolist()
+            angular_vel = angular_vel.tolist()
                 
             for v, theta in zip(linear_vel, angular_vel):
                 if(abs(v) > 0):
