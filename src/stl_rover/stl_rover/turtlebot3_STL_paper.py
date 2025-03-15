@@ -88,6 +88,7 @@ class turtlebot3DQN(Node):
 
         # If there is no pending sequence, plan a new one.
         if len(self.action_sequence) == 0 and not self.executing_action:
+            self.get_logger().info(f"Input state: { state_torch.tolist()}")
             linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading, self.timer_period)
             linear_vel = linear_vel.tolist()
             angular_vel = angular_vel.tolist()

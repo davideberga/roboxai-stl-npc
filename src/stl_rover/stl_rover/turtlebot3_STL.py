@@ -35,7 +35,7 @@ class turtlebot3DQN(Node):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.verbose = True
-        self.agent = Agent(self.verbose, 'model-closeness-beta-increased_0.5871999859809875_112000.pth', False,  self.device)
+        self.agent = Agent(self.verbose, 'model-closeness-beta-increased_0.7432000041007996_96500.pth', False,  self.device)
         self.battery = 4
         self.hold_time = 0.6
         
@@ -78,7 +78,7 @@ class turtlebot3DQN(Node):
         # print("Goal: ", dist, heading)
         # print(self.battery)
         scan = np.array(self.turtlebot3.get_scan())
-        scan = scan - 0.4
+        scan = scan - 0.07
         scan = np.clip(scan, a_min=0.00, a_max=1.0)
         # scan = scan[::-1]
 
@@ -93,9 +93,7 @@ class turtlebot3DQN(Node):
         # return 
 
         # If there is no pending sequence, plan a new one.
-        # Note: We do not execute an action in the same tick when planning,
-        # ensuring a 0.25-second delay before executing the first action.
-        if not self.action_sequence:
+        if len(self.action_sequence) == 0 and not self.executing_action:
             
             # Update battery and hold time based on charger distance.
             if dist_charger < 0.12:
@@ -107,9 +105,9 @@ class turtlebot3DQN(Node):
             if self.hold_time < 0.1:
                 self.hold_time = 1
             
-            print(state_torch.tolist())
-            linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading_rover, self.timer_period)
-            # Convert tensor outputs to lists, if necessary.
+            self.get_logger().info(f"Input state: { state_torch.tolist()}")
+            linear_vel, angular_vel = self.agent.plan_absolute_theta_our(state_torch, heading_rover, self.timer_period)
+
             linear_vel = linear_vel.tolist()
             angular_vel = angular_vel.tolist()
                 

@@ -130,10 +130,19 @@ class Agent:
         return linear_velocity, angular_velocity
     
     def plan_absolute_theta(self, state, heading, delta_t: float):
-        print("State:", state)
         control = self.model(state)
         control = control[0].detach().cpu().numpy()
         linear_velocity = control[:, 0] * 10 * 0.5 #  * delta_t
+        # angle_diff = control[:, 1] - heading
+        # normalized_angle_diff = (angle_diff + np.pi) % (2 * np.pi) - np.pi
+        # angular_velocity = 1 * normalized_angle_diff
+
+        return linear_velocity, control[:, 1]
+    
+    def plan_absolute_theta_our(self, state, heading, delta_t: float):
+        control = self.model(state)
+        control = control[0].detach().cpu().numpy()
+        linear_velocity = control[:, 0] * 10 * delta_t
         # angle_diff = control[:, 1] - heading
         # normalized_angle_diff = (angle_diff + np.pi) % (2 * np.pi) - np.pi
         # angular_velocity = 1 * normalized_angle_diff
