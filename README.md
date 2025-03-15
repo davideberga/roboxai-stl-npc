@@ -105,6 +105,13 @@ This repo contains the code for the project of Robotics in AI and XAI courses.
 >               0.0547, -0.1086, -0.5540]], device='cuda:0', grad_fn=<DivBackward0>)
 > ```
 
+### Instruction for ros
+
+1. `cd src/stl_rover`
+2. `colcon build && source install/setup.(bash | zsh)`
+3. To start the node with the model of the paper: `colcon build && ros2 run stl_rover paper`
+4. To start the node with our model: `colcon build && ros2 run stl_rover STL`
+
 ### Config
 
 - self.safe_distance = 0.12 # Inferred from ros experiments in unity
