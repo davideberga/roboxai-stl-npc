@@ -24,7 +24,6 @@ setup(
     license="TODO: License declaration",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [
-            'STL = stl_rover.turtlebot3_STL:main'],
+        "console_scripts": ["STL = stl_rover.turtlebot3_STL:main", "paper = stl_rover.turtlebot3_STL_paper:main"],
     },
 )

@@ -25,9 +25,17 @@ class TurtleBot3:
         self.lidar_msg = LaserScan()
         self.odom_msg = Odometry()
         # set your desired goal:
-        self.goal_x, self.goal_y = -1.868001, 3.722999,    # this is for simulation change for real robot
-        self.charger_x, self.charger_y = -2.139001, -0.2830013  # this is for simulation change for real robot
+        # x: z
+        # y: -x
+        
+        # -- Paper RoverEnv V1 -- 
+        # self.goal_x, self.goal_y = 1.717, 7.33  # this is for simulation change for real robot
+        # self.charger_x, self.charger_y = 1.79, 5.85 # this is for simulation change for real robot
 
+        # -- RoverEnv V1 -- 
+        self.goal_x, self.goal_y = -1.868001, 3.44
+        self.charger_x, self.charger_y = -2.696, 3.231999
+        
         # linear velocity is costant set your value
         self.linear_velocity = 0.2  # to comment
 
@@ -57,6 +65,9 @@ class TurtleBot3:
         self.rot_ = tf_transformations.euler_from_quaternion([rot.x, rot.y, rot.z, rot.w])
 
         return point, np.rad2deg(self.rot_[2]) / 180
+    
+    def get_yaw_radiants(self):
+        return self.rot_[2]
 
     def get_scan(self):
         scan_val = []
@@ -95,9 +106,13 @@ class TurtleBot3:
         # for i in range(0, rays):
         #     scan_val.append(min(acceptable[i * step: (i+1) *step]))
 
-        print(scan_val)
-
         return scan_val
+    
+    def get_goal(self):
+        return self.goal_x, self.goal_y
+    
+    def get_charger(self):
+        return self.charger_x, self.charger_y
 
     def get_goal_info(self, tb3_pos):
         delta_y = self.goal_y - tb3_pos.y
@@ -121,10 +136,11 @@ class TurtleBot3:
         return distance / 5,  heading
 
     def move(self, linear_vel, angular_vel, pub):
-        print(linear_vel)
+        # print(linear_vel)
         twist = Twist()
         
-        linear_vel = min(float(linear_vel), 0.2)
+        # linear_vel = min(float(linear_vel), 0.2)
+        linear_vel = float(linear_vel)
         angular_vel = float(angular_vel)
 
         twist.linear.x = linear_vel
@@ -135,7 +151,7 @@ class TurtleBot3:
         twist.angular.y = 0.0
         twist.angular.z = angular_vel
         
-        print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
+        # print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
 
         pub.publish(twist)
         

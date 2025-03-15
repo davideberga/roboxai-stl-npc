@@ -3,8 +3,7 @@
 **/log
 
 **/STL/exap_model_*.pth
-
-**/images
+**/STL/model_testing/model_correct*.pth
 
 .fleet/
 
