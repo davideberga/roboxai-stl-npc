@@ -74,6 +74,30 @@ class PolicyPaper(nn.Module):
         checkpoint = torch.load(path)
         state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
         self.net.load_state_dict(state_dict_parsed)
+        
+        
+
+
+class DifferentialController:
+    def __init__(self, k_p, k_d, dt):
+        self.k_p = k_p
+        self.k_d = k_d
+        self.dt = dt
+        self.prev_error = 0.0
+        
+    def normalize_angle(self, angle):
+        return (angle + torch.pi) % (2 * torch.pi) - torch.pi
+
+    def compute_control(self, desired_angle, current_angle):
+        # Compute the normalized error between desired and current headings.
+        error = self.normalize_angle(desired_angle - current_angle)
+        # Compute the derivative term as the difference in error divided by the time step.
+        derivative = (error - self.prev_error) / self.dt
+        # Save the current error for the next iteration.
+        self.prev_error = error
+        # Compute the angular control output.
+        control_output = self.k_p * error + self.k_d * derivative
+        return control_output
 
 class Agent:
     def __init__(self, verbose, model_name: str, is_paper: bool,  device):
@@ -90,6 +114,7 @@ class Agent:
             self.model.load_eval_paper(model_path)
         self.model.eval()
         
+        
         if verbose:
             print('==================================================')
             print('  We are using this model for the testing phase:  ')
@@ -101,33 +126,19 @@ class Agent:
         control = control[0].detach().cpu().numpy()
  
         linear_velocity = control[:, 0] * 0.2 * delta_t
-        angular_velocity = control[:, 1] / delta_t
+        angular_velocity = control[4:7, 1] / delta_t
         return linear_velocity, angular_velocity
     
     def plan_absolute_theta(self, state, heading, delta_t: float):
         print("State:", state)
-        
-        # Get control output from model and convert to numpy array.
         control = self.model(state)
-        # Assuming control is a batch; extract first sample.
         control = control[0].detach().cpu().numpy()
-        
-        # Calculate linear velocity. Adjust the multiplier as needed.
-        linear_velocity = control[:, 0] * 0.4 # * delta_t
+        linear_velocity = control[:, 0] * 0.5 # * delta_t
+        # angle_diff = control[:, 1] - heading
+        # normalized_angle_diff = (angle_diff + np.pi) % (2 * np.pi) - np.pi
+        # angular_velocity = 1 * normalized_angle_diff
 
-        # Proportional gain for angular control.
-        Kp = 0.2
-        print("Current Heading:", heading)
-        
-        # Compute the angular error between the predicted angle and current heading.
-        angle_diff = control[:, 1] - heading
-        # Normalize the error to be within [-pi, pi]
-        normalized_angle_diff = (angle_diff + np.pi) % (2 * np.pi) - np.pi
-        
-        # Apply the proportional gain to the normalized angular error.
-        angular_velocity = Kp * normalized_angle_diff
-
-        return linear_velocity, angular_velocity
+        return linear_velocity, control[:, 1]
     
     def plan_one(self, state, delta_t: float):
         control = self.model(state)

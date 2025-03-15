@@ -25,10 +25,11 @@ class TurtleBot3:
         self.lidar_msg = LaserScan()
         self.odom_msg = Odometry()
         # set your desired goal:
-        #x,y following unity reference frame (-z is x and x is y ), the code will take care of the -z to +z later
+        # x: z
+        # y: -x
         
         # -- Paper RoverEnv V1 -- 
-        # self.goal_x, self.goal_y = 2.85, 7.33  # this is for simulation change for real robot
+        # self.goal_x, self.goal_y = 1.717, 7.33  # this is for simulation change for real robot
         # self.charger_x, self.charger_y = 1.79, 5.85 # this is for simulation change for real robot
 
         # -- RoverEnv V1 -- 
@@ -150,7 +151,7 @@ class TurtleBot3:
         twist.angular.y = 0.0
         twist.angular.z = angular_vel
         
-        print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
+        # print(f"Action -> linear vel: {linear_vel}, angular vel: {angular_vel}")
 
         pub.publish(twist)
         

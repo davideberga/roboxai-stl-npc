@@ -3,7 +3,7 @@ import os
 from time import sleep
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-from stl_rover.agent import Agent
+from stl_rover.agent import Agent, DifferentialController
 from stl_rover.turtlebot3 import TurtleBot3
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import LaserScan
@@ -29,20 +29,36 @@ class turtlebot3DQN(Node):
         self.verbose = True
         self.agent = Agent(self.verbose, 'model_final_paper.ckpt', True,  self.device)
         self.battery = 5
-        self.hold_time = 0.6
+        self.hold_time = 1
         
         self.action_sequence = []
         
         self.n_episode_test = 1
-        self.timer_period = 1 # 0.25 seconds
+        self.timer_period = 0.25 # 0.25 seconds
         time.sleep(1)
         self.timer = self.create_timer(self.timer_period, self.control_loop)
+        self.controller = DifferentialController(k_p=0.2, k_d=0.1, dt=self.timer_period)
+        
+        self.executing_action = False
+        self.rotateTo = 0
 
     def callback_lidar(self, msg):
         self.turtlebot3.SetLaser(msg)
 
     def callback_odom(self, msg):
         self.turtlebot3.SetOdom(msg)
+        
+    def normalize_degrees(self, angle):
+        return (angle + 180) % 360 - 180
+        
+    def calculate_angular_distance(self, start_angle, end_angle):
+        clockwise_distance = (end_angle - start_angle) % 360
+        counterclockwise_distance = (start_angle - end_angle) % 360
+
+        if clockwise_distance <= counterclockwise_distance:
+            return clockwise_distance
+        else:
+            return -counterclockwise_distance
 
     def control_loop(self):
         # Get the current state information.
@@ -55,30 +71,30 @@ class turtlebot3DQN(Node):
             return abs(x)
 
         # Build the state vector.
-        state = np.array((remap(pos.x) , remap(pos.y)  , remap(goal_x), remap(goal_y), remap(charger_x), remap(charger_y), self.battery, self.hold_time))
+        state = np.array((remap(pos.x) , remap(pos.y)  , goal_x, goal_y, charger_x, charger_y, self.battery, self.hold_time))
         state = self.agent.normalize_state(state)
         
         state_torch = torch.tensor([state], dtype=torch.float32).to(self.device)
         state_torch = torch.round(state_torch, decimals=3)
 
         # If there is no pending sequence, plan a new one.
-        if len(self.action_sequence) == 0:
+        if len(self.action_sequence) == 0 and not self.executing_action:
             print(state_torch)
             linear_vel, angular_vel = self.agent.plan_absolute_theta(state_torch, heading, self.timer_period)
             linear_vel = linear_vel.tolist()
             angular_vel = angular_vel.tolist()
             
-            self.action_sequence = list(zip(linear_vel, angular_vel))
+            # self.action_sequence = list(zip(linear_vel, angular_vel))
+            for v, theta in zip(linear_vel, angular_vel):
+                self.action_sequence.append((None, theta))
+                self.action_sequence.append((v, None))
             self.get_logger().info(f"New action sequence planned: {len(self.action_sequence)} actions")
-
-        # Execute the next planned action
-        v, theta = self.action_sequence.pop(0)
-        
-        # Goal and charger distances
+            
+            
         dist_goal, _ = self.turtlebot3.get_goal_info(pos)
         dist_charger, _ = self.turtlebot3.get_charger_info(pos)
 
-        if dist_goal < 0.05:
+        if dist_goal < 0.08:
             self.get_logger().info("Goal reached")
             self.turtlebot3.stop(self.pub)
             rclpy.shutdown()
@@ -96,13 +112,39 @@ class turtlebot3DQN(Node):
             self.hold_time = max(0, self.hold_time - 0.3)
             self.get_logger().info("Recharging")
         else:
-            self.battery -= 0.01
+            pass  #self.battery -= 0.01
 
         if self.hold_time < 0.1:
             self.hold_time = 1
             
+        heading_deg = self.normalize_degrees(heading * (180/3.14))
+
+        if not self.executing_action:
+            v, theta = self.action_sequence.pop(0)
+            if theta is not None:
+                self.rotateTo = self.normalize_degrees(theta * (180/3.14))
+                self.executing_action = True
+                self.get_logger().info(f"We want to reach: {self.rotateTo}°, curr heading: {heading_deg}")
+            if v is not None:
+                self.turtlebot3.move(v, 0.0, self.pub)
+        else:
+            angle_difference = self.rotateTo - heading_deg
+            angular_distance = self.calculate_angular_distance(heading_deg, self.rotateTo)
+            turn = 0.1
+            if abs(angle_difference) > 0.2:
+                
+                print('Adjusting to angle: {:.2f} Current angle is: {:.2f}'.format(self.rotateTo, heading_deg))
+                if angular_distance >= 0: self.turtlebot3.move(0.0, +turn, self.pub)
+                else: self.turtlebot3.move(0.0, -turn, self.pub)
+            else:
+                print("Angle reached")
+                self.executing_action = False
+        
+        # Goal and charger distances
+        
+            
         # Execute the action.
-        self.turtlebot3.move(v, theta, self.pub)
+        # self.turtlebot3.move(v, ang_vel, self.pub)
 
 
 def main(args=None):

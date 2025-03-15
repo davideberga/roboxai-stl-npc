@@ -215,7 +215,6 @@ class RoverSTL:
                 )
                 
                 
-
                 print(
                     "Avoid: %.3f, Battery: %.3f, Dest: %.3f, Charger: %.3f, Charging: %.3f"
                     % (
