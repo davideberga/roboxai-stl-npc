@@ -235,14 +235,14 @@ class DDQN():
 			#if 'sigma' in self.__dict__.keys(): print( f"sigma: {self.sigma:3.2f}", end=" " )
 			#print( f"success_last_100 {int(np.mean(success_last_100)*100):4d}%" )
 
-			print(f'Mean_Reward: {avg_reward_last_100} Batteria: {info["battery"]}, Goal_reached: {info["target_reached"]}, Collision: {info["collision"]}, Charger_reached: {info["n_charged"]}, d_n_target: {info["d_n_target"]}, d_n_charger: {info["d_n_charger"]}')	
+			print(f'{episode} > Suc: {np.mean(success_last_100)*100:.3f} Rew: {avg_reward_last_100:.3f} Batteria: {info["battery"]:.1f}, Goal: {info["target_reached"]}, Col: {info["collision"]}, Timeout: {info["time_out"]}, Charger: {info["n_charged"]}, target: {info["d_n_target"]:.3f}, charger: {info["d_n_charger"]:.3f}')	
 			
 			if args.wandb_log:
 				wandb.log(record) 
 
 			# save model if we reach avg_success greater than 78%
 			if int(np.mean(success_last_100)*100) >= 79:
-					self.actor.save(f"models/DDQN_id{self.seed}_ep{episode}_success{int(np.mean(success_last_100)*100)}.h5")
+					self.actor.save(f"models/DDQN_paper_id{self.seed}_ep{episode}_success{int(np.mean(success_last_100)*100)}.h5")
 
 		
 	

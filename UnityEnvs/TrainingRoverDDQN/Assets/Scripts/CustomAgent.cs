@@ -18,7 +18,7 @@ public class CustomAgent : Agent {
     public bool randomizeAgentPosition = false;
     public bool randomizeTarget = false;
     public float targetRandomArea = 1.8f;
-    public float distanceNormFact = 3.0f;
+    public float distanceNormFact = 6.0f;
 
     // The target transform
     private Transform target;
@@ -163,6 +163,8 @@ public class CustomAgent : Agent {
 
     public override void CollectObservations(VectorSensor sensor) {
         // Calculate observations to the target
+        distanceNormFact = 6.0f;
+        // Debug.Log(distanceNormFact);
         (float targetDistance, float targetAngle) = CalculateDistanceAndAngle(
             transform.position, target.position, transform.forward, transform.up, distanceNormFact);
         sensor.AddObservation(targetAngle);
@@ -201,7 +203,6 @@ public class CustomAgent : Agent {
 
     // When a collision with a solid object occurs
     private void OnCollisionEnter(Collision collision) {
-        Debug.Log(collision.collider.CompareTag("Obstacle"));
         if (collision.collider.CompareTag("Obstacle") || collision.collider.CompareTag("Wall"))
             SetReward(-1f);
     }

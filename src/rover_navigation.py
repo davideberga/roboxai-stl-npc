@@ -33,7 +33,6 @@ class RoverNavigation(gym.Env):
         else:
             env_path = None
             worker_id = 0
-        
 
         unity_env = UnityEnvironment(env_path, worker_id=worker_id, seed=seed)
         self.env = UnityToGymWrapper(unity_env, flatten_branched=True)
@@ -43,8 +42,8 @@ class RoverNavigation(gym.Env):
         # Override the state_size
         state_size = self.env.observation_space.shape[0] - self.scan_number
 
-        #print(f"State size: {state_size}")
-        #print(f"Scan size: {self.scan_number}")
+        # print(f"State size: {state_size}")
+        # print(f"Scan size: {self.scan_number}")
 
         # Sanity check for the scan number
         assert_messages = "Mismatching between the given scan number and the observations (check the cost value)"
@@ -56,7 +55,7 @@ class RoverNavigation(gym.Env):
 
         # Initialize battery time and charger hold time
         if env_type == "train":
-            #self.FULL_BATTERY_TIME = battery_time if battery_time is not None else random.uniform(1, 5)
+            # self.FULL_BATTERY_TIME = battery_time if battery_time is not None else random.uniform(1, 5)
             self.FULL_BATTERY_TIME = battery_time
         else:
             self.FULL_BATTERY_TIME = battery_time
@@ -87,24 +86,30 @@ class RoverNavigation(gym.Env):
         state = self.env.reset()
         state = self.fix_state(state)
 
-        self.target_distance = state[-3]
+        self.target_distance = state[-5]
+        self.charger_distance = state[-3]
 
         env_var = self.extractValues(state)
-        env_var['n_charged'] = 0
+        env_var["n_charged"] = 0
         return state
 
     def step(self, action):
         info = {}
         done = False
         state, reward, a, b = self.env.step(action)
-        #print(f'Batteria prima dello step: {self.battery_time}')
-        #print('Reward prima dello step: ', reward)
+        # print(f'Batteria prima dello step: {self.battery_time}')
+        # print('Reward prima dello step: ', reward)
 
         state = self.fix_state(state)
         env_var = self.extractValues(state)
+        self.step_counter += 1
 
         info["target_reached"] = False
         info["collision"] = False
+        info["time_out"] = self.step_counter >= 300
+
+        if info["time_out"]:
+            done = True
 
         if reward == -1:
             done = True
@@ -114,55 +119,55 @@ class RoverNavigation(gym.Env):
             done = True
             info["target_reached"] = True
             # print("\n Target raggiunto! Episodio terminato.\n")
-        
+
         # ------ HANDLE BATTERY -----
         # If near charger
-        if env_var["d_n_charger"] < 0.3 and self.battery_time > 0:  # close to charger
+        if env_var["d_n_charger"] < 0.1 and self.battery_time > 0:  # close to charger
             if self.charger_hold_time > 0:
-                #print(f'before charger_hold_time: {self.charger_hold_time}')
+                # print(f'before charger_hold_time: {self.charger_hold_time}')
                 self.battery_time = min(self.FULL_BATTERY_TIME, self.battery_time + 0.1)  # Recharge
                 self.charger_hold_time -= 1
-                #print(f'before charger_hold_time: {self.charger_hold_time}')
-                #print(f'Il robot si sta ricaricando. Batteria: {self.battery_time}')
-                env_var['n_charged'] += 1
+                # print(f'before charger_hold_time: {self.charger_hold_time}')
+                # print(f'Il robot si sta ricaricando. Batteria: {self.battery_time}')
+                env_var["n_charged"] += 1
             elif self.charger_hold_time == 0:
                 self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
-                #print(f'Il robot ha finito di caricarsi. Batteria: {self.battery_time} e Charger_hold_time: {self.charger_hold_time}')
+                # print(f'Il robot ha finito di caricarsi. Batteria: {self.battery_time} e Charger_hold_time: {self.charger_hold_time}')
         else:
             if self.battery_time > 0:
-                self.battery_time -= 0.01  # Discharge when not near charger                
-                #print(f'Batteria dopo lo step: {self.battery_time} perchè non vicino al charger')
+                self.battery_time -= 0.01  # Discharge when not near charger
+                # print(f'Batteria dopo lo step: {self.battery_time} perchè non vicino al charger')
             else:
                 done = True
                 print("\n Batteria esaurita! Episodio terminato.\n")
         # ------ / HANDLE BATTERY -----
-        
-        #print(f"env_var: {env_var}")
-        #print(f"Step terminato: {done}\n")
 
-        if not done: # if done=False
-            new_distance = env_var['d_n_target'] # update target distance
-            reward = self.override_reward2(state, reward, action, done)
-            self.target_distance = new_distance
+        # print(f"env_var: {env_var}")
+        # print(f"Step terminato: {done}\n")
+
+        if not done:  # if done=False
+            # update target distance
+            reward = self.override_reward_boost(state, reward, action, done)
+            self.target_distance = env_var["d_n_target"]
+            self.charger_distance = env_var["d_n_charger"]
         else:
-            reward = self.override_reward2(state, reward, action, done)
+            reward = self.override_reward_boost(state, reward, action, done)
 
-        #print(f'Reward dopo lo step: {reward}')
+        # print(f'Reward dopo lo step: {reward}')
 
         if done:
             info["battery"] = self.battery_time
             info["n_charged"] = env_var["n_charged"]
             info["d_n_target"] = env_var["d_n_target"]
             info["d_n_charger"] = env_var["d_n_charger"]
-        
-        return state, reward, done, info
 
+        return state, reward, done, info
 
     def override_reward3(self, state, reward, action, done):
         env_var = self.extractValues(state)
 
         collision_penalty = -100
-        #out_of_map_penalty = -100
+        # out_of_map_penalty = -100
         out_of_battery_penalty = -100
         reach_station_reward = 10
         reach_dest_reward = 10
@@ -177,7 +182,7 @@ class RoverNavigation(gym.Env):
         lidar5 = state[4]
         lidar6 = state[5]
         lidar7 = state[6]
-        
+
         lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
 
         min_lidar = min(lidar)
@@ -192,52 +197,86 @@ class RoverNavigation(gym.Env):
         if self.battery_time < 0:
             reward += out_of_battery_penalty
 
-        if env_var["h_n_charger"] < 1: # il robot si sta caricando
-            reward += stay_station_reward 
+        if env_var["h_n_charger"] < 1:  # il robot si sta caricando
+            reward += stay_station_reward
 
-        if env_var["d_n_charger"] < 0.3: # il robot è vicino al target
-            reward  += reach_station_reward
+        if env_var["d_n_charger"] < 0.3:  # il robot è vicino al target
+            reward += reach_station_reward
 
         return reward
 
-
     def override_reward2(self, state, reward, action, done):
         env_var = self.extractValues(state)
-        step_penalty = 0.0001
+        step_penalty = -0.001
         collision_penalty = -50
-        out_of_battery_penalty = -50
+        out_of_battery_penalty = -20
         security_threshold = 0.1
-        reach_dest_reward = 10
+        reach_dest_reward = 100
 
-        lidar1 = state[0]
-        lidar2 = state[1]
-        lidar3 = state[2]
-        lidar4 = state[3]
-        lidar5 = state[4]
-        lidar6 = state[5]
-        lidar7 = state[6]
-        
-        lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
+        # Ensure safety of lidar
+        reward += min(state[0:7]) - security_threshold
+        battery = env_var["bat_time"]
 
-        min_lidar = min(lidar)
-
-        if (done and reward == -1) or min_lidar < security_threshold:
-            reward += collision_penalty
-
-        if done and reward == 1: 
-            reward += reach_dest_reward
-
-        if self.battery_time > 2.5:
-            reward += self.battery_time -(abs(env_var['d_n_target'])) + step_penalty
-        elif self.battery_time < 0:
-            reward += out_of_battery_penalty
+        if battery > 2:
+            # If enough battery go to target
+            reward += (-abs(env_var["h_n_target"]) - env_var["d_n_target"]) * 10
         else:
-            reward += self.battery_time -(abs(env_var['d_n_charger'])) + step_penalty
-        
+            # Else go to charger
+            reward += -abs(env_var["h_n_charger"]) - env_var["d_n_charger"]
+
+        # Battery finished
+        if done and battery < 0:
+            reward += out_of_battery_penalty
+        # Collision
         if done and reward == -1:
             reward += collision_penalty
-        
-        return reward 
+        # Goal reached
+        if done and reward == 1:
+            reward += reach_dest_reward
+
+        return reward + step_penalty
+
+    def override_reward_boost(self, state, reward, action, done):
+        env_reward = reward
+        env_var = self.extractValues(state)
+        step_penalty = -0.01
+        collision_penalty = -50
+        out_of_battery_penalty = -20
+        reach_dest_reward = 100
+
+        reward = 0.0
+
+        # Destination approaching
+        # reward += 10 * (1 / (1 + env_var["d_n_target"]))
+        reward += 20 * (self.target_distance - env_var["d_n_target"])  # Decreasing
+        reward -= abs(env_var["h_n_target"]) * 0.1
+
+        # Safe
+        min_lidar = min(state[0:7])
+        if min_lidar < 0.2:
+            reward -= 20 * (1 - min_lidar / 0.2)
+
+        # Battery
+        battery = env_var["bat_time"]
+        if battery < 2 and env_var["d_n_charger"] < 0.3:
+            # Close to the charger, right heading and decresing distance
+            reward += (-abs(env_var["h_n_charger"]) * 0.1) + 10 * (self.charger_distance - env_var["d_n_charger"])  # 5 * (1 / (1 + env_var["d_n_charger"]))
+
+        # Penalize unnecessary charger stops
+        if battery > 4 and env_var["d_n_charger"] < 0.2:
+            reward -= 5
+
+        # Battery finished
+        if done and battery <= 0:
+            reward += out_of_battery_penalty
+        # Collision
+        if done and env_reward == -1:
+            reward += collision_penalty
+        # Goal reached
+        if done and env_reward == 1:
+            reward += reach_dest_reward
+
+        return reward + step_penalty
 
     def override_reward1(self, state, reward, action, done):
         # Dati estratti dallo stato
@@ -250,7 +289,7 @@ class RoverNavigation(gym.Env):
         lidar5 = state[4]
         lidar6 = state[5]
         lidar7 = state[6]
-        
+
         lidar = [lidar1, lidar2, lidar3, lidar4, lidar5, lidar6, lidar7]
 
         min_lidar = min(lidar)
@@ -267,18 +306,17 @@ class RoverNavigation(gym.Env):
         # Se il robot ha avuto una collisione, penalizzare fortemente
         if (done and reward == -1) or min_lidar < security_threshold:  # Se reward è -1, c'è stata una collisione
             reward += collision_penalty
-        elif done and reward == 1: 
+        elif done and reward == 1:
             reward += reach_dest_reward
-        elif min_lidar > security_threshold:  
+        elif min_lidar > security_threshold:
             reward += min_lidar
 
         if self.battery_time < 0:
             reward += out_of_battery_penalty
-        elif self.battery_time > 2.5: # Se la batteria è carica abbastanza, vai al target
+        elif self.battery_time > 2.5:  # Se la batteria è carica abbastanza, vai al target
             reward -= env_var["d_n_target"]
-        elif self.battery_time <= 2.5: # Se la batteria è scarica, vai alla stazione di ricarica
-            reward += reach_station_reward - env_var["d_n_charger"] 
-
+        elif self.battery_time <= 2.5:  # Se la batteria è scarica, vai alla stazione di ricarica
+            reward += reach_station_reward - env_var["d_n_charger"]
 
         return reward
 
@@ -301,22 +339,16 @@ class RoverNavigation(gym.Env):
         state_lidar = [s for id, s in enumerate(state[:scan_limit]) if id % 2 == 1]
 
         # Change the order of the lidar scan to the order of the wrapper (see the class declaration for details)
-        lidar_ordered_1 = [
-            s for id, s in enumerate(reversed(state_lidar)) if id % 2 == 0
-        ]
+        lidar_ordered_1 = [s for id, s in enumerate(reversed(state_lidar)) if id % 2 == 0]
         lidar_ordered_2 = [s for id, s in enumerate(state_lidar) if id % 2 == 1]
         lidar_ordered = lidar_ordered_1 + lidar_ordered_2
 
         # Concatenate the ordered lidar state with the other values of the state
-        state_fixed = (
-            lidar_ordered
-            + list(state[scan_limit:])
-            + [self.battery_time, self.charger_hold_time]
-        )
+        state_fixed = lidar_ordered + list(state[scan_limit:]) + [self.battery_time, self.charger_hold_time]
 
         state_fixed = np.array(state_fixed)
-        
-        #print('len(state_fixed): ', len(state_fixed))
+
+        # print('len(state_fixed): ', len(state_fixed))
         return state_fixed
 
     # Override the "close" function

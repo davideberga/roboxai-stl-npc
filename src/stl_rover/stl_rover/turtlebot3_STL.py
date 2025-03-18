@@ -35,7 +35,7 @@ class turtlebot3DQN(Node):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.verbose = True
-        self.agent = Agent(self.verbose, 'model-closeness-beta-increased_0.7432000041007996_96500.pth', False,  self.device)
+        self.agent = Agent(self.verbose, 'model_0.9167999625205994_102500.pth', False,  self.device)
         self.battery = 4
         self.hold_time = 0.6
         
