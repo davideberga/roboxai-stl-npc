@@ -68,9 +68,9 @@ public class CustomAgent : Agent {
         if (randomizeTarget) {
             do {
                 target.position = new Vector3(
-                    Random.Range(-targetRandomArea, targetRandomArea),
+                    Random.Range(0.5f, 9.5f),
                     0f,
-                    Random.Range(-targetRandomArea, targetRandomArea)
+                    Random.Range(0.5f, 9.5f)
                 );
             } while (VerifyIntersectionWithObstacles(target.gameObject));
         }
@@ -93,7 +93,7 @@ public class CustomAgent : Agent {
         transform.rotation = startingRot;
 
 		randomizeAgentRotation = true;
-		randomizeAgentPosition = true;
+		randomizeAgentPosition = false;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -101,15 +101,15 @@ public class CustomAgent : Agent {
         }
 
         // Optionally randomize the agent's position (checking collisions against obstacles and chargers)
-        if (randomizeAgentPosition) {
-            do {
-                transform.position = new Vector3(
-                    Random.Range(-targetRandomArea, targetRandomArea),
-                    0f,
-                    Random.Range(-targetRandomArea, targetRandomArea)
-                );
-            } while (VerifyIntersectionWithObstacles(this.gameObject));
-        }
+        // if (randomizeAgentPosition) {
+        //     do {
+        //         transform.position = new Vector3(
+        //             Random.Range(0, targetRandomArea),
+        //             0.5f,
+        //             Random.Range(0, targetRandomArea)
+        //         );
+        //     } while (VerifyIntersectionWithObstacles(this.gameObject));
+        // }
 
         Debug.Log("Agent randomized position: " + transform.position);
 
@@ -169,6 +169,14 @@ public class CustomAgent : Agent {
         }
         sensor.AddObservation(chargerAngle);
         sensor.AddObservation(chargerDistance);
+
+        // STL state requirements
+        sensor.AddObservation(transform.position[0]); // Agent x
+        sensor.AddObservation(transform.position[2]); // Agent y
+        sensor.AddObservation(target.position[0]); // Target x
+        sensor.AddObservation(target.position[2]); // Target y
+        sensor.AddObservation(nearestCharger.transform.position[0]); // Nearest charger x
+        sensor.AddObservation(nearestCharger.transform.position[2]); // Nearest charger y
     }
 
     // Heuristic method for keyboard control
