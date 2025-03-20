@@ -16,153 +16,12 @@ safe_distance = 0.05
 wait_for_charging = 3
 
 
-def generate_env_with_starting_states(sim, area_width: int, area_height: int, n_objects: int, n_states: int):
-    obstacles = [
-        {"center": [1.5, 1.5], "width": 3.0, "height": 3.0},
-        {"center": [8.5, 1.5], "width": 3.0, "height": 3.0},
-        {"center": [5, 8.5], "width": 4.0, "height": 3.0},
-        {"center": [5, 5], "width": 1.0, "height": 1.0},
-    ]
-    obstacles = obstacles + sim.walls()
-    obstacles_tensor = to_obs_tensor(obstacles)
-
-    min_size = 0.5
-    max_size = 4.0
-    target_size = 0.2
-    charger_size = 0.2
-
-    return sim.generate_random_environments_v2(
-        n_states,
-        None,
-        min_size,
-        max_size,
-        target_size,
-        charger_size,
-        0.05,
-        obstacles=obstacles_tensor,
-        num_chargers=4,
-        max_attempts=100,
-    )
-
 
 def to_obs_tensor(world_objects):
     tmp = []
     for obstacle in world_objects:
         tmp.append([obstacle["center"][0], obstacle["center"][1], obstacle["width"], obstacle["height"]])
     return torch.tensor(tmp).float().to(device)
-
-
-def dynamics(
-    sim,
-    world_objects,
-    states,
-    robot_poses,
-    targets,
-    chargers,
-    es_trajectories,
-    include_first=False,
-):
-    """Estimate planning of T steps ahead"""
-
-    t = es_trajectories.shape[1]  # Extract actions predicted
-    x = states.clone()
-    poses = robot_poses.clone()
-    tgs = targets.clone()
-    chrs = chargers.clone()
-
-    segs = [states] if include_first else []
-
-    for ti in range(t):
-        new_x, new_poses = dynamics_per_step(sim, x, world_objects, poses, tgs, chrs, es_trajectories[:, ti])
-        segs.append(new_x)
-        x = new_x
-        poses = new_poses
-
-    return torch.stack(segs, dim=1)
-
-
-def dynamics_per_step(sim, x, world_objects, poses, tgs, chrs, es_trajectories):
-    """Computes how the system state changes in one time step given the current state x
-    and a single es_trajectories  u
-    """
-
-    # The new state must have these values estimated
-    # [LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, LIDAR, HEAD_TARGET, DIST_TARGET, HEAD_N_CHARGER, DIST_N_CHARGER, B_TIME, C_TIME]
-
-    predicted_velocity = es_trajectories[:, 0]
-    predicted_theta = es_trajectories[:, 1]
-
-    return sim.update_state_batch(
-        x,
-        predicted_velocity,
-        predicted_theta,
-        poses,
-        world_objects,
-        tgs,
-        chrs,
-    )
-
-
-def lidar_obs_avoidance_robustness(x):
-    def smooth_min(lidar_values, alpha=500.0):
-        # Computes a smooth approximation of the minimum.
-        # To ensure smooth differentiability
-        return -(1 / alpha) * torch.logsumexp(-alpha * lidar_values, dim=-1)
-
-    lidar_values = x[..., 0:7]
-    min_lidar = smooth_min(lidar_values)
-    # print(f"Smooth min { min_lidar}")
-    # print(f"Actual min { torch.min(lidar_values, dim=-1)}")
-    # print(f"Lidar robustness: ${min_lidar - self.safe_distance}")
-
-    # Rescale lidar values to give them more importance
-    return (min_lidar - safe_distance) * 100
-
-
-def generateSTL(steps_ahead: int, battery_limit: float):
-    def debug_print(label, func, x):
-        value = func(x)
-        # print(f"{label}: {value}")
-        return value
-
-    avoid0 = Always(0, steps_ahead, AP(lambda x: (x[..., 0] - safe_distance) * 100))
-    avoid1 = Always(0, steps_ahead, AP(lambda x: (x[..., 1] - safe_distance) * 100))
-    avoid2 = Always(0, steps_ahead, AP(lambda x: (x[..., 2] - safe_distance) * 100))
-    avoid3 = Always(0, steps_ahead, AP(lambda x: (x[..., 3] - safe_distance) * 100))
-    avoid4 = Always(0, steps_ahead, AP(lambda x: (x[..., 4] - safe_distance) * 100))
-    avoid5 = Always(0, steps_ahead, AP(lambda x: (x[..., 5] - safe_distance) * 100))
-    avoid6 = Always(0, steps_ahead, AP(lambda x: (x[..., 6] - safe_distance) * 100))
-
-    avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
-
-    avoid = ListAnd(avoid_list)
-
-    at_dest = AP(lambda x: debug_print("Distance to destination", lambda x: enough_close_to - x[..., 8], x), comment="Distance to destination")
-    at_charger = AP(lambda x: debug_print("Distance to charger", lambda x: enough_close_to - x[..., 10], x), comment="Distance to charger")
-
-    if_enough_battery_go_destiantion = Imply(AP(lambda x: debug_print("Battery level > limit", lambda x: x[..., 11] - battery_limit, x)), Eventually(0, steps_ahead, at_dest))
-    if_low_battery_go_charger = Imply(AP(lambda x: debug_print("Battery level < limit", lambda x: battery_limit - x[..., 11], x)), Eventually(0, steps_ahead, at_charger))
-
-    always_have_battery = Always(0, steps_ahead, AP(lambda x: debug_print("Battery level", lambda x: x[..., 11], x)))
-
-    stand_by = AP(lambda x: debug_print("Stand by (distance from charger)", lambda x: enough_close_to - x[..., 10], x), comment="Stand by: agent remains close to charger")
-    enough_stay = AP(lambda x: debug_print(f"Stay > {wait_for_charging} steps", lambda x: -x[..., 12], x), comment=f"Stay>{wait_for_charging} steps")
-    charging = Imply(at_charger, Always(0, wait_for_charging, Or(stand_by, enough_stay)))
-
-    return ListAnd(
-        [avoid, always_have_battery, if_low_battery_go_charger, charging, if_enough_battery_go_destiantion]
-    )  # ListAnd([avoid])# if_enough_battery_go_destiantion, always_have_battery, if_low_battery_go_charger]) # missing charging
-
-    return ListAnd(
-        [
-            avoid,
-            if_enough_battery_go_destiantion,
-            charging,
-            always_have_battery,
-            if_low_battery_go_charger,
-        ]
-    )
-
 
 if __name__ == "__main__":
     # Define fixed area dimensions.
@@ -195,7 +54,6 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(8, 8))
     writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
 
-    stl = generateSTL(10, 2.0)
 
     with writer.saving(fig, "simulation_video.mp4", dpi=100):
         for _ in range(5):
