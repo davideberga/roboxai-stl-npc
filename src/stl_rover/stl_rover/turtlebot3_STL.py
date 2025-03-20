@@ -26,8 +26,11 @@ class turtlebot3DQN(Node):
         # y: -x
 
         # -- RoverEnv V1 -- 
-        self.goal_x, self.goal_y = -1.868001, 3.44
-        self.charger_x, self.charger_y = -2.696, 3.231999
+        # self.goal_x, self.goal_y = -1.868001, 3.44
+        # self.charger_x, self.charger_y = -2.696, 3.231999
+        
+        self.goal_x, self.goal_y = 1.887824, 7.211161
+        self.charger_x, self.charger_y = 0.95, 6.19
         
         self.turtlebot3 = TurtleBot3(self.goal_x, self.goal_y, self.charger_x, self.charger_y)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self.callback_lidar, rclpy.qos.qos_profile_sensor_data)
@@ -112,9 +115,8 @@ class turtlebot3DQN(Node):
             angular_vel = angular_vel.tolist()
                 
             for v, theta in zip(linear_vel, angular_vel):
-                if(abs(v) > 0):
-                    self.action_sequence.append((None, theta))
-                    self.action_sequence.append((v, None))
+                self.action_sequence.append((None, theta))
+                self.action_sequence.append((v, None))
             self.get_logger().info(f"New action sequence planned: {len(self.action_sequence)} actions")
         
 
@@ -142,7 +144,7 @@ class turtlebot3DQN(Node):
         if not self.executing_action:
             v, theta = self.action_sequence.pop(0)
             if theta is not None:
-                self.rotateTo = self.normalize_degrees(theta * (180/3.14))
+                self.rotateTo = self.normalize_degrees((heading - theta) * (180/3.14))
                 self.executing_action = True
                 self.get_logger().info(f"We want to reach: {self.rotateTo}°, curr heading: {heading_deg}")
             if v is not None:

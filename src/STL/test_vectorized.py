@@ -6,10 +6,12 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
+from alg.utils import soft_step_hard
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 beam_angles = torch.tensor([-torch.pi / 2, -torch.pi / 3, -torch.pi / 4, 0.0, torch.pi / 4, torch.pi / 3, torch.pi / 2]).to(device)
 
-enough_close_to = 0.08
+enough_close_to = 0.05
 safe_distance = 0.05
 wait_for_charging = 3
 
@@ -174,7 +176,7 @@ if __name__ == "__main__":
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
     # 172000
-    model.load_eval("model_testing/model-no-12_0.8791999816894531_71500.pth")
+    model.load_eval("model_testing/model_0.9145999550819397_170000.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
     model.eval()
     
@@ -187,6 +189,8 @@ if __name__ == "__main__":
     # robot_pose = robot_pose[0]
     battery = 5
     hold_time = 1
+    state[..., 11] = 5
+    state[..., 12] = 1
 
     fig, ax = plt.subplots(figsize=(8, 8))
     writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
@@ -214,8 +218,11 @@ if __name__ == "__main__":
                 # safe_control = control[stl_max_i : stl_max_i + 1]
                 
                 # print(len(safe_control))
+                
+                # robot_pose = torch.tensor([[5, 6.2, 1.57]]).to(device)
 
                 for ctl in control[0]:
+                    # 0.5 for our model
                     v = ctl[0] * 10 * 0.5
                     theta = ctl[1].unsqueeze(0)
 
@@ -242,20 +249,19 @@ if __name__ == "__main__":
                     # new_state[..., 12] = state[..., 12].unsqueeze(1) - 0.2 * near_charger
 
                     # Manual handling
-                    new_state[..., 11] = battery
-                    new_state[..., 12] = hold_time
+                    
                     
                     # print(new_state[..., :])
-
-                    if new_state[..., 10].item() < 0.1:
-                        battery = min(battery + 0.5, 5)
-                        hold_time = max(0, hold_time - 0.3)
-                    else:
-                        battery -= 0.05
-
-                    if hold_time < 0.1:
-                        hold_time = 1
-
+                    
+                    near_charger = soft_step_hard(0.05 * (enough_close_to - charger_distance))
+                    # near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - nearest_dists))) + 1) / 2
+                    battery = (new_state[:, 11].unsqueeze(1) - 0.2) * (1 - near_charger.unsqueeze(1)) + 5 * near_charger.unsqueeze(1)
+                    hold_time = new_state[:, 12].unsqueeze(1) - 0.2 * near_charger.unsqueeze(1)
+                    
+                    
+                    # new_state[..., 11] = battery
+                    # new_state[..., 12] = hold_time
+                    
                     # Visualize the initial environment.
                     ax.clear()
                     extra = torch.full_like(target, 0.4)  # Create zeros of required shape
@@ -274,7 +280,7 @@ if __name__ == "__main__":
 
                     writer.grab_frame()
 
-                    if target_distance.item() < 0.05:
+                    if target_distance.item() < 0.1:
                         print("Goal reached")
                         episode_finished = True
                         break
