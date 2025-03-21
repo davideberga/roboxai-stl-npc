@@ -39,6 +39,7 @@ class RoverNavigationTest(gym.Env):
         self.env = UnityToGymWrapper(unity_env, flatten_branched=True)
 
         self.action_space = self.env.action_space
+        print(self.action_space)
 
         # Override the state_size
         state_size = self.env.observation_space.shape[0] - self.scan_number

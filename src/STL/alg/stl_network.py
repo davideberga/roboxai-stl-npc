@@ -48,3 +48,26 @@ class RoverSTLPolicy(nn.Module):
         checkpoint = torch.load(path)
         state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
         self.net.load_state_dict(state_dict_parsed)
+        
+        
+class PolicyPaper(nn.Module):
+    def __init__(self):
+        super(PolicyPaper, self).__init__()
+        # input  (rover xy; dest xy; charger xy; battery t; hold_t)
+        # output (rover v theta)
+        self.net = build_relu_nn(
+            2 + 2 + 2 + 2, 2 * 10, [256, 256, 256], activation_fn=nn.ReLU
+        )
+
+    def forward(self, x):
+        num_samples = x.shape[0]
+        u = self.net(x).reshape(num_samples, 10, -1)
+        u0 = torch.clip(u[..., 0], 0, 1)
+        u1 = torch.clip(u[..., 1], -np.pi, np.pi)
+        uu = torch.stack([u0, u1], dim=-1)
+        return uu
+    
+    def load_eval_paper(self, path: str):
+        checkpoint = torch.load(path)
+        state_dict_parsed = {k.replace("net.", ""): v for k, v in checkpoint.items()}
+        self.net.load_state_dict(state_dict_parsed)

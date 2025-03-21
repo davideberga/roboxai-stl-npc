@@ -93,7 +93,7 @@ public class CustomAgent : Agent {
         transform.rotation = startingRot;
 
 		randomizeAgentRotation = true;
-		randomizeAgentPosition = false;
+		randomizeAgentPosition = true;
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -123,13 +123,52 @@ public class CustomAgent : Agent {
         if(actionBuffers.ContinuousActions.Length < 2) 
             return;
 
-        float moveAction = actionBuffers.ContinuousActions[0];
-        float turnAction = actionBuffers.ContinuousActions[1];
+        float speed = actionBuffers.ContinuousActions[0];
+        float desiredAngle = actionBuffers.ContinuousActions[1];
 
-        Debug.Log("Linear: " + moveAction + " , angular: " + turnAction);
+        // // Apply absolute rotation
+        // transform.Rotate(0f, desiredAngle, 0f);
+        // // Move forward based on current rotation
+        // transform.Translate(Vector3.forward * speed);ù
 
-        transform.Translate(Vector3.forward * moveAction * Time.deltaTime);
-        transform.Rotate(Vector3.up * turnAction * Mathf.Rad2Deg * Time.deltaTime);
+        float radians = desiredAngle * Mathf.Deg2Rad;
+
+        float deltaX = speed * Mathf.Cos(radians);
+        float deltaZ = speed * Mathf.Sin(radians);
+
+        // Update position directly
+        transform.position += new Vector3(deltaX, 0f, deltaZ);
+        
+        // Set absolute rotation
+        transform.rotation = Quaternion.Euler(0f, desiredAngle, 0f);
+
+        
+
+    // Debug.Log("Linear: " + moveAction + " , Target Angle: " + desiredAngle);
+
+    // // Move forward
+    // float v = 0.0f;
+    // float t = 0.0f;
+    // if (!float.IsNaN(moveAction)){
+    //     v = moveAction;
+    // }
+    // if(!float.IsNaN(desiredAngle)) {
+    //     float currentYAngle = transform.eulerAngles.y;
+    //     t = Mathf.DeltaAngle(currentYAngle, desiredAngle * Mathf.Rad2Deg);
+    //     // transform.Rotate(Vector3.up * angularVelocity);
+    //     // transform.rotation = Quaternion.Euler(0, , 0);
+    //     transform.rotation = Quaternion.Euler(0, desiredAngle * Mathf.Rad2Deg, 0);
+    // }
+    // transform.Translate(Vector3.forward * v);
+    // transform.Rotate(Vector3.up * t);
+
+    // Quaternion targetRotation = Quaternion.Euler(0, desiredAngle, 0);
+    // float rotationSpeed = 180f;
+    // transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    // float desiredAngleInDegrees = desiredAngle * Mathf.Rad2Deg;
+
+    // Instantly set the rotation to the absolute angle (in degrees)
+    
     }
 
     // Observation helper function: calculates normalized distance and angle.
