@@ -174,8 +174,9 @@ class DynamicsSimulator:
         dy = cy - ry
         distance = torch.norm(torch.stack([dx, dy], dim=-1), dim=-1)
         normalized_distance = torch.clamp(distance / self.max_range_destination, max=1.0)
-        angle = torch.atan2(dy, dx + self.epsilon) - rtheta
-        angle = torch.atan2(torch.sin(angle), torch.cos(angle) + self.epsilon)
+        angle = torch.atan2(dy, dx + self.epsilon) # - rtheta
+        angle = (angle + torch.pi) % (2 * torch.pi) - torch.pi
+        # old angle = torch.atan2(torch.sin(angle), torch.cos(angle) + self.epsilon)
         return normalized_distance, angle
 
     def update_state_batch(self, state, v, theta, robot_pose, world_objects, target, chargers, collision_enabled=False):
@@ -188,9 +189,13 @@ class DynamicsSimulator:
 
         # --- Update robot pose linearly ---
         # Predict angle displacement
-        new_x = robot_pose[:, 0] + (v * torch.cos(robot_pose[:, 2] + theta) * self.dt)
-        new_y = robot_pose[:, 1] + (v * torch.sin(robot_pose[:, 2] + theta) * self.dt)
-        new_heading = robot_pose[:, 2] + theta
+        # new_x = robot_pose[:, 0] + (v * torch.cos(robot_pose[:, 2] + theta) * self.dt)
+        # new_y = robot_pose[:, 1] + (v * torch.sin(robot_pose[:, 2] + theta) * self.dt)
+        # new_heading = robot_pose[:, 2] + theta
+        
+        new_x = robot_pose[:, 0] + (v * torch.cos(theta) * self.dt)
+        new_y = robot_pose[:, 1] + (v * torch.sin(theta) * self.dt)
+        new_heading = theta
 
         new_pose = torch.stack([new_x, new_y, new_heading], dim=1)
 
