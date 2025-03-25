@@ -42,7 +42,8 @@ class RoverSTLPolicy(nn.Module):
         torch.save(self.net.state_dict(), path)
         
     def load_eval(self, path: str):
-        self.net.load_state_dict(torch.load(path, weights_only=True))
+        self.net.load_state_dict(torch.load(path, weights_only=True, map_location=torch.device('cpu')))
+
         
     def load_eval_paper(self, path: str):
         checkpoint = torch.load(path)
