@@ -38,7 +38,7 @@ class turtlebot3DQN(Node):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.verbose = True
-        self.agent = Agent(self.verbose, 'model_0.9167999625205994_102500.pth', False,  self.device)
+        self.agent = Agent(self.verbose, 'model-absolute-theta_0.87.pth', False,  self.device)
         self.battery = 4
         self.hold_time = 0.6
         
@@ -144,7 +144,7 @@ class turtlebot3DQN(Node):
         if not self.executing_action:
             v, theta = self.action_sequence.pop(0)
             if theta is not None:
-                self.rotateTo = self.normalize_degrees((heading - theta) * (180/3.14))
+                self.rotateTo = self.normalize_degrees(theta * (180/3.14))
                 self.executing_action = True
                 self.get_logger().info(f"We want to reach: {self.rotateTo}°, curr heading: {heading_deg}")
             if v is not None:

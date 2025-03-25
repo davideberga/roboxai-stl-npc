@@ -97,7 +97,7 @@ class TurtleBot3:
         delta_x = self.goal_x - tb3_pos.x
 
         distance = np.sqrt(delta_x**2 + delta_y**2)
-        heading = math.atan2(delta_y, delta_x) - self.rot_[2]
+        heading = math.atan2(delta_y, delta_x) #- self.rot_[2]
         # Map to [-np.pi, np.pi]
         heading = (heading + np.pi) % (2 * np.pi) - np.pi
         return distance / 5, heading

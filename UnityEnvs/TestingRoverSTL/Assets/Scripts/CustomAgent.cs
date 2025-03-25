@@ -19,6 +19,8 @@ public class CustomAgent : Agent {
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
+    private int episodeCounter = 0;
+
     // The target transform
     private Transform target;
 
@@ -41,6 +43,7 @@ public class CustomAgent : Agent {
     public override void Initialize() {
 
         Random.InitState(seed);
+        episodeCounter = 0;
 
         // Find target, obstacles, and chargers via tag
         target = GameObject.FindGameObjectWithTag("Target").transform;
@@ -60,7 +63,18 @@ public class CustomAgent : Agent {
     // Called at the beginning of each episode
     public override void OnEpisodeBegin() {
         Debug.Log("Episode Begin: Resetting Environment");
+        
+        
+        // Always randomize target
         randomizeTarget = true;
+
+        // Randomize agent position/rotation every 3 episodes
+        bool timeToActualReset = episodeCounter == 3;
+        Debug.Log("Rand " + timeToActualReset);
+        randomizeAgentRotation = timeToActualReset;
+		randomizeAgentPosition = timeToActualReset;
+
+        episodeCounter = timeToActualReset ? 0 : episodeCounter + 1;
 
         //Random.InitState(seed);
 
@@ -89,11 +103,10 @@ public class CustomAgent : Agent {
 
         // --- Reset the agent ---
         // Reset agent's position and rotation to their starting values
-        transform.position = startingPos;
-        transform.rotation = startingRot;
+        // transform.position = startingPos;
+        // transform.rotation = startingRot;
 
-		randomizeAgentRotation = true;
-		randomizeAgentPosition = true;
+		
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -101,17 +114,18 @@ public class CustomAgent : Agent {
         }
 
         // Optionally randomize the agent's position (checking collisions against obstacles and chargers)
-        // if (randomizeAgentPosition) {
-        //     do {
-        //         transform.position = new Vector3(
-        //             Random.Range(0, targetRandomArea),
-        //             0.5f,
-        //             Random.Range(0, targetRandomArea)
-        //         );
-        //     } while (VerifyIntersectionWithObstacles(this.gameObject));
-        // }
+        if (randomizeAgentPosition) {
+            do {
+                transform.position = new Vector3(
+                    Random.Range(0.5f, 9.5f),
+                    0f,
+                    Random.Range(0.5f, 9.5f)
+                );
+            } while (VerifyIntersectionWithObstacles(this.gameObject));
+        }
 
-        Debug.Log("Agent randomized position: " + transform.position);
+        // Debug.Log("Agent randomized position: " + transform.position);
+        
 
         // Recalculate the initial distance from the target
         oldDistance = Vector3.Distance(target.position, transform.position);
@@ -126,21 +140,28 @@ public class CustomAgent : Agent {
         float speed = actionBuffers.ContinuousActions[0];
         float desiredAngle = actionBuffers.ContinuousActions[1];
 
+        float desiredRad = desiredAngle * Mathf.Deg2Rad;
+
         // // Apply absolute rotation
         // transform.Rotate(0f, desiredAngle, 0f);
         // // Move forward based on current rotation
         // transform.Translate(Vector3.forward * speed);ù
+        // Debug.Log(radians);
+       
 
-        float radians = desiredAngle * Mathf.Deg2Rad;
-
-        float deltaX = speed * Mathf.Cos(radians);
-        float deltaZ = speed * Mathf.Sin(radians);
+        float deltaX = speed * Mathf.Cos(desiredRad);
+        float deltaZ = speed * Mathf.Sin(desiredRad);
 
         // Update position directly
         transform.position += new Vector3(deltaX, 0f, deltaZ);
         
         // Set absolute rotation
-        transform.rotation = Quaternion.Euler(0f, desiredAngle, 0f);
+        transform.rotation = Quaternion.Euler(0f, desiredAngle , 0f);
+
+        float x = transform.position[0];
+        float y = transform.position[2];
+
+        if( x < 0 || x > 10 || y < 0 || y > 10) SetReward(-1f);
 
         
 
@@ -178,7 +199,7 @@ public class CustomAgent : Agent {
         float distance = Vector2.Distance(fromPos, toPos) / normFactor;
 
         Vector3 direction = to - from;
-        float angle = (0.5f - (Vector3.SignedAngle(direction, forward, up) / 360f));
+        float angle = Vector3.SignedAngle(direction, forward, up) * Mathf.Deg2Rad;
         return (distance, angle);
     }
 

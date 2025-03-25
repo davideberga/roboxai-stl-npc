@@ -119,6 +119,7 @@ class RoverSTL:
                 control,
                 include_first=True,
             )
+ 
             score = stl(estimated_next_states, self.smoothing_factor)[:, :1]
             acc = (stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
             acc_avg = torch.mean(acc)
@@ -137,7 +138,7 @@ class RoverSTL:
             dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
             dist_target_charger_loss = dist_target_charger_loss * 0.1
 
-            loss = torch.mean(F.relu(0.5 - score)) + dist_target_charger_loss
+            loss = torch.mean(F.relu(0.4 - score)) + dist_target_charger_loss
 
             if acc_avg.item() > best_accuracy:
                 print(f"Increased accuracy: {acc_avg.item()}")
@@ -262,16 +263,16 @@ class RoverSTL:
 
         avoid = ListAnd(avoid_list)
 
-        at_dest = AP(lambda x: self.enough_close_to - x[..., 8], comment="Distance to destination")
-        at_charger = AP(lambda x: self.enough_close_to - x[..., 10], comment="Distance to charger")
+        at_dest = AP(lambda x: self.enough_close_to - x[..., 8])
+        at_charger = AP(lambda x: self.enough_close_to - x[..., 10])
 
         if_enough_battery_go_destiantion = Imply(AP(lambda x: x[..., 11] - battery_limit), Eventually(0, steps_ahead, at_dest))
         if_low_battery_go_charger = Imply(AP(lambda x: battery_limit - x[..., 11]), Eventually(0, steps_ahead, at_charger))
 
-        always_have_battery = Always(0, steps_ahead, AP(lambda x: lambda x: x[..., 11]))
+        always_have_battery = Always(0, steps_ahead, AP(lambda x: x[..., 11]))
 
-        stand_by = AP(lambda x: self.enough_close_to - x[..., 10], comment="Stand by: agent remains close to charger")
-        enough_stay = AP(lambda x:  -x[..., 12], comment=f"Stay>{self.wait_for_charging} steps")
+        stand_by = AP(lambda x: self.enough_close_to - x[..., 10])
+        enough_stay = AP(lambda x:  -x[..., 12])
         charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
         return (

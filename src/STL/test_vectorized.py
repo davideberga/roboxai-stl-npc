@@ -35,8 +35,9 @@ if __name__ == "__main__":
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
     # 172000
-    model.load_eval("model_testing/model_0.9145999550819397_170000.pth")
+    # model.load_eval("model_testing/model_0.9145999550819397_170000.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
+    model.load_eval_paper("model_testing/model-closeness-beta-increased_0.8799999952316284_89500.pth")
     model.eval()
     
     _, obstacles, _, _ = sim.generate_objects()

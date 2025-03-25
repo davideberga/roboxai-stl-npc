@@ -76,22 +76,23 @@ class RoverNavigationTest(gym.Env):
             dtype=np.float64,
         )
 
-    def reset(self):
+    def reset(self, battery_reset=False):
         # Reset the counter for the maximum step counter and battery status
-        self.battery_time = self.FULL_BATTERY_TIME
-        self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
+        if battery_reset:
+            self.battery_time = self.FULL_BATTERY_TIME
+            self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
         self.step_counter = 0
 
         # Override the state to return with the fixed state, as described in the constructor
         state = self.env.reset()
-        state = self.fix_state(state)
+        state, state_complete = self.fix_state(state)
 
         self.target_distance = state[-5]
         self.charger_distance = state[-3]
 
         env_var = self.extractValues(state)
         env_var["n_charged"] = 0
-        return state
+        return state, state_complete
 
     def step(self, action):
         info = {}
@@ -100,12 +101,13 @@ class RoverNavigationTest(gym.Env):
         # print(f'Batteria prima dello step: {self.battery_time}')
         # print('Reward prima dello step: ', reward)
 
-        state = self.fix_state(state)
+        state, state_complete = self.fix_state(state)
         env_var = self.extractValues(state)
         self.step_counter += 1
 
         info["target_reached"] = False
         info["collision"] = False
+        info["battery_ended"] = False
         info["time_out"] = self.step_counter >= 300
 
         if info["time_out"]:
@@ -138,6 +140,7 @@ class RoverNavigationTest(gym.Env):
                 self.battery_time -= 0.01  # Discharge when not near charger
                 # print(f'Batteria dopo lo step: {self.battery_time} perchè non vicino al charger')
             else:
+                info["battery_ended"] = True
                 done = True
                 # print("\n Batteria esaurita! Episodio terminato.\n")
         # ------ / HANDLE BATTERY -----
@@ -158,7 +161,7 @@ class RoverNavigationTest(gym.Env):
             info["d_n_target"] = env_var["d_n_target"]
             info["d_n_charger"] = env_var["d_n_charger"]
 
-        return state, reward, done, info
+        return state, reward, done, info, state_complete
 
     def override_reward_boost(self, state, reward, action, done):
         env_reward = reward
@@ -226,8 +229,11 @@ class RoverNavigationTest(gym.Env):
         lidar_ordered = lidar_ordered_1 + lidar_ordered_2
 
         # Concatenate the ordered lidar state with the other values of the state
-        state_fixed = lidar_ordered + list(state[scan_limit:]) + [self.battery_time, self.charger_hold_time]
+        state_fixed = lidar_ordered + list(state[scan_limit:scan_limit+4]) + [self.battery_time, self.charger_hold_time]
         state_fixed = np.array(state_fixed)
+        
+        state_complete = lidar_ordered + list(state[scan_limit:scan_limit+4]) +  list(state[scan_limit+4:]) + [self.battery_time, self.charger_hold_time]
+        state_complete = np.array(state_complete)
         
         if(self.is_env_for_paper):
             state_fixed = list(state[scan_limit+4:]) + [self.battery_time, self.charger_hold_time]
@@ -235,7 +241,7 @@ class RoverNavigationTest(gym.Env):
 
 
         # print('len(state_fixed): ', len(state_fixed))
-        return state_fixed
+        return state_fixed, state_complete
 
     # Override the "close" function
     def close(self):

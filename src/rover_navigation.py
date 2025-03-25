@@ -135,11 +135,11 @@ class RoverNavigation(gym.Env):
                 # print(f'Il robot ha finito di caricarsi. Batteria: {self.battery_time} e Charger_hold_time: {self.charger_hold_time}')
         else:
             if self.battery_time > 0:
-                self.battery_time -= 0.01  # Discharge when not near charger
+                self.battery_time -= 0.02  # Discharge when not near charger
                 # print(f'Batteria dopo lo step: {self.battery_time} perchè non vicino al charger')
             else:
                 done = True
-                print("\n Batteria esaurita! Episodio terminato.\n")
+                # print("\n Batteria esaurita! Episodio terminato.\n")
         # ------ / HANDLE BATTERY -----
 
         # print(f"env_var: {env_var}")
