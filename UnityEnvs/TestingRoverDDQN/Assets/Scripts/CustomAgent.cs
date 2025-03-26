@@ -19,6 +19,8 @@ public class CustomAgent : Agent {
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
+    private int episodeCounter = 0;
+
     // The target transform
     private Transform target;
 
@@ -41,6 +43,7 @@ public class CustomAgent : Agent {
     public override void Initialize() {
 
         Random.InitState(seed);
+        episodeCounter = 0;
 
         // Find target, obstacles, and chargers via tag
         target = GameObject.FindGameObjectWithTag("Target").transform;
@@ -60,7 +63,18 @@ public class CustomAgent : Agent {
     // Called at the beginning of each episode
     public override void OnEpisodeBegin() {
         Debug.Log("Episode Begin: Resetting Environment");
+        
+        
+        // Always randomize target
         randomizeTarget = true;
+
+        // Randomize agent position/rotation every 3 episodes
+        bool timeToActualReset = episodeCounter == 3;
+        Debug.Log("Rand " + timeToActualReset);
+        randomizeAgentRotation = timeToActualReset;
+		randomizeAgentPosition = timeToActualReset;
+
+        episodeCounter = timeToActualReset ? 0 : episodeCounter + 1;
 
         //Random.InitState(seed);
 
@@ -68,9 +82,9 @@ public class CustomAgent : Agent {
         if (randomizeTarget) {
             do {
                 target.position = new Vector3(
-                    Random.Range(-targetRandomArea, targetRandomArea),
+                    Random.Range(0.5f, 9.5f),
                     0f,
-                    Random.Range(-targetRandomArea, targetRandomArea)
+                    Random.Range(0.5f, 9.5f)
                 );
             } while (VerifyIntersectionWithObstacles(target.gameObject));
         }
@@ -89,11 +103,10 @@ public class CustomAgent : Agent {
 
         // --- Reset the agent ---
         // Reset agent's position and rotation to their starting values
-        transform.position = startingPos;
-        transform.rotation = startingRot;
+        // transform.position = startingPos;
+        // transform.rotation = startingRot;
 
-		randomizeAgentRotation = true;
-		randomizeAgentPosition = true;
+		
 
         // Optionally randomize the agent's rotation
         if (randomizeAgentRotation) {
@@ -104,14 +117,15 @@ public class CustomAgent : Agent {
         if (randomizeAgentPosition) {
             do {
                 transform.position = new Vector3(
-                    Random.Range(-targetRandomArea, targetRandomArea),
+                    Random.Range(0.5f, 9.5f),
                     0f,
-                    Random.Range(-targetRandomArea, targetRandomArea)
+                    Random.Range(0.5f, 9.5f)
                 );
             } while (VerifyIntersectionWithObstacles(this.gameObject));
         }
 
-        Debug.Log("Agent randomized position: " + transform.position);
+        // Debug.Log("Agent randomized position: " + transform.position);
+        
 
         // Recalculate the initial distance from the target
         oldDistance = Vector3.Distance(target.position, transform.position);
@@ -173,6 +187,14 @@ public class CustomAgent : Agent {
         }
         sensor.AddObservation(chargerAngle);
         sensor.AddObservation(chargerDistance);
+
+        // STL state requirements
+        sensor.AddObservation(transform.position[0]); // Agent x
+        sensor.AddObservation(transform.position[2]); // Agent y
+        sensor.AddObservation(target.position[0]); // Target x
+        sensor.AddObservation(target.position[2]); // Target y
+        sensor.AddObservation(nearestCharger.transform.position[0]); // Nearest charger x
+        sensor.AddObservation(nearestCharger.transform.position[2]); // Nearest charger y
     }
 
     // Heuristic method for keyboard control

@@ -54,13 +54,15 @@ def main(env, policy_network, iterations=100):
         collision = 0
         battery = 0
         
+        episode = []
+        
         for _ in range(3):
             while True:
                 if len(planned_actions) < 1:
                     planned_actions = get_plan(state, policy_network)
 
                 v, t = planned_actions.pop(0)
-                saved_episodes.append(np.concatenate((state_complete, np.array([v, t, 0, 0, 0]))))
+                episode.append(np.concatenate((state_complete, np.array([v, t, 0, 0, 0]))))
                 state, reward, done, info, state_complete = env.step([v, t])
                 
                 if info["target_reached"]: goal += 1
@@ -68,16 +70,19 @@ def main(env, policy_network, iterations=100):
                 if info["battery_ended"] < 0.1: battery = 1
                 
                 if done:
-                    saved_episodes.append(np.concatenate((state_complete, np.array([0, 0, goal, collision, battery]))))
+                    episode.append(np.concatenate((state_complete, np.array([0, 0, goal, collision, battery]))))
                     break
 
             if not info["target_reached"]:
                 break
+            
+            
 
             # Soft reset, we are in the same "virtual" episode
             state, state_complete = env.reset()
         
         print(f" Episode {ep}")
+        saved_episodes.append(np.array(episode))
 
         # After 3 dones reset the battery (HARD reset)
         state, state_complete = env.reset(battery_reset=True)
