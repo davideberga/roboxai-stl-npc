@@ -1,18 +1,17 @@
-# XAI - Robotics project
+## XAI - Robotics project
 
 This repo contains the code for the project of Robotics in AI and XAI courses.
-
 - [XAI - Robotics project](#xai---robotics-project)
-  - [:cyclone: Overview and purpose](#cyclone-overview-and-purpose)
-  - [:whale: Porting of navigation (rover) task to ROS2-Unity](#whale-porting-of-navigation-rover-task-to-ros2-unity)
-  - [:book: Project structure](#book-project-structure)
-  - [:syringe: Installation](#syringe-installation)
-    - [System requirements](#system-requirements)
-  - [:trumpet: Running](#trumpet-running)
-    - [Train / Test](#train--test)
-    - [DQN](#dqn)
-    - [STL](#stl)
-    - [ROS](#ros)
+- [:cyclone: Overview and purpose](#cyclone-overview-and-purpose)
+- [:whale: Porting of navigation (rover) task to ROS2-Unity](#whale-porting-of-navigation-rover-task-to-ros2-unity)
+- [:book: Project structure](#book-project-structure)
+- [:syringe: Installation](#syringe-installation)
+  - [System requirements](#system-requirements)
+- [:trumpet: Running](#trumpet-running)
+  - [Train / Test](#train--test)
+  - [DQN](#dqn)
+  - [STL](#stl)
+  - [ROS](#ros)
 
 
 **Team members:**
