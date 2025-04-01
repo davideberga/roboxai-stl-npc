@@ -46,7 +46,7 @@ def get_plan_x(state, policy):
     state = torch.tensor([state]).to(device).float()
     control = policy(state)
     control = control[0].detach().cpu().numpy()
-    linear_velocity = control[:, 0] * 10 * 0.11  # * 10 * 0.6
+    linear_velocity = control[:, 0] * 10 * 0.15  # * 10 * 0.6
     theta = control[:, 1]
     
     
@@ -122,19 +122,19 @@ def main(env, policy_network, iterations=100):
 
 if __name__ == "__main__":
     
-    ENV_TYPE = ""
+    ENV_TYPE = "test"
     
-    policy_paper = PolicyPaper().to(device).float()
-    policy_paper.load_eval_paper("model_testing/model_final_paper.ckpt")
-    policy_paper.eval()
+    # policy_paper = PolicyPaper().to(device).float()
+    # policy_paper.load_eval_paper("model_testing/model_final_paper.ckpt")
+    # policy_paper.eval()
 
-    try:
-        env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=True)
-        saved_episodes = main(env, policy_paper)
-        np.savez("test-result/paper.result.npz", episodes=saved_episodes)
-        env.close()
-    finally:
-        print("Test paper finished!")
+    # try:
+    #     env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=True)
+    #     saved_episodes = main(env, policy_paper)
+    #     np.savez("test-result/paper.result.npz", episodes=saved_episodes)
+    #     env.close()
+    # finally:
+    #     print("Test paper finished!")
 
     policy_our = RoverSTLPolicy(10).to(device).float()
     policy_our.load_eval("model_testing/model-closeness-beta-increased_0.9581999778747559_157500.pth")

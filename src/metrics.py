@@ -26,16 +26,18 @@ def read_npz(file_path):
 def calculate_metrics(episodes):
     battery_for_epi = {}
     velocity_for_epi = {}
-    goal_for_epi = {}
+    goal_for_epi = []
     velocity_for_delta = []
     min_radar_list = []
     low_battery = 0
     total_len_episodes = 0
     safe_threshold = 0.15 # calcola in numero di volte che il min lidar in min_radar_list è minore di 0.15
     
+    
+    no_episodes = len(episodes)
 
     for i, epi in enumerate(episodes):
-        goal_for_epi[i] = np.max(epi[:,21])
+        goal_for_epi.append(np.max(epi[:,21]))
         
         mean_battery = sum(step[17] for step in epi) / len(epi)  # Media della batteria per episodio
         mean_velocity = sum(step[19] for step in epi) / len(epi)  # Media della velocità per episodio
@@ -53,10 +55,7 @@ def calculate_metrics(episodes):
             
         velocity_for_delta.append(temp_list)
 
-    perc_goals = 0
-    for epi in goal_for_epi:
-        if goal_for_epi[epi] > 2:
-            perc_goals += 1
+    perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100 
 
     #print(np.mean(np.array(list(goal_for_epi.values()))))
    
