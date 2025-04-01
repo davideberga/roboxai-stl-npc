@@ -1,4 +1,5 @@
 import torch
+from alg.RoverSTL import RoverSTL
 from alg.lib_stl_core import AP, Always, Eventually, Imply, ListAnd, Or
 from alg.dynamics import DynamicsSimulator
 from alg.stl_network import RoverSTLPolicy
@@ -32,12 +33,14 @@ if __name__ == "__main__":
     # Initialize model
     sim: DynamicsSimulator = DynamicsSimulator(wait_for_charging=4, steps_ahead=100, area_h=10, area_w=10, squared_area=True, beam_angles=beam_angles, device=device, close_thres=0.05)
     model = RoverSTLPolicy(steps_ahead).to(device)
+    rover_model = RoverSTL(None, type('c', (object,), {'seed': 20, 'n_epochs': 2, 'lr': 0.0001})())
+    stl, _, _, _, _, _ = rover_model.generateSTL(10, 2)
     # model.load_eval("model_testing/model_correct_dynamics_training_0.9039800465106964_395.pth")
     # model.load_eval("model_testing/model_correct_dynamics_training_0.798820035457611_22.pth")
     # 172000
     # model.load_eval("model_testing/model_0.9145999550819397_170000.pth")
     # model.load_eval_paper("model_testing/model_10000.ckpt")
-    model.load_eval_paper("model_testing/model-closeness-beta-increased_0.8799999952316284_89500.pth")
+    model.load_eval_paper("model_testing/model-closeness-beta-increased_0.9581999778747559_157500.pth")
     model.eval()
     
     _, obstacles, _, _ = sim.generate_objects()
@@ -71,18 +74,27 @@ if __name__ == "__main__":
                 v = control[0][0]
                 theta = control[0][0][1]
 
-                # estimated = dynamics(sim, world_objects, state, robot_pose, target, charger, control)
-                # stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
-                # stl_max_i = torch.argmax(stl_score, dim=0)
-                # safe_control = control[stl_max_i : stl_max_i + 1]
+                estimated, _ = rover_model.dynamics(world_objects, state, robot_pose, target, charger, control)
+                stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
+                stl_max_i = torch.argmax(stl_score, dim=0)
+                safe_control = control[stl_max_i : stl_max_i + 1]
+                print(stl_max_i)
+                # print("---------------------------------")
+                # print(world_objects)
+                # print(state)
+                # print(robot_pose)
+                # print(target)
+                # print(charger)
+                # print(control)
                 
                 # print(len(safe_control))
                 
                 # robot_pose = torch.tensor([[5, 6.2, 1.57]]).to(device)
 
-                for ctl in control[0]:
+                for ctl in safe_control[0]:
                     # 0.5 for our model
                     v = ctl[0] * 10 * 0.5
+                    if not v > 0: continue
                     theta = ctl[1].unsqueeze(0)
 
                     new_state, new_pose = sim.update_state_batch(
@@ -112,14 +124,24 @@ if __name__ == "__main__":
                     
                     # print(new_state[..., :])
                     
-                    near_charger = soft_step_hard(0.05 * (enough_close_to - charger_distance))
-                    # near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - nearest_dists))) + 1) / 2
-                    battery = (new_state[:, 11].unsqueeze(1) - 0.2) * (1 - near_charger.unsqueeze(1)) + 5 * near_charger.unsqueeze(1)
-                    hold_time = new_state[:, 12].unsqueeze(1) - 0.2 * near_charger.unsqueeze(1)
+                    # near_charger = soft_step_hard(0.05 * (enough_close_to - charger_distance))
+                    # # near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - nearest_dists))) + 1) / 2
+                    # battery = (new_state[:, 11].unsqueeze(1) - 0.2) * (1 - near_charger.unsqueeze(1)) + 5 * near_charger.unsqueeze(1)
+                    # hold_time = new_state[:, 12].unsqueeze(1) - 0.2 * near_charger.unsqueeze(1)
+                    
+                    if new_state[..., 10].item() < 0.1:
+                        battery = min(battery + 0.5, 5)
+                        hold_time = max(0, hold_time - 0.3)
+                    else:
+                        battery -= 0.05
+
+                    if hold_time < 0.1:
+                        hold_time = 1
+
                     
                     
-                    # new_state[..., 11] = battery
-                    # new_state[..., 12] = hold_time
+                    new_state[..., 11] = battery
+                    new_state[..., 12] = hold_time
                     
                     # Visualize the initial environment.
                     ax.clear()
