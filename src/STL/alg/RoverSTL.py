@@ -27,17 +27,9 @@ class RoverSTL:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.env = env
-        self.run_name = f"{args.alg}__{args.tag if args.tag != '' else ''}__{args.seed}__{int(time.time())}"
 
         # Training hyperparameters
-        self.memory_size = args.memory_size
-        self.gamma = args.gamma
         self.epoch = args.n_epochs
-        self.batch_size = args.batch_size
-        self.eps_decay = args.eps_decay
-        self.tau = args.tau
-        self.layers = args.n_layers
-        self.nodes = args.layer_size
         self.smoothing_factor = 500.0
         self.print_freq = 5
 

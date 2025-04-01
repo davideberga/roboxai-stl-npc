@@ -58,46 +58,34 @@ def main(env, policy_network, iterations=100):
         goal = 0
         collision = 0
         battery = 0
+        state, state_complete = env.reset(battery_reset=True)
 
-        for _ in range(3):
-            while True:
-                action = get_action(state, policy_network)
-                v = 0.05
-                t = 0
-                if action == 1:
-                    v = 0
-                    t = np.pi / 3
-                if action == 2:
-                    v = 0
-                    t = -np.pi / 3
-                episode.append(np.concatenate((state_complete, np.array([v, t, 0, 0, 0]))))
-                state, reward, done, info, state_complete = env.step(action)
+        while True:
+            action = get_action(state, policy_network)
+            v = 0.05
+            t = 0
+            if action == 1:
+                v = 0
+                t = np.pi / 3
+            if action == 2:
+                v = 0
+                t = -np.pi / 3
+            state, reward, done, info, state_complete = env.step(action)
+
+            if info["target_reached"]:
+                goal = 1
+            if info["collision"]:
+                collision = 1
+            if info["battery_ended"]:
+                battery = 1
                 
-                # print(state)
-                # print(action)
+            episode.append(np.concatenate((state_complete, np.array([v, t, goal, collision, battery]))))
 
-                if info["target_reached"]:
-                    goal += 1
-                if info["collision"]:
-                    collision = 1
-                if info["battery_ended"] < 0.1:
-                    battery = 1
-
-                if done:
-                    episode.append(np.concatenate((state_complete, np.array([0, 0, goal, collision, battery]))))
-                    break
-
-            if not info["target_reached"]:
+            if done:
                 break
-
-            # Soft reset, we are in the same "virtual" episode
-            state, state_complete = env.reset()
 
         saved_episodes.append(np.array(episode))
         print(f" Episode {ep}")
-
-        # After 3 dones reset the battery (HARD reset)
-        state, state_complete = env.reset(battery_reset=True)
 
     return np.array(saved_episodes)
 

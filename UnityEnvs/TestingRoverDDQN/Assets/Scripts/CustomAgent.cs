@@ -19,7 +19,6 @@ public class CustomAgent : Agent {
     public float targetRandomArea = 1.8f;
     public float distanceNormFact = 3.0f;
 
-    private int episodeCounter = 0;
 
     // The target transform
     private Transform target;
@@ -43,7 +42,6 @@ public class CustomAgent : Agent {
     public override void Initialize() {
 
         Random.InitState(seed);
-        episodeCounter = 0;
 
         // Find target, obstacles, and chargers via tag
         target = GameObject.FindGameObjectWithTag("Target").transform;
@@ -67,14 +65,8 @@ public class CustomAgent : Agent {
         
         // Always randomize target
         randomizeTarget = true;
-
-        // Randomize agent position/rotation every 3 episodes
-        bool timeToActualReset = episodeCounter == 3;
-        Debug.Log("Rand " + timeToActualReset);
-        randomizeAgentRotation = timeToActualReset;
-		randomizeAgentPosition = timeToActualReset;
-
-        episodeCounter = timeToActualReset ? 0 : episodeCounter + 1;
+        randomizeAgentRotation = true;
+		randomizeAgentPosition = true;
 
         //Random.InitState(seed);
 
