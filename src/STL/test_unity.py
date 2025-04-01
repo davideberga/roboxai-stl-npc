@@ -157,3 +157,15 @@ if __name__ == "__main__":
         env.close()
     finally:
         print("Test our finished!")
+
+    policy_our = RoverSTLPolicy(10).to(device).float()
+    policy_our.load_eval("model_testing/model-no-avoid_1.0_92000.pth")
+    policy_our.eval()
+
+    try:
+        env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=False)
+        saved_episodes = main(env, policy_our)
+        np.savez("test-result/no_avoid.result.npz", episodes=saved_episodes)
+        env.close()
+    finally:
+        print("Test no-avoid finished!")
