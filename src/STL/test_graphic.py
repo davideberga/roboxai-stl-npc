@@ -23,14 +23,14 @@ def paper_state(pose, target, charger, battery, hold_time):
     return torch.tensor([pose[0][0], pose[0][1], target[0][0], target[0][1], charger[0][0], charger[0][1], battery, hold_time]).unsqueeze(0).to(device)
 
 
-def main(model, iterations=100, is_paper=False):
+def main(model, iterations=1000, is_paper=False):
     area_width = 10
     area_height = 10
     steps_ahead = 10
     saved_episodes = []
     max_steps = 200
     
-    random_battery = np.random.uniform(0.5, 5, iterations).tolist()
+    random_battery = np.random.uniform(0.08, 5, iterations).tolist()
 
     # Initialize model
     sim: DynamicsSimulator = DynamicsSimulator(wait_for_charging=4, steps_ahead=10, area_h=10, area_w=10, squared_area=True, beam_angles=beam_angles, device=device, close_thres=0.05)

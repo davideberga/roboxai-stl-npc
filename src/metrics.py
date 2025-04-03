@@ -35,7 +35,7 @@ def calculate_metrics(episodes):
     total_len_episodes = 0
     safe_threshold = 0.15 # calcola in numero di volte che il min lidar in min_radar_list è minore di 0.15
     
-    
+
     no_episodes = len(episodes)
 
     for i, epi in enumerate(episodes):
@@ -89,6 +89,22 @@ def calculate_metrics(episodes):
     std_dev_battery = round(std_dev_battery, 2)
     perc_battery = round(perc_battery, 2)
     perc_goals = round(perc_goals, 2)
+    
+    b_correlations = []
+    for epi in episodes:
+        np_episode = np.array(epi)
+        mask = np_episode[:, 17] < 2
+        battery_filtered = np_episode[mask, 17]
+        distance_filtered = np_episode[mask, 10]
+        if len(battery_filtered) > 1 and np.std(battery_filtered) > 0 and np.std(distance_filtered) > 0:
+            corr = np.corrcoef(battery_filtered, distance_filtered)[0, 1]
+        else:
+            continue
+            
+        b_correlations.append(np.nan_to_num(corr))
+    battery_corr = np.mean(np.array(b_correlations))
+    print(battery_corr)
+    
 
     print('------------------------------------------------------------')
     print(f"Goal Percentage: {perc_goals}%")

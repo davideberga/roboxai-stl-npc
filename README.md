@@ -116,8 +116,8 @@ The dependencies marked as *optional* are required only for testing/training out
 
 |Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|100.0|89.92|15.11|0.14|0.11|0.16|35.45|0.0|
-|OUR|83.0|72.48|29.47|0.07|0.05|0.12|37.45|4.0|
+|Paper|98.6|90.11|15.33|0.14|0.09|0.17|34.67|5.0|
+|OUR|80.7|71.41|30.4|0.07|0.05|0.12|34.7|50.0|
 
 
 
