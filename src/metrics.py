@@ -1,3 +1,5 @@
+import copy
+from typing import Dict, List
 import numpy as np
 from mdutils.mdutils import MdUtils
 import statistics
@@ -63,7 +65,7 @@ def calculate_metrics(episodes):
     perc_battery = sum(battery_for_epi.values()) / len(battery_for_epi)
 
     # Calcolo della media della velocità per test
-    mean_velocity = sum(velocity_for_epi.values()) / len(velocity_for_epi)
+    mean_velocity = sum(velocity_for_epi.values()) / len(velocity_for_epi.values())
     
     # Calcolo della deviazione standard della batteria
     std_dev_battery = statistics.stdev(battery_for_epi.values())  
@@ -102,48 +104,78 @@ def calculate_metrics(episodes):
     return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery
 
 # Funzione per creare una tabella Markdown
-def create_markdown_table(name_md_file, column_names):
-    mdFile = MdUtils(file_name=name_md_file, title="Results") 
+def generate_markdown_table(title: str, column_names: List, methods: Dict) -> str:
+    mdFile = MdUtils(file_name="temp")
+    n_cols = len(column_names)
+    n_rows = len(methods.keys()) + 1
     
-    # Definire i metodi analizzati
-    methods = ['Paper', 'DQN', 'OUR']
+    mdFile.new_header(level=3, title=title, add_table_of_contents='n')
 
-    # Preparare i dati della tabella
-    table_data = column_names  # Intestazione
+    table_data = column_names
     
+    for method, path in methods.items():
+        print(f'------------------------------------ {method} ------------------------------------')
+        episodes = read_npz(path)
+        metrics = calculate_metrics(episodes)
+        row = [
+            method,
+            str(metrics[0]),  # N_Goals_Reached
+            str(metrics[1]),  # Mean Battery %
+            str(metrics[2]),  # Battery std_dev
+            str(metrics[3]),  # Mean Velocity
+            str(metrics[4]),  # Velocity std_dev
+            str(metrics[5]),  # Mean Abs Delta Velocity
+            str(metrics[6]),  # Safety %
+            str(metrics[7])   # Low Battery %
+        ]
+        table_data.extend(row)
 
-    for method in methods:
-        if method == 'Paper':
-            print('------------------------------------PAPER------------------------------------')
-            episodes = read_npz("STL/test-result/paper.result.npz")
-        elif method == 'DQN':
-            print('------------------------------------DQN------------------------------------')
-            episodes = read_npz("DQN/test-result/dqn.result.npz")
-        elif method == 'OUR':
-            print('------------------------------------OUR------------------------------------')
-            episodes = read_npz("STL/test-result/our.result.npz")
+    mdFile.new_table(columns=n_cols, rows=n_rows, text=table_data, text_align="center")
+    table_md = mdFile.get_md_text()
+    return table_md
 
-        perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery = calculate_metrics(episodes)
-    
+def update_md_file(existing_md_path: str, new_content: str, start_marker: str="<!-- START TABLES -->", end_marker: str="<!-- END TABLES -->"):
+    import re
+    try:
+        with open(existing_md_path, "r", encoding="utf-8") as f:
+            file_content = f.read()
+    except FileNotFoundError:
+        file_content = ""
         
-        table_data.extend([
-            method,  # Metodo
-            str(perc_goals),  # Percentuale goal raggiunti
-            str(perc_battery),  # Percentuale batteria
-            str(std_dev_battery),  # Deviazione standard batteria
-            str(mean_velocity),  # Velocità media
-            str(std_dev_velocity),  # Deviazione standard velocità
-            str(mean_abs_delta_v),  # Media assoluta delta velocità
-            str(safety),  # Sicurezza
-            str(low_battery)  # Percentuale batteria carica
-        ])
+    pattern = re.compile(
+        re.escape(start_marker) + ".*?" + re.escape(end_marker),
+        re.DOTALL
+    )
+    new_section = f"{start_marker}\n{new_content}\n{end_marker}"
+
+    if re.search(pattern, file_content):
+        file_content = re.sub(pattern, new_section, file_content)
+    else:
+        file_content += "\n\n" + new_section
+
+    with open(existing_md_path, "w", encoding="utf-8") as f:
+        f.write(file_content)
+
+if __name__ == "__main__":
+    methods_unity = {
+        'Paper': 'STL/test-result/paper.result.npz',
+        'DQN': 'DQN/test-result/dqn.result.npz',
+        'OUR': 'STL/test-result/our.result.npz'
+    }
+    methods_graphics = {
+        'Paper': 'STL/test-result/paper-figure.result.npz',
+        'OUR': 'STL/test-result/our-figure.result.npz'
+    }
+    columns = ['Method', 'N_Goals_Reached', 'Mean Battery %', 'Battery std_dev', 
+               'Mean Velocity', 'Velocity std_dev', 'Mean Abs Delta Velocity', 
+               'Safety %', 'Low Battery %']
+
+
+    table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
+    table_graphics_md = generate_markdown_table("Test in graphical env", copy.deepcopy(columns), methods_graphics)
+
+
+    existing_md_file = "../README.md"
+    combined_tables = table_graphics_md  + "\n\n" +  table_unity_md
     
-
-    # Creare la tabella Markdown
-    mdFile.new_table(columns=9, rows=len(methods) + 1, text=table_data, text_align="center")
-    
-    # Salvare il file Markdown
-    mdFile.create_md_file()
-
-
-create_markdown_table("Results", ['Method', 'N_Goals_Reached', 'Mean Battery %', 'Battery std_dev', 'Mean Velocity', 'Velocity std_dev', 'Mean Abs Delta Velocity', 'Safety %', 'Low Battery %'])
+    update_md_file(existing_md_file, combined_tables)

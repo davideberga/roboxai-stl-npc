@@ -12,6 +12,9 @@ This repo contains the code for the project of Robotics in AI and XAI courses.
   - [DQN](#dqn)
   - [STL](#stl)
   - [ROS](#ros)
+- [:checkered\_flag: Test result](#checkered_flag-test-result)
+  - [Test in graphical env](#test-in-graphical-env)
+  - [Test in unity](#test-in-unity)
 
 
 **Team members:**
@@ -99,3 +102,34 @@ The dependencies marked as *optional* are required only for testing/training out
 2. `colcon build && source install/setup.(bash | zsh)`
 3. To start the node with the model of the paper: `colcon build && ros2 run stl_rover paper`
 4. To start the node with our model: `colcon build && ros2 run stl_rover STL`
+
+
+## :checkered_flag: Test result
+
+
+<!-- START TABLES -->
+
+
+
+
+### Test in graphical env
+
+|Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|100.0|89.92|15.11|0.14|0.11|0.16|35.45|0.0|
+|OUR|83.0|72.48|29.47|0.07|0.05|0.12|37.45|4.0|
+
+
+
+
+
+
+### Test in unity
+
+|Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|55.0|98.82|0.78|0.49|0.3|0.6|87.85|0.0|
+|DQN|100.0|78.42|1.74|0.02|0.0|0.0|71.02|0.0|
+|OUR|11.0|99.76|0.22|1.08|0.38|0.74|82.78|0.0|
+
+<!-- END TABLES -->
