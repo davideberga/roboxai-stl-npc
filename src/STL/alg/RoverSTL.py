@@ -3,7 +3,7 @@ from typing import List
 
 from matplotlib import pyplot as plt
 
-from alg.dynamics import DynamicsSimulator
+from .dynamics import DynamicsSimulator
 from .utils import EtaEstimator
 from .lib_stl_core import AP, Always, Eventually, Imply, ListAnd, Or
 from .stl_network import RoverSTLPolicy
