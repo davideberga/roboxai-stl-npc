@@ -3,6 +3,11 @@ from typing import Dict, List
 import numpy as np
 from mdutils.mdutils import MdUtils
 import statistics
+import torch
+from STL.alg.RoverSTL import RoverSTL
+from STL import config
+
+chunk_size = 10
 
 # Funzione per leggere il file NPZ e restituisce gli episodi (100) con i relativi step
 def read_npz(file_path):
@@ -23,31 +28,69 @@ def read_npz(file_path):
     #         print(epi[0])
 
     return episodes
+
+# Funzione per dividere gli episodi in chunk da 10 step
+def divide_episodes(episodes, chunk_size=10):
+    result = []
+    for i, epi in enumerate(episodes):
+        epi = np.array(epi)
+        epi = epi[:, np.r_[0:11, 17, 18]]  # Seleziona solo i primi 11 valori e il 17° e 18° = 13 valori totali
+        num_steps = len(epi)
+        num_full_chunks = num_steps // chunk_size # 
+        last_steps = epi[-(num_full_chunks * chunk_size):]
+        chunks = last_steps.reshape(-1, chunk_size, epi.shape[1]) if num_full_chunks > 0 else []
+
+        for c in chunks:
+            result.append(c)
+        
+    return result
+
+def calculate_accuracy(result, rover_stl):
+    stl, _, _, _, _, _ = rover_stl.generateSTL(steps_ahead=chunk_size, battery_limit=2.0)
+    accuracy = []
+    
+    for i, chunk in enumerate(result):
+        t = torch.tensor(chunk).float().to(rover_stl.device)
+        t = t.unsqueeze(0)  # aggiunge una dimensione all'inizio
+        accuracy.append((stl(t, rover_stl.smoothing_factor, d={"hard": True})[:, :1] >= 0).float())
+    
+    if len(accuracy) > 0:
+        accuracy = torch.cat(accuracy, dim=0)
+        acc_avg = torch.mean(accuracy)
+    else: 
+        print("La lista accuracy è vuota!")
+        acc_avg = torch.tensor(0.0)
+    
+    return acc_avg * 100
     
 
-def calculate_metrics(episodes):
+def calculate_metrics(episodes, rover_stl, method_name):
     battery_for_epi = {}
     velocity_for_epi = {}
     goal_for_epi = []
     velocity_for_delta = []
     min_radar_list = []
-    low_battery = 0
+    collision_list = []
+    low_battery_list = []
+    mean_battery_list = []
+    mean_velocity_list = []
+    min_lidar_list = []
+    collision = 0
     total_len_episodes = 0
-    safe_threshold = 0.15 # calcola in numero di volte che il min lidar in min_radar_list è minore di 0.15
+    safe_threshold = 0.15 
     
 
     no_episodes = len(episodes)
 
     for i, epi in enumerate(episodes):
         goal_for_epi.append(np.max(epi[:,21]))
+        collision_list.append(np.max(epi[:,22]))
+        low_battery_list.append(np.max(epi[:,23]))
         
-        mean_battery = sum(step[17] for step in epi) / len(epi)  # Media della batteria per episodio
-        mean_velocity = sum(step[19] for step in epi) / len(epi)  # Media della velocità per episodio
-        level_battery = (100 * mean_battery) / 5.0  # Converti in percentuale
-        battery_for_epi[i] = level_battery 
-        velocity_for_epi[i] = mean_velocity
+        mean_battery_list.append(np.sum(epi[:,17]) / len(epi))   
+        mean_velocity_list.append(np.sum(epi[:,19]) / len(epi)) 
 
-        low_battery += np.max(epi[:,23])
+        min_lidar_list.append(np.min(epi[:,0:7]))
 
         temp_list = []
         for step in epi:
@@ -59,19 +102,23 @@ def calculate_metrics(episodes):
 
     perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100 
 
+    # Quante volte c'è stata collisone
+    collision = (np.sum(collision_list) / no_episodes) * 100
+    
+    # Quante volte la batteria si è scaricata
+    low_battery = (np.sum(low_battery_list) / no_episodes) * 100
+
     #print(np.mean(np.array(list(goal_for_epi.values()))))
    
     # Calcolo della media della percentuale di batteria per test
-    perc_battery = sum(battery_for_epi.values()) / len(battery_for_epi)
-
-    # Calcolo della media della velocità per test
-    mean_velocity = sum(velocity_for_epi.values()) / len(velocity_for_epi.values())
-    
+    perc_battery = ((np.sum(mean_battery_list) / no_episodes) * 100) / 5.0 # 5.0 è la capacità massima della batteria
     # Calcolo della deviazione standard della batteria
-    std_dev_battery = statistics.stdev(battery_for_epi.values())  
+    std_dev_battery = np.std(mean_battery_list) 
 
+     # Calcolo della media della velocità per test
+    mean_velocity = np.sum(mean_velocity_list) / no_episodes
     # Calcolo della deviazione standard della velocità
-    std_dev_velocity = statistics.stdev(velocity_for_epi.values()) 
+    std_dev_velocity = np.std(mean_velocity_list)
 
     # Calcolo delta velocità per ogni episodio separatamente
     delta_v = [np.diff(episode) for episode in velocity_for_delta]
@@ -79,16 +126,15 @@ def calculate_metrics(episodes):
     # Calcolo della media assoluta del delta velocità, ignorando episodi vuoti
     mean_abs_delta_v = np.mean([np.mean(np.abs(ep)) for ep in delta_v if len(ep) > 0])
 
-    safety = np.mean(min_radar_list) * 100
+    # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15
+    safety = np.sum(np.array(min_lidar_list) > safe_threshold)
 
-    low_battery = round(low_battery, 2)
-    safety = round(safety, 2)
-    mean_velocity = round(mean_velocity, 2)
-    mean_abs_delta_v = round(mean_abs_delta_v, 2)
-    std_dev_velocity = round(std_dev_velocity, 2)
-    std_dev_battery = round(std_dev_battery, 2)
-    perc_battery = round(perc_battery, 2)
-    perc_goals = round(perc_goals, 2)
+    if method_name == 'DQN':
+        accuracy = torch.tensor(0.0)
+    else:
+        # Rules accuracy
+        result = divide_episodes(episodes, chunk_size=10)
+        accuracy = calculate_accuracy(result, rover_stl)
     
     b_correlations = []
     for epi in episodes:
@@ -102,10 +148,21 @@ def calculate_metrics(episodes):
             continue
             
         b_correlations.append(np.nan_to_num(corr))
-    battery_corr = np.mean(np.array(b_correlations))
-    print(battery_corr)
     
+    battery_corr = np.mean(np.array(b_correlations))
 
+    low_battery = round(low_battery, 2)
+    safety = round(safety, 2)
+    mean_velocity = round(mean_velocity, 2)
+    mean_abs_delta_v = round(mean_abs_delta_v, 2)
+    std_dev_velocity = round(std_dev_velocity, 2)
+    std_dev_battery = round(std_dev_battery, 2)
+    perc_battery = round(perc_battery, 2)
+    perc_goals = round(perc_goals, 2)
+    collision = round(collision, 2)
+    battery_corr = round(battery_corr, 2)
+    
+    # Stampa dei risultati
     print('------------------------------------------------------------')
     print(f"Goal Percentage: {perc_goals}%")
     print(f"Battery Percentage: {perc_battery}%")
@@ -115,9 +172,12 @@ def calculate_metrics(episodes):
     print(f"Mean Abs Delta Velocity: {mean_abs_delta_v}")
     print(f"Safety: {safety}%")
     print(f"Low battery: {low_battery}")
+    print(f"Accuracy: {accuracy}%")
+    print(f"Battery correlation: {battery_corr}")
+    print(f"Collision: {collision}")
     print('------------------------------------------------------------')
 
-    return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery
+    return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery, accuracy, battery_corr, collision
 
 # Funzione per creare una tabella Markdown
 def generate_markdown_table(title: str, column_names: List, methods: Dict) -> str:
@@ -127,22 +187,27 @@ def generate_markdown_table(title: str, column_names: List, methods: Dict) -> st
     
     mdFile.new_header(level=3, title=title, add_table_of_contents='n')
 
+    args = config.parse_args()
+    rover_stl = RoverSTL(None, args)
+
     table_data = column_names
     
     for method, path in methods.items():
         print(f'------------------------------------ {method} ------------------------------------')
         episodes = read_npz(path)
-        metrics = calculate_metrics(episodes)
+        metrics = calculate_metrics(episodes, rover_stl, method)
+
         row = [
             method,
             str(metrics[0]),  # N_Goals_Reached
-            str(metrics[1]),  # Mean Battery %
-            str(metrics[2]),  # Battery std_dev
-            str(metrics[3]),  # Mean Velocity
-            str(metrics[4]),  # Velocity std_dev
+            str(metrics[1]) + ' ± ' + str(metrics[2]),  # Mean Battery % and # Battery std_dev
+            str(metrics[3]) + ' ± ' + str(metrics[4]),  # Mean Velocity and # Velocity std_dev
             str(metrics[5]),  # Mean Abs Delta Velocity
             str(metrics[6]),  # Safety %
-            str(metrics[7])   # Low Battery %
+            str(metrics[7]),   # Low Battery %
+            str(round(metrics[8].item(), 2)),  # Accuracy %
+            str(metrics[9]),   # Battery correlation
+            str(metrics[10])  # Collision %
         ]
         table_data.extend(row)
 
@@ -182,9 +247,9 @@ if __name__ == "__main__":
         'Paper': 'STL/test-result/paper-figure.result.npz',
         'OUR': 'STL/test-result/our-figure.result.npz'
     }
-    columns = ['Method', 'N_Goals_Reached', 'Mean Battery %', 'Battery std_dev', 
-               'Mean Velocity', 'Velocity std_dev', 'Mean Abs Delta Velocity', 
-               'Safety %', 'Low Battery %']
+    columns = ['Method', 'N_Goals_Reached', 'Mean Battery %',
+               'Mean Velocity', 'Mean Abs Delta Velocity', 
+               'Safety %', 'Low Battery %', 'Accuracy %', 'Battery correlation', 'Collision %']
 
 
     table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
