@@ -116,8 +116,8 @@ The dependencies marked as *optional* are required only for testing/training out
 
 |Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|98.6|90.11|15.33|0.14|0.09|0.17|34.67|5.0|
-|OUR|80.7|71.41|30.4|0.07|0.05|0.12|34.7|50.0|
+|Paper|76.4|90.32|16.2|0.21|0.17|0.21|33.37|1.0|
+|OUR|69.3|72.91|30.02|0.13|0.13|0.16|32.93|46.0|
 
 
 
@@ -128,8 +128,8 @@ The dependencies marked as *optional* are required only for testing/training out
 
 |Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|55.0|98.82|0.78|0.49|0.3|0.6|87.85|0.0|
-|DQN|100.0|78.42|1.74|0.02|0.0|0.0|71.02|0.0|
-|OUR|11.0|99.76|0.22|1.08|0.38|0.74|82.78|0.0|
+|Paper|34.0|42.66|31.93|0.32|0.43|0.28|32.43|37.0|
+|DQN|100.0|47.52|2.66|0.03|0.0|0.0|76.2|94.0|
+|OUR|8.0|99.8|0.23|1.07|0.37|0.81|24.24|0.0|
 
 <!-- END TABLES -->

@@ -247,6 +247,11 @@ public class CustomAgent : Agent {
             SetReward(-1f);
     }
 
+    private void OnCollisionStay(Collision collision) {
+        if (collision.collider.CompareTag("Obstacle") || collision.collider.CompareTag("Wall"))
+            SetReward(-1f);
+    }
+
     // When staying within a trigger (for the target)
     private void OnTriggerStay(Collider collision) {
         if (collision.CompareTag("Target"))

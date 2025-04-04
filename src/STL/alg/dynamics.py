@@ -209,9 +209,13 @@ class DynamicsSimulator:
 
             collision_mask = (torch.abs(x_exp - obs_cx) <= obs_w / 2) & (torch.abs(y_exp - obs_cy) <= obs_h / 2)
             collision_any = collision_mask.any(dim=1)
+            
+            if collision_any.shape[0] == 1 and collision_any[0]:
+                return None, None
 
             # If a collision is detected, revert the pose to the previous one.
             new_pose[collision_any] = robot_pose[collision_any]
+            
 
         new_scan = self.simulate_lidar_scan(new_pose, world_objects)
         t_norm, t_angle = self.estimate_destination(new_pose, target)
@@ -249,6 +253,82 @@ class DynamicsSimulator:
         ).to(self.device)
 
         return new_state, new_pose
+    
+    def update_state_batch_figure(self, state, v, theta, robot_pose, world_objects, target, chargers, collision_enabled=False):
+        """
+        Fully vectorized update of the robot state for a batch of moves.
+        """
+        # --- Rescale velocity ---
+        if not collision_enabled:
+            v = v * (self.rover_max_velocity - self.rover_min_velocity) + self.rover_min_velocity
+
+        # --- Update robot pose linearly ---
+        # Predict angle displacement
+        # new_x = robot_pose[:, 0] + (v * torch.cos(robot_pose[:, 2] + theta) * self.dt)
+        # new_y = robot_pose[:, 1] + (v * torch.sin(robot_pose[:, 2] + theta) * self.dt)
+        # new_heading = robot_pose[:, 2] + theta
+        
+        new_x = robot_pose[:, 0] + (v * torch.cos(theta) * self.dt)
+        new_y = robot_pose[:, 1] + (v * torch.sin(theta) * self.dt)
+        new_heading = theta
+
+        new_pose = torch.stack([new_x, new_y, new_heading], dim=1)
+
+        collision_detected = False
+        if collision_enabled:
+            x_exp = new_pose[:, 0].unsqueeze(1)
+            y_exp = new_pose[:, 1].unsqueeze(1)
+            obs_cx = world_objects[:, 0].unsqueeze(0)
+            obs_cy = world_objects[:, 1].unsqueeze(0)
+            obs_w = world_objects[:, 2].unsqueeze(0)
+            obs_h = world_objects[:, 3].unsqueeze(0)
+
+            collision_mask = (torch.abs(x_exp - obs_cx) <= obs_w / 2) & (torch.abs(y_exp - obs_cy) <= obs_h / 2)
+            collision_any = collision_mask.any(dim=1)
+            
+            if collision_any.shape[0] == 1:
+                collision_detected = collision_any[0]
+
+            # If a collision is detected, revert the pose to the previous one.
+            new_pose[collision_any] = robot_pose[collision_any]
+            
+
+        new_scan = self.simulate_lidar_scan(new_pose, world_objects)
+        t_norm, t_angle = self.estimate_destination(new_pose, target)
+
+        robot_pos = new_pose[:, :2].unsqueeze(1)
+        charger_centers = chargers[..., :2]
+        diff = charger_centers - robot_pos
+        dists = torch.norm(diff, dim=2)
+        angles = torch.atan2(diff[..., 1], diff[..., 0] + self.epsilon)
+
+        nearest_dists, min_idx = dists.min(dim=1)
+        batch_indices = torch.arange(new_pose.shape[0], device=self.device)
+        nearest_angles = angles[batch_indices, min_idx]
+
+        nearest_dists = nearest_dists / self.max_range_destination
+
+        # ADAPTED from the paper code
+        battery_charge = 5
+        near_charger = soft_step_hard(0.05 * (self.enough_close_to_charger - nearest_dists))
+        # near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - nearest_dists))) + 1) / 2
+        es_battery_time = (state[:, 11].unsqueeze(1) - self.dt) * (1 - near_charger.unsqueeze(1)) + battery_charge * near_charger.unsqueeze(1)
+        es_charger_time = state[:, 12].unsqueeze(1) - self.dt * near_charger.unsqueeze(1)
+
+        new_state = torch.cat(
+            [
+                new_scan,
+                t_angle,
+                t_norm,
+                nearest_angles.unsqueeze(1),
+                nearest_dists.unsqueeze(1),
+                es_battery_time,
+                es_charger_time,
+            ],
+            dim=1,
+        ).to(self.device)
+
+        return new_state, new_pose, collision_detected
 
     def visualize_environment(self, robot_pose, lidar_scan, world_objects, target, chargers, battery_level=1.0, ax=None):
         """

@@ -62,7 +62,7 @@ def main(model, iterations=1000, is_paper=False):
                 v = ctl[0] * 10 * 0.5
                 theta = ctl[1].unsqueeze(0)
 
-                new_state, new_pose = sim.update_state_batch(state, v, theta, robot_pose, world_objects, target, charger, collision_enabled=True)
+                new_state, new_pose, collision_detected = sim.update_state_batch_figure(state, v, theta, robot_pose, world_objects, target, charger, collision_enabled=True)
                 robot_pose = new_pose
                 if new_state[..., 10] < 0.1:
                     battery = min(battery + 0.5, 5)
@@ -108,7 +108,7 @@ def main(model, iterations=1000, is_paper=False):
                     done = True
                     battery_finished = 1
 
-                if step_counter > 100:
+                if step_counter > 100 or collision_detected:
                     done = True
                     collision = 1
 

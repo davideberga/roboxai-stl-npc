@@ -16,7 +16,6 @@ from alg.RoverSTL import RoverSTL
 import torch
 
 seed = 42
-seed_everything(seed)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 rover_model = RoverSTL(None, type("c", (object,), {"seed": seed, "n_epochs": 2, "lr": 0.0001})())
@@ -70,24 +69,10 @@ def get_plan_x(state, policy, state_complete):
     return plan
 
 
-def get_plan_stl(state, policy):
-    state = torch.tensor([state]).to(device).float()
-    control = policy(state)
-    control = control[0].detach().cpu().numpy()
-    linear_velocity = control[:, 0] * 10 * 0.2  # * 10 * 0.6
-    theta = control[:, 1]
 
-    plan = []
-    linear_vel = linear_velocity.tolist()
-    theta = theta.tolist()
-    for v, t in zip(linear_vel, theta):
-        plan.append((v, normalize_degrees(t * (180 / 3.14))))
-    print(plan)
-    return plan
-
-
-def main(env, policy_network, iterations=100, is_paper=False):
+def main(env, policy_network, random_battery, iterations=100, is_paper=False):
     goal, crash = 0, 0
+    print
 
     # First reset
     state, state_complete = env.reset()
@@ -104,7 +89,7 @@ def main(env, policy_network, iterations=100, is_paper=False):
 
         episode = []
 
-        state, state_complete = env.reset(battery_reset=True)
+        state, state_complete = env.reset(battery_reset=True, battery=random_battery[ep])
 
         while True:
             if len(planned_actions) < 1:
@@ -133,38 +118,43 @@ def main(env, policy_network, iterations=100, is_paper=False):
 
 if __name__ == "__main__":
     ENV_TYPE = "test"
+    n_tests=100
 
+    seed_everything(seed)
+    random_battery = np.random.uniform(0.08, 5, n_tests).tolist()
     policy_paper = PolicyPaper().to(device).float()
     policy_paper.load_eval_paper("model_testing/model_final_paper.ckpt")
     policy_paper.eval()
 
     try:
         env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=True)
-        saved_episodes = main(env, policy_paper, is_paper=True)
+        saved_episodes = main(env, policy_paper, random_battery, iterations=n_tests, is_paper=True)
         np.savez("test-result/paper.result.npz", episodes=saved_episodes)
         env.close()
     finally:
         print("Test paper finished!")
 
+    seed_everything(seed)
     policy_our = RoverSTLPolicy(10).to(device).float()
     policy_our.load_eval("model_testing/model-closeness-beta-increased_0.9581999778747559_157500.pth")
     policy_our.eval()
 
     try:
         env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=False)
-        saved_episodes = main(env, policy_our)
+        saved_episodes = main(env, policy_our, random_battery, iterations=n_tests)
         np.savez("test-result/our.result.npz", episodes=saved_episodes)
         env.close()
     finally:
         print("Test our finished!")
 
+    seed_everything(seed)
     policy_our = RoverSTLPolicy(10).to(device).float()
     policy_our.load_eval("model_testing/model-no-avoid_1.0_92000.pth")
     policy_our.eval()
 
     try:
         env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=False)
-        saved_episodes = main(env, policy_our)
+        saved_episodes = main(env, policy_our, random_battery, iterations=n_tests)
         np.savez("test-result/no_avoid.result.npz", episodes=saved_episodes)
         env.close()
     finally:

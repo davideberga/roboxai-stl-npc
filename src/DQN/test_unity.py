@@ -1,5 +1,6 @@
 import warnings
 
+
 warnings.filterwarnings("ignore")
 import os
 
@@ -43,7 +44,7 @@ def get_action(state, policy):
     return selected_action
 
 
-def main(env, policy_network, iterations=100):
+def main(env, policy_network, random_battery, iterations=100 ):
     goal, crash = 0, 0
 
     # First reset
@@ -58,7 +59,7 @@ def main(env, policy_network, iterations=100):
         goal = 0
         collision = 0
         battery = 0
-        state, state_complete = env.reset(battery_reset=True)
+        state, state_complete = env.reset(battery_reset=True, battery=random_battery[ep])
 
         while True:
             action = get_action(state, policy_network)
@@ -94,10 +95,13 @@ if __name__ == "__main__":
     policy_network = tf.keras.models.load_model("models/DDQN_paper_id940_ep4883_success82.h5")
 
     ENV_TYPE = "test"
+    n_tests=100
+
+    random_battery = np.random.uniform(0.08, 5, n_tests).tolist()
 
     try:
         env = RoverNavigationTest(env_type=ENV_TYPE, seed=seed, worker_id=0, is_env_for_paper=False)
-        saved_episodes = main(env, policy_network)
+        saved_episodes = main(env, policy_network,random_battery=random_battery, iterations=n_tests )
         np.savez("test-result/dqn.result.npz", episodes=saved_episodes)
         env.close()
     finally:

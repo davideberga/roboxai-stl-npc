@@ -76,10 +76,10 @@ class RoverNavigationTest(gym.Env):
             dtype=np.float64,
         )
 
-    def reset(self, battery_reset=False):
+    def reset(self, battery_reset=False, battery=5):
         # Reset the counter for the maximum step counter and battery status
         if battery_reset:
-            self.battery_time = self.FULL_BATTERY_TIME
+            self.battery_time = battery
             self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
         self.step_counter = 0
 
@@ -128,11 +128,11 @@ class RoverNavigationTest(gym.Env):
             if self.charger_hold_time > 0:
                 # print(f'before charger_hold_time: {self.charger_hold_time}')
                 self.battery_time = min(self.FULL_BATTERY_TIME, self.battery_time + 0.1)  # Recharge
-                self.charger_hold_time -= 1
+                self.charger_hold_time -= 0.8
                 # print(f'before charger_hold_time: {self.charger_hold_time}')
                 # print(f'Il robot si sta ricaricando. Batteria: {self.battery_time}')
                 env_var["n_charged"] += 1
-            elif self.charger_hold_time == 0:
+            elif self.charger_hold_time <= 0:
                 self.charger_hold_time = self.FULL_CHARGER_HOLD_TIME
                 # print(f'Il robot ha finito di caricarsi. Batteria: {self.battery_time} e Charger_hold_time: {self.charger_hold_time}')
         else:
