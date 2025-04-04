@@ -114,10 +114,10 @@ The dependencies marked as *optional* are required only for testing/training out
 
 ### Test in graphical env
 
-|Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|76.4|90.32|16.2|0.21|0.17|0.21|33.37|1.0|
-|OUR|69.3|72.91|30.02|0.13|0.13|0.16|32.93|46.0|
+|Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|691|0.1|0.0|0.86|23.5|
+|OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|686|4.6|0.0|-0.35|26.1|
 
 
 
@@ -126,10 +126,10 @@ The dependencies marked as *optional* are required only for testing/training out
 
 ### Test in unity
 
-|Method|N_Goals_Reached|Mean Battery %|Battery std_dev|Mean Velocity|Velocity std_dev|Mean Abs Delta Velocity|Safety %|Low Battery %|
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|34.0|42.66|31.93|0.32|0.43|0.28|32.43|37.0|
-|DQN|100.0|47.52|2.66|0.03|0.0|0.0|76.2|94.0|
-|OUR|8.0|99.8|0.23|1.07|0.37|0.81|24.24|0.0|
+|Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45|37.0|87.24|0.36|29.0|
+|DQN|100.0|47.52 ± 0.13|0.03 ± 0.0|0.0|33|94.0|0.0|0.03|67.0|
+|OUR|8.0|99.8 ± 0.01|1.07 ± 0.37|0.81|23|0.0|50.0|nan|92.0|
 
 <!-- END TABLES -->
