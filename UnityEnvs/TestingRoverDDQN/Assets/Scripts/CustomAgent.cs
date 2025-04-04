@@ -211,6 +211,11 @@ public class CustomAgent : Agent {
             SetReward(1f);
     }
 
+    private void OnCollisionStay(Collision collision) {
+        if (collision.collider.CompareTag("Obstacle") || collision.collider.CompareTag("Wall"))
+            SetReward(-1f);
+    }
+
     // This method uses LINQ to combine the obstacles and chargers.
     // It checks if the given GameObject's renderer bounds intersect with any
     // of the other objects’ renderer bounds.

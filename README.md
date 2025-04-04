@@ -116,8 +116,9 @@ The dependencies marked as *optional* are required only for testing/training out
 
 |Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|691|0.1|0.0|0.86|23.5|
-|OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|686|4.6|0.0|-0.35|26.1|
+|Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|691|0.1|20.14|0.86|23.5|
+|OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|686|4.6|31.3|-0.35|26.1|
+|No avoid rule|75.2|65.05 ± 1.37|0.21 ± 0.14|0.22|695|0.4|2.33|-0.54|24.5|
 
 
 
@@ -128,8 +129,9 @@ The dependencies marked as *optional* are required only for testing/training out
 
 |Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45|37.0|87.24|0.36|29.0|
-|DQN|100.0|47.52 ± 0.13|0.03 ± 0.0|0.0|33|94.0|0.0|0.03|67.0|
-|OUR|8.0|99.8 ± 0.01|1.07 ± 0.37|0.81|23|0.0|50.0|nan|92.0|
+|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45|37.0|82.28|0.36|29.0|
+|DQN|53.0|45.51 ± 1.29|0.04 ± 0.02|0.01|99|19.0|13.45|-0.04|2.0|
+|OUR|4.0|48.05 ± 1.52|0.34 ± 0.28|0.4|27|13.0|11.03|-0.13|83.0|
+|No avoid rule|1.0|48.15 ± 1.47|0.67 ± 0.27|0.67|20|0.0|5.88|-0.19|99.0|
 
 <!-- END TABLES -->

@@ -52,7 +52,7 @@ def main(env, policy_network, random_battery, iterations=100 ):
 
     saved_episodes = []
     
-    episode = []
+    
 
     for ep in range(iterations):
         # An episode is complete when 3 goals are reached or collision or battery finished occur
@@ -60,6 +60,7 @@ def main(env, policy_network, random_battery, iterations=100 ):
         collision = 0
         battery = 0
         state, state_complete = env.reset(battery_reset=True, battery=random_battery[ep])
+        episode = []
 
         while True:
             action = get_action(state, policy_network)

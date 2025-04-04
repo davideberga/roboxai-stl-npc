@@ -100,6 +100,7 @@ def main(model, iterations=1000, is_paper=False):
                 goal_reached = 0
                 battery_finished = 0
                 collision = 0
+                
                 if new_state[..., 8].item() < 0.1:
                     done = True
                     goal_reached = 1
@@ -111,6 +112,7 @@ def main(model, iterations=1000, is_paper=False):
                 if step_counter > 100 or collision_detected:
                     done = True
                     collision = 1
+                
 
                 new_state_arr = new_state[..., :11].detach().cpu().numpy().reshape(1, -1)
                 new_pose_arr = new_pose[..., :2].detach().cpu().numpy().reshape(1, -1)
@@ -122,6 +124,9 @@ def main(model, iterations=1000, is_paper=False):
                 concatenated_data = np.concatenate([new_state_arr, new_pose_arr, target_arr, charger_arr, remaining_state_arr, ctl_arr, end], axis=1)
 
                 episode.append(np.squeeze(concatenated_data))
+                
+                
+                
                 if done: break
                 
             state_paper = paper_state(robot_pose, target, charger, battery, hold_time)
@@ -162,5 +167,16 @@ if __name__ == "__main__":
     try:
         saved_episodes = main(policy_our)
         np.savez("test-result/our-figure.result.npz", episodes=saved_episodes)
+    finally:
+        print("Test our finished!")
+        
+    seed_everything(seed)
+    policy_no_avoid = RoverSTLPolicy(10).to(device).float()
+    policy_no_avoid.load_eval("model_testing/model-no-avoid_1.0_92000.pth")
+    policy_no_avoid.eval()
+
+    try:
+        saved_episodes = main(policy_no_avoid)
+        np.savez("test-result/no_avoid-figure.result.npz", episodes=saved_episodes)
     finally:
         print("Test our finished!")

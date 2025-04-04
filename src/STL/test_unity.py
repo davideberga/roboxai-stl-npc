@@ -64,8 +64,7 @@ def get_plan_x(state, policy, state_complete):
     for ctl in safe_control[0].cpu().detach().numpy():
         v = ctl[0] * 10 * 0.2
         t = ctl[1]
-        if(abs(v) > 0):
-            plan.append((v, normalize_degrees(t * (180 / 3.14))))
+        plan.append((v, normalize_degrees(t * (180 / 3.14))))
     return plan
 
 

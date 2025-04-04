@@ -7,7 +7,7 @@ import torch
 from STL.alg.RoverSTL import RoverSTL
 from STL import config
 
-chunk_size = 10
+chunk_size = 5
 
 # Funzione per leggere il file NPZ e restituisce gli episodi (100) con i relativi step
 def read_npz(file_path):
@@ -53,7 +53,7 @@ def calculate_accuracy(result, rover_stl):
         t = torch.tensor(chunk).float().to(rover_stl.device)
         t = t.unsqueeze(0)  # aggiunge una dimensione all'inizio
         accuracy.append((stl(t, rover_stl.smoothing_factor, d={"hard": True})[:, :1] >= 0).float())
-    
+        
     if len(accuracy) > 0:
         accuracy = torch.cat(accuracy, dim=0)
         acc_avg = torch.mean(accuracy)
@@ -129,12 +129,12 @@ def calculate_metrics(episodes, rover_stl, method_name):
     # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15
     safety = np.sum(np.array(min_lidar_list) > safe_threshold)
 
-    if method_name == 'DQN':
-        accuracy = torch.tensor(0.0)
-    else:
-        # Rules accuracy
-        result = divide_episodes(episodes, chunk_size=10)
-        accuracy = calculate_accuracy(result, rover_stl)
+    # if method_name == 'DQN':
+    #     accuracy = torch.tensor(0.0)
+    # else:
+    # Rules accuracy
+    result = divide_episodes(episodes, chunk_size)
+    accuracy = calculate_accuracy(result, rover_stl)
     
     b_correlations = []
     for epi in episodes:
@@ -241,11 +241,13 @@ if __name__ == "__main__":
     methods_unity = {
         'Paper': 'STL/test-result/paper.result.npz',
         'DQN': 'DQN/test-result/dqn.result.npz',
-        'OUR': 'STL/test-result/our.result.npz'
+        'OUR': 'STL/test-result/our.result.npz',
+        'No avoid rule': 'STL/test-result/no_avoid.result.npz'
     }
     methods_graphics = {
         'Paper': 'STL/test-result/paper-figure.result.npz',
-        'OUR': 'STL/test-result/our-figure.result.npz'
+        'OUR': 'STL/test-result/our-figure.result.npz',
+        'No avoid rule': 'STL/test-result/no_avoid-figure.result.npz',
     }
     columns = ['Method', 'N_Goals_Reached', 'Mean Battery %',
                'Mean Velocity', 'Mean Abs Delta Velocity', 
