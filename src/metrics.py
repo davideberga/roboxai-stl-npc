@@ -46,27 +46,35 @@ def divide_episodes(episodes, chunk_size=10):
     return result
 
 def calculate_accuracy(result, rover_stl):
-    stl, _, _, _, _, _ = rover_stl.generateSTL(steps_ahead=chunk_size, battery_limit=2.0)
-    accuracy = []
-    
+    stl, avoid, _, _, _, _ = rover_stl.generateSTL(steps_ahead=chunk_size, battery_limit=2.0)
+    accuracy_list = []
+    avoid_list = []
+
     for i, chunk in enumerate(result):
         t = torch.tensor(chunk).float().to(rover_stl.device)
         t = t.unsqueeze(0)  # aggiunge una dimensione all'inizio
-        accuracy.append((stl(t, rover_stl.smoothing_factor, d={"hard": True})[:, :1] >= 0).float())
-        
-    if len(accuracy) > 0:
-        accuracy = torch.cat(accuracy, dim=0)
-        acc_avg = torch.mean(accuracy)
+        accuracy_list.append((stl(t, rover_stl.smoothing_factor, d={"hard": True})[:, :1] >= 0).float())
+        avoid_list.append(torch.mean(avoid(t, rover_stl.smoothing_factor)[:, :1]).item())
+    
+    if len(accuracy_list) > 0 or len(avoid_list) > 0:
+        accuracy_list = torch.cat(accuracy_list, dim=0)
+        acc_avg = torch.mean(accuracy_list)
     else: 
-        print("La lista accuracy è vuota!")
+        print("La lista accuracy o avoid è vuota!")
         acc_avg = torch.tensor(0.0)
-    
-    return acc_avg * 100
-    
+        avoid_avg = 0.0
 
+    avoid_avg = np.mean(avoid_list)
+    
+    return acc_avg * 100, avoid_avg
+
+def total_distance(pos_list):
+    pos_list = np.array(pos_list)
+    difference = np.diff(pos_list, axis=0)
+    distance = np.linalg.norm(difference, axis=1)
+    return np.sum(distance)
+    
 def calculate_metrics(episodes, rover_stl, method_name):
-    battery_for_epi = {}
-    velocity_for_epi = {}
     goal_for_epi = []
     velocity_for_delta = []
     min_radar_list = []
@@ -75,6 +83,9 @@ def calculate_metrics(episodes, rover_stl, method_name):
     mean_battery_list = []
     mean_velocity_list = []
     min_lidar_list = []
+    pos_list = [] # lista di posizioni del rover in un episodio
+    pos =  [] # coordinate x, y del rover in uno step [x,y]
+    distance_list = [] # lista delle distanze percorse in ogni episodio
     collision = 0
     total_len_episodes = 0
     safe_threshold = 0.15 
@@ -99,6 +110,14 @@ def calculate_metrics(episodes, rover_stl, method_name):
             min_radar_list.append(min(step[0:7]))
             
         velocity_for_delta.append(temp_list)
+
+        # Calcolo della distanza totale percorsa
+        if method_name != 'DQN':
+            for step in epi:
+                pos_list.append([step[11], step[12]]) # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
+        
+            distance_list.append(total_distance(pos_list)) # lista delle distanze totali percorse in ogni episodio
+            pos_list = [] # reset della lista delle posizioni per il prossimo episodio
 
     perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100 
 
@@ -129,12 +148,18 @@ def calculate_metrics(episodes, rover_stl, method_name):
     # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15
     safety = np.sum(np.array(min_lidar_list) > safe_threshold)
 
+    # Calcolo della distanza totale percorsa
+    distance = np.mean(distance_list)
+    # Calcolo della deviazione standard della distanza
+    std_dev_distance = np.std(distance_list)
+
     # if method_name == 'DQN':
     #     accuracy = torch.tensor(0.0)
     # else:
+
     # Rules accuracy
     result = divide_episodes(episodes, chunk_size)
-    accuracy = calculate_accuracy(result, rover_stl)
+    accuracy, avoid = calculate_accuracy(result, rover_stl)
     
     b_correlations = []
     for epi in episodes:
@@ -161,6 +186,10 @@ def calculate_metrics(episodes, rover_stl, method_name):
     perc_goals = round(perc_goals, 2)
     collision = round(collision, 2)
     battery_corr = round(battery_corr, 2)
+    avoid = round(avoid, 2)
+    distance = round(distance, 2)
+    std_dev_distance = round(std_dev_distance, 2)
+    accuracy = round(accuracy.item(), 2)
     
     # Stampa dei risultati
     print('------------------------------------------------------------')
@@ -175,9 +204,12 @@ def calculate_metrics(episodes, rover_stl, method_name):
     print(f"Accuracy: {accuracy}%")
     print(f"Battery correlation: {battery_corr}")
     print(f"Collision: {collision}")
+    print(f"Avoid: {avoid}")
+    print(f"Distance: {distance}")
+    print(f"Distance std_dev: {std_dev_distance}")
     print('------------------------------------------------------------')
 
-    return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery, accuracy, battery_corr, collision
+    return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery, accuracy, battery_corr, collision, avoid, distance, std_dev_distance
 
 # Funzione per creare una tabella Markdown
 def generate_markdown_table(title: str, column_names: List, methods: Dict) -> str:
@@ -205,9 +237,11 @@ def generate_markdown_table(title: str, column_names: List, methods: Dict) -> st
             str(metrics[5]),  # Mean Abs Delta Velocity
             str(metrics[6]),  # Safety %
             str(metrics[7]),   # Low Battery %
-            str(round(metrics[8].item(), 2)),  # Accuracy %
+            str(round(metrics[8], 2)),  # Accuracy %
             str(metrics[9]),   # Battery correlation
-            str(metrics[10])  # Collision %
+            str(metrics[10]),  # Collision %
+            str(metrics[11]),  # Avoid %
+            str(metrics[12]) + ' ± ' + str(metrics[13])  # Distance and # Distance std_dev
         ]
         table_data.extend(row)
 
@@ -251,7 +285,8 @@ if __name__ == "__main__":
     }
     columns = ['Method', 'N_Goals_Reached', 'Mean Battery %',
                'Mean Velocity', 'Mean Abs Delta Velocity', 
-               'Safety %', 'Low Battery %', 'Accuracy %', 'Battery correlation', 'Collision %']
+               'Safety %', 'Low Battery %', 'Accuracy %', 'Battery correlation',
+                'Collision %', 'Avoid %', 'Total distance']
 
 
     table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
