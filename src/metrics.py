@@ -112,12 +112,11 @@ def calculate_metrics(episodes, rover_stl, method_name):
         velocity_for_delta.append(temp_list)
 
         # Calcolo della distanza totale percorsa
-        if method_name != 'DQN':
-            for step in epi:
-                pos_list.append([step[11], step[12]]) # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
-        
-            distance_list.append(total_distance(pos_list)) # lista delle distanze totali percorse in ogni episodio
-            pos_list = [] # reset della lista delle posizioni per il prossimo episodio
+        for step in epi:
+            pos_list.append([step[11], step[12]]) # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
+    
+        distance_list.append(total_distance(pos_list)) # lista delle distanze totali percorse in ogni episodio
+        pos_list = [] # reset della lista delle posizioni per il prossimo episodio
 
     perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100 
 
@@ -146,7 +145,7 @@ def calculate_metrics(episodes, rover_stl, method_name):
     mean_abs_delta_v = np.mean([np.mean(np.abs(ep)) for ep in delta_v if len(ep) > 0])
 
     # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15
-    safety = np.sum(np.array(min_lidar_list) > safe_threshold)
+    safety = (np.sum(np.array(min_lidar_list) > safe_threshold) / no_episodes) * 100
 
     # Calcolo della distanza totale percorsa
     distance = np.mean(distance_list)
@@ -283,7 +282,7 @@ if __name__ == "__main__":
         'OUR': 'STL/test-result/our-figure.result.npz',
         'No avoid rule': 'STL/test-result/no_avoid-figure.result.npz',
     }
-    columns = ['Method', 'N_Goals_Reached', 'Mean Battery %',
+    columns = ['Method', 'N Goals Reached %', 'Mean Battery %',
                'Mean Velocity', 'Mean Abs Delta Velocity', 
                'Safety %', 'Low Battery %', 'Accuracy %', 'Battery correlation',
                 'Collision %', 'Avoid %', 'Total distance']
