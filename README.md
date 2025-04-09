@@ -139,11 +139,11 @@ The average of the total distance traveled for each episode.
 
 ### Test in graphical env
 
-|Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
+|Method|N Goals Reached %|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|691|0.1|20.14|0.86|23.5|16.66|1.15 ± 0.94|
-|OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|686|4.6|31.3|-0.35|26.1|17.25|0.78 ± 0.91|
-|No avoid rule|75.2|65.05 ± 1.37|0.21 ± 0.14|0.22|695|0.4|2.33|-0.54|24.5|16.07|0.77 ± 0.66|
+|Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|69.1|0.1|20.14|0.86|23.5|16.66|1.15 ± 0.94|
+|OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|68.6|4.6|31.3|-0.35|26.1|17.25|0.78 ± 0.91|
+|No avoid rule|75.2|65.05 ± 1.37|0.21 ± 0.14|0.22|69.5|0.4|2.33|-0.54|24.5|16.07|0.77 ± 0.66|
 
 
 
@@ -152,11 +152,11 @@ The average of the total distance traveled for each episode.
 
 ### Test in unity
 
-|Method|N_Goals_Reached|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
+|Method|N Goals Reached %|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45|37.0|82.28|0.36|29.0|24.03|4.5 ± 4.06|
-|DQN|53.0|45.51 ± 1.29|0.04 ± 0.02|0.01|99|19.0|13.45|-0.04|2.0|68.27|nan ± nan|
-|OUR|4.0|48.05 ± 1.52|0.34 ± 0.28|0.4|27|13.0|11.03|-0.13|83.0|12.48|3.29 ± 2.71|
-|No avoid rule|1.0|48.15 ± 1.47|0.67 ± 0.27|0.67|20|0.0|5.88|-0.19|99.0|9.6|3.81 ± 2.46|
+|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45.0|37.0|82.28|0.36|29.0|24.03|4.5 ± 4.06|
+|DQN|53.0|45.51 ± 1.29|0.04 ± 0.02|0.01|99.0|19.0|13.45|-0.04|2.0|68.27|5.34 ± 3.77|
+|OUR|4.0|48.05 ± 1.52|0.34 ± 0.28|0.4|27.0|13.0|11.03|-0.13|83.0|12.48|3.29 ± 2.71|
+|No avoid rule|1.0|48.15 ± 1.47|0.67 ± 0.27|0.67|20.0|0.0|5.88|-0.19|99.0|9.6|3.81 ± 2.46|
 
 <!-- END TABLES -->
