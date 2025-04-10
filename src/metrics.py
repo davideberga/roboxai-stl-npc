@@ -9,6 +9,7 @@ from STL import config
 
 chunk_size = 5
 
+
 # Funzione per leggere il file NPZ e restituisce gli episodi (100) con i relativi step
 def read_npz(file_path):
     data = np.load(file_path, allow_pickle=True)
@@ -16,10 +17,10 @@ def read_npz(file_path):
 
     # Stampa le chiavi del file NPZ
     # print(f"data.files: {data_episodes}")
-   
+
     # Determinare il numero di episodi (dovrebbe essere 100)
     tot_episodes = len(data[data_episodes[0]])
-    #print(f"Numero di episodi per questo test: {tot_episodes}")
+    # print(f"Numero di episodi per questo test: {tot_episodes}")
 
     episodes = data[data_episodes[0]]
 
@@ -29,6 +30,7 @@ def read_npz(file_path):
 
     return episodes
 
+
 # Funzione per dividere gli episodi in chunk da 10 step
 def divide_episodes(episodes, chunk_size=10):
     result = []
@@ -36,14 +38,15 @@ def divide_episodes(episodes, chunk_size=10):
         epi = np.array(epi)
         epi = epi[:, np.r_[0:11, 17, 18]]  # Seleziona solo i primi 11 valori e il 17° e 18° = 13 valori totali
         num_steps = len(epi)
-        num_full_chunks = num_steps // chunk_size # 
-        last_steps = epi[-(num_full_chunks * chunk_size):]
+        num_full_chunks = num_steps // chunk_size  #
+        last_steps = epi[-(num_full_chunks * chunk_size) :]
         chunks = last_steps.reshape(-1, chunk_size, epi.shape[1]) if num_full_chunks > 0 else []
 
         for c in chunks:
             result.append(c)
-        
+
     return result
+
 
 def calculate_accuracy(result, rover_stl):
     stl, avoid, _, _, _, _ = rover_stl.generateSTL(steps_ahead=chunk_size, battery_limit=2.0)
@@ -55,25 +58,27 @@ def calculate_accuracy(result, rover_stl):
         t = t.unsqueeze(0)  # aggiunge una dimensione all'inizio
         accuracy_list.append((stl(t, rover_stl.smoothing_factor, d={"hard": True})[:, :1] >= 0).float())
         avoid_list.append(torch.mean(avoid(t, rover_stl.smoothing_factor)[:, :1]).item())
-    
+
     if len(accuracy_list) > 0 or len(avoid_list) > 0:
         accuracy_list = torch.cat(accuracy_list, dim=0)
         acc_avg = torch.mean(accuracy_list)
-    else: 
+    else:
         print("La lista accuracy o avoid è vuota!")
         acc_avg = torch.tensor(0.0)
         avoid_avg = 0.0
 
     avoid_avg = np.mean(avoid_list)
-    
+
     return acc_avg * 100, avoid_avg
+
 
 def total_distance(pos_list):
     pos_list = np.array(pos_list)
     difference = np.diff(pos_list, axis=0)
     distance = np.linalg.norm(difference, axis=1)
     return np.sum(distance)
-    
+
+
 def calculate_metrics(episodes, rover_stl, method_name):
     goal_for_epi = []
     velocity_for_delta = []
@@ -83,57 +88,73 @@ def calculate_metrics(episodes, rover_stl, method_name):
     mean_battery_list = []
     mean_velocity_list = []
     min_lidar_list = []
-    pos_list = [] # lista di posizioni del rover in un episodio
-    pos =  [] # coordinate x, y del rover in uno step [x,y]
-    distance_list = [] # lista delle distanze percorse in ogni episodio
+    pos_list = []  # lista di posizioni del rover in un episodio
+    pos = []  # coordinate x, y del rover in uno step [x,y]
+    distance_list = []  # lista delle distanze percorse in ogni episodio
     collision = 0
     total_len_episodes = 0
-    safe_threshold = 0.15 
-    
+    safe_threshold = 0.15
 
     no_episodes = len(episodes)
 
     for i, epi in enumerate(episodes):
-        goal_for_epi.append(np.max(epi[:,21]))
-        collision_list.append(np.max(epi[:,22]))
-        low_battery_list.append(np.max(epi[:,23]))
-        
-        mean_battery_list.append(np.sum(epi[:,17]) / len(epi))   
-        mean_velocity_list.append(np.sum(epi[:,19]) / len(epi)) 
+        goal_reached = np.max(epi[:, 21])
+        collision_detected = np.max(epi[:, 22])
+        low_battery_detected = np.max(epi[:, 23])
 
-        min_lidar_list.append(np.min(epi[:,0:7]))
+        if collision_detected > 0:
+            goal_for_epi.append(0)
+            collision_list.append(1)
+            low_battery_list.append(0)
+        elif low_battery_detected > 0:
+            goal_for_epi.append(0)
+            collision_list.append(0)
+            low_battery_list.append(1)
+        elif goal_reached > 0:
+            goal_for_epi.append(1)
+            collision_list.append(0)
+            low_battery_list.append(0)
+        else:
+            goal_for_epi.append(0)
+            collision_list.append(0)
+            low_battery_list.append(0)
+            
+        mean_battery_list.append(np.sum(epi[:, 17]) / len(epi))
+        mean_velocity_list.append(np.sum(epi[:, 19]) / len(epi))
+
+        min_lidar_list.append(np.min(epi[:, 0:7]))
 
         temp_list = []
         for step in epi:
             total_len_episodes += 1
             temp_list.append(step[19])
             min_radar_list.append(min(step[0:7]))
-            
+
         velocity_for_delta.append(temp_list)
 
         # Calcolo della distanza totale percorsa
         for step in epi:
-            pos_list.append([step[11], step[12]]) # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
-    
-        distance_list.append(total_distance(pos_list)) # lista delle distanze totali percorse in ogni episodio
-        pos_list = [] # reset della lista delle posizioni per il prossimo episodio
+            pos_list.append([step[11], step[12]])  # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
 
-    perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100 
+        distance_list.append(total_distance(pos_list))  # lista delle distanze totali percorse in ogni episodio
+        pos_list = []  # reset della lista delle posizioni per il prossimo episodio
+
+    perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100
 
     # Quante volte c'è stata collisone
     collision = (np.sum(collision_list) / no_episodes) * 100
-    
+
     # Quante volte la batteria si è scaricata
     low_battery = (np.sum(low_battery_list) / no_episodes) * 100
 
-    #print(np.mean(np.array(list(goal_for_epi.values()))))
-   
-    # Calcolo della media della percentuale di batteria per test
-    perc_battery = ((np.sum(mean_battery_list) / no_episodes) * 100) / 5.0 # 5.0 è la capacità massima della batteria
-    # Calcolo della deviazione standard della batteria
-    std_dev_battery = np.std(mean_battery_list) 
+    # print(np.mean(np.array(list(goal_for_epi.values()))))
 
-     # Calcolo della media della velocità per test
+    # Calcolo della media della percentuale di batteria per test
+    perc_battery = ((np.sum(mean_battery_list) / no_episodes) * 100) / 5.0  # 5.0 è la capacità massima della batteria
+    # Calcolo della deviazione standard della batteria
+    std_dev_battery = np.std(mean_battery_list)
+
+    # Calcolo della media della velocità per test
     mean_velocity = np.sum(mean_velocity_list) / no_episodes
     # Calcolo della deviazione standard della velocità
     std_dev_velocity = np.std(mean_velocity_list)
@@ -159,7 +180,7 @@ def calculate_metrics(episodes, rover_stl, method_name):
     # Rules accuracy
     result = divide_episodes(episodes, chunk_size)
     accuracy, avoid = calculate_accuracy(result, rover_stl)
-    
+
     b_correlations = []
     for epi in episodes:
         np_episode = np.array(epi)
@@ -170,9 +191,9 @@ def calculate_metrics(episodes, rover_stl, method_name):
             corr = np.corrcoef(battery_filtered, distance_filtered)[0, 1]
         else:
             continue
-            
+
         b_correlations.append(np.nan_to_num(corr))
-    
+
     battery_corr = np.mean(np.array(b_correlations))
 
     low_battery = round(low_battery, 2)
@@ -189,9 +210,9 @@ def calculate_metrics(episodes, rover_stl, method_name):
     distance = round(distance, 2)
     std_dev_distance = round(std_dev_distance, 2)
     accuracy = round(accuracy.item(), 2)
-    
+
     # Stampa dei risultati
-    print('------------------------------------------------------------')
+    print("------------------------------------------------------------")
     print(f"Goal Percentage: {perc_goals}%")
     print(f"Battery Percentage: {perc_battery}%")
     print(f"Battery std_dev: {std_dev_battery}")
@@ -206,41 +227,42 @@ def calculate_metrics(episodes, rover_stl, method_name):
     print(f"Avoid: {avoid}")
     print(f"Distance: {distance}")
     print(f"Distance std_dev: {std_dev_distance}")
-    print('------------------------------------------------------------')
+    print("------------------------------------------------------------")
 
     return perc_goals, perc_battery, std_dev_battery, mean_velocity, std_dev_velocity, mean_abs_delta_v, safety, low_battery, accuracy, battery_corr, collision, avoid, distance, std_dev_distance
+
 
 # Funzione per creare una tabella Markdown
 def generate_markdown_table(title: str, column_names: List, methods: Dict) -> str:
     mdFile = MdUtils(file_name="temp")
     n_cols = len(column_names)
     n_rows = len(methods.keys()) + 1
-    
-    mdFile.new_header(level=3, title=title, add_table_of_contents='n')
+
+    mdFile.new_header(level=3, title=title, add_table_of_contents="n")
 
     args = config.parse_args()
     rover_stl = RoverSTL(None, args)
 
     table_data = column_names
-    
+
     for method, path in methods.items():
-        print(f'------------------------------------ {method} ------------------------------------')
+        print(f"------------------------------------ {method} ------------------------------------")
         episodes = read_npz(path)
         metrics = calculate_metrics(episodes, rover_stl, method)
 
         row = [
             method,
             str(metrics[0]),  # N_Goals_Reached
-            str(metrics[1]) + ' ± ' + str(metrics[2]),  # Mean Battery % and # Battery std_dev
-            str(metrics[3]) + ' ± ' + str(metrics[4]),  # Mean Velocity and # Velocity std_dev
+            str(metrics[1]) + " ± " + str(metrics[2]),  # Mean Battery % and # Battery std_dev
+            str(metrics[3]) + " ± " + str(metrics[4]),  # Mean Velocity and # Velocity std_dev
             str(metrics[5]),  # Mean Abs Delta Velocity
             str(metrics[6]),  # Safety %
-            str(metrics[7]),   # Low Battery %
+            str(metrics[7]),  # Low Battery %
             str(round(metrics[8], 2)),  # Accuracy %
-            str(metrics[9]),   # Battery correlation
+            str(metrics[9]),  # Battery correlation
             str(metrics[10]),  # Collision %
             str(metrics[11]),  # Avoid %
-            str(metrics[12]) + ' ± ' + str(metrics[13])  # Distance and # Distance std_dev
+            str(metrics[12]) + " ± " + str(metrics[13]),  # Distance and # Distance std_dev
         ]
         table_data.extend(row)
 
@@ -248,18 +270,17 @@ def generate_markdown_table(title: str, column_names: List, methods: Dict) -> st
     table_md = mdFile.get_md_text()
     return table_md
 
-def update_md_file(existing_md_path: str, new_content: str, start_marker: str="<!-- START TABLES -->", end_marker: str="<!-- END TABLES -->"):
+
+def update_md_file(existing_md_path: str, new_content: str, start_marker: str = "<!-- START TABLES -->", end_marker: str = "<!-- END TABLES -->"):
     import re
+
     try:
         with open(existing_md_path, "r", encoding="utf-8") as f:
             file_content = f.read()
     except FileNotFoundError:
         file_content = ""
-        
-    pattern = re.compile(
-        re.escape(start_marker) + ".*?" + re.escape(end_marker),
-        re.DOTALL
-    )
+
+    pattern = re.compile(re.escape(start_marker) + ".*?" + re.escape(end_marker), re.DOTALL)
     new_section = f"{start_marker}\n{new_content}\n{end_marker}"
 
     if re.search(pattern, file_content):
@@ -270,29 +291,38 @@ def update_md_file(existing_md_path: str, new_content: str, start_marker: str="<
     with open(existing_md_path, "w", encoding="utf-8") as f:
         f.write(file_content)
 
+
 if __name__ == "__main__":
     methods_unity = {
-        'Paper': 'STL/test-result/paper.result.npz',
-        'DQN': 'DQN/test-result/dqn.result.npz',
-        'OUR': 'STL/test-result/our.result.npz',
-        'No avoid rule': 'STL/test-result/no_avoid.result.npz'
+        "Paper": "STL/test-result/paper.result.npz",
+        "DQN": "DQN/test-result/dqn.result.npz",
+        "OUR": "STL/test-result/our.result.npz",
+        "OUR No avoid rule": "STL/test-result/no_avoid.result.npz",
     }
     methods_graphics = {
-        'Paper': 'STL/test-result/paper-figure.result.npz',
-        'OUR': 'STL/test-result/our-figure.result.npz',
-        'No avoid rule': 'STL/test-result/no_avoid-figure.result.npz',
+        "Paper": "STL/test-result/paper-figure.result.npz",
+        "OUR": "STL/test-result/our-figure.result.npz",
+        "OUR No avoid rule": "STL/test-result/no_avoid-figure.result.npz",
     }
-    columns = ['Method', 'N Goals Reached %', 'Mean Battery %',
-               'Mean Velocity', 'Mean Abs Delta Velocity', 
-               'Safety %', 'Low Battery %', 'Accuracy %', 'Battery correlation',
-                'Collision %', 'Avoid %', 'Total distance']
-
+    columns = [
+        "Method",
+        "N Goals Reached %",
+        "Mean Battery %",
+        "Mean Velocity",
+        "Mean Abs Delta Velocity",
+        "Safety %",
+        "Low Battery %",
+        "Accuracy %",
+        "Battery correlation",
+        "Collision %",
+        "Avoid %",
+        "Total distance",
+    ]
 
     table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
     table_graphics_md = generate_markdown_table("Test in graphical env", copy.deepcopy(columns), methods_graphics)
 
-
     existing_md_file = "../README.md"
-    combined_tables = table_graphics_md  + "\n\n" +  table_unity_md
-    
+    combined_tables = table_graphics_md + "\n\n" + table_unity_md
+
     update_md_file(existing_md_file, combined_tables)

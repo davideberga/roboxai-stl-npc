@@ -106,30 +106,18 @@ The dependencies marked as *optional* are required only for testing/training out
 
 ## :checkered_flag: Test result
 
-## METRICS
-
-#### N° of goals reached: 
-The average percentage of the sum of the goals achieved in each episode.
-#### Mean Battery: 
-The average percentage of the battery average value for each episode.
-#### Mean Velocity:
-The average of the velocity average value for each episode.
-#### Delta Velocity:
-Given an array containing lists of velocities at each step for each episode, the velocity delta is represents the average of the difference between each velocity value and the previous one for each step.
-#### Safety:
-Set a threshold = 0.15 representing the maximum distance to an obstacle, safety is the average percentage of times the lidar, with minimum distance at each step, does not exceed this threshold.
-#### Low Battery:
-The number of times, as a percentage, that the battery discharged to the total number of episodes.
-#### Accuracy:
-The percentage of how well the robot complies with STL rules.
-#### Battery correlation:
--
-#### Collision:
-The number of times, as a percentage, that the robot collides to the total number of episodes.
-#### Avoid:
-- 
-#### Totale distance:
-The average of the total distance traveled for each episode.
+- **N° of goals reached**: Percetange of episodes ended reaching the goal.
+- **Mean Battery**:  The average percentage of the battery average value for each episode.
+- **Mean Velocity**: The average of the velocity average value for each episode.
+- **Delta Velocity**: Given an array containing lists of velocities at each step for each episode, the velocity delta is represents the average of the difference between each velocity value and the previous one for each step.
+- **Safety**:
+Set a threshold = 0.15 representing the safe distance to an obstacle, safety is the average percentage of times the lidar, with minimum distance at each step, does not reach below this threshold.
+- **Low Battery**: Percetange of episodes ended with battery = 0.
+- **Accuracy**: The percentage of how well the robot complies with STL rules.
+- **Battery correlation**: The linear correlation between the follwing random variables: low battery and distance to the charger.
+- **Collision**: The number of times, as a percentage, that the robot collides to the total number of episodes.
+- **Avoid**: The percentage of how well the robot complies onlu the avoid STL rules.
+- **Totale distance**: The average of the total distance traveled for each episode.
 
 
 <!-- START TABLES -->
@@ -143,7 +131,7 @@ The average of the total distance traveled for each episode.
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 |Paper|76.4|90.32 ± 0.81|0.21 ± 0.17|0.21|69.1|0.1|20.14|0.86|23.5|16.66|1.15 ± 0.94|
 |OUR|69.3|72.91 ± 1.5|0.13 ± 0.13|0.16|68.6|4.6|31.3|-0.35|26.1|17.25|0.78 ± 0.91|
-|No avoid rule|75.2|65.05 ± 1.37|0.21 ± 0.14|0.22|69.5|0.4|2.33|-0.54|24.5|16.07|0.77 ± 0.66|
+|OUR No avoid rule|75.1|65.05 ± 1.37|0.21 ± 0.14|0.22|69.5|0.4|2.33|-0.54|24.5|16.07|0.77 ± 0.66|
 
 
 
@@ -154,9 +142,9 @@ The average of the total distance traveled for each episode.
 
 |Method|N Goals Reached %|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|34.0|42.66 ± 1.59|0.32 ± 0.42|0.28|45.0|37.0|82.28|0.36|29.0|24.03|4.5 ± 4.06|
+|Paper|32.0|48.52 ± 1.58|0.57 ± 0.56|0.5|40.0|21.0|78.58|0.17|47.0|24.29|3.76 ± 3.23|
 |DQN|53.0|45.51 ± 1.29|0.04 ± 0.02|0.01|99.0|19.0|13.45|-0.04|2.0|68.27|5.34 ± 3.77|
-|OUR|4.0|48.05 ± 1.52|0.34 ± 0.28|0.4|27.0|13.0|11.03|-0.13|83.0|12.48|3.29 ± 2.71|
-|No avoid rule|1.0|48.15 ± 1.47|0.67 ± 0.27|0.67|20.0|0.0|5.88|-0.19|99.0|9.6|3.81 ± 2.46|
+|OUR|7.0|51.93 ± 1.54|0.32 ± 0.26|0.36|37.0|11.0|6.95|-0.21|82.0|27.21|3.94 ± 4.79|
+|OUR No avoid rule|5.0|52.79 ± 1.51|0.6 ± 0.28|0.62|52.0|1.0|24.57|-0.34|92.0|22.6|4.54 ± 5.78|
 
 <!-- END TABLES -->

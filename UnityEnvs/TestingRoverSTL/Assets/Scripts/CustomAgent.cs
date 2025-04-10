@@ -184,14 +184,52 @@ public class CustomAgent : Agent {
     
     }
 
+     private const float epsilon = 1e-6f;
+
+    // Example method demonstrating the calculation
+    public float ComputeAngle(Vector3 robotPose, Vector2 destination)
+    {
+        // Extract robot position (x, y) and orientation if needed (robotPose.z)
+        Vector2 robotPos = new Vector2(robotPose.x, robotPose.y);
+        // float robotTheta = robotPose.z; // Not used in this calculation (mirrors the commented out subtraction in Python)
+
+        // Calculate direction vector from robot to destination
+        Vector2 diff = destination - robotPos;
+
+        // Calculate angle in radians using Atan2; add epsilon to avoid division by zero for dx.
+        float angle = Mathf.Atan2(diff.y, diff.x + epsilon);
+
+        // Normalize angle to be within [-Mathf.PI, Mathf.PI]
+        angle = NormalizeAngle(angle);
+
+        return angle;
+    }
+
+    // Normalizes any angle to the range [-PI, PI]
+    private float NormalizeAngle(float angle)
+    {
+        // Option 1: Using a while loop (clear and straightforward)
+        while (angle > Mathf.PI)
+        {
+            angle -= 2 * Mathf.PI;
+        }
+        while (angle < -Mathf.PI)
+        {
+            angle += 2 * Mathf.PI;
+        }
+        return angle;
+
+        // Option 2: A one-line version:
+        // return (angle + Mathf.PI) - Mathf.Floor((angle + Mathf.PI) / (2 * Mathf.PI)) * (2 * Mathf.PI) - Mathf.PI;
+    }
+
     // Observation helper function: calculates normalized distance and angle.
     private (float, float) CalculateDistanceAndAngle(Vector3 from, Vector3 to, Vector3 forward, Vector3 up, float normFactor) {
         Vector2 fromPos = new Vector2(from.x, from.z);
         Vector2 toPos = new Vector2(to.x, to.z);
         float distance = Vector2.Distance(fromPos, toPos) / normFactor;
 
-        Vector3 direction = to - from;
-        float angle = Vector3.SignedAngle(direction, forward, up) * Mathf.Deg2Rad;
+        float angle = ComputeAngle(from, to);
         return (distance, angle);
     }
 

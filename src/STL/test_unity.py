@@ -15,7 +15,7 @@ from alg.utils import seed_everything
 from alg.RoverSTL import RoverSTL
 import torch
 
-seed = 42
+seed = 12
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 rover_model = RoverSTL(None, type("c", (object,), {"seed": seed, "n_epochs": 2, "lr": 0.0001})())
@@ -59,6 +59,8 @@ def get_plan_x(state, policy, state_complete):
     stl_score = stl(estimated, 500, d={"hard": False})[:, :1]
     stl_max_i = torch.argmax(stl_score, dim=0)
     safe_control = control[stl_max_i : stl_max_i + 1]
+    
+    
 
     plan = []
     for ctl in safe_control[0].cpu().detach().numpy():
