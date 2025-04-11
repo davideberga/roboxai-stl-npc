@@ -29,7 +29,7 @@ We have rethinked the state in a more general way a rewite the STL rules for the
 
 | STL Repository | Our Model | ROS Simulation |
 |----------------|-----------|------------------|
-| ![Alt Text](./asset/paper.gif)   | ![Alt Text](./asset/our.gif) | |
+| ![Paper GIF](./asset/paper.gif)   | ![OUR Graphics](./asset/our.gif) | ![OUR Unity](./asset/charger-speedy.gif) |
 
 
 ## :whale: Porting of navigation (rover) task to ROS2-Unity
