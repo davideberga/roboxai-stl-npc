@@ -28,7 +28,8 @@ class turtlebot3DQN(Node):
 
         # -- Paper RoverEnv V1 -- 
         self.goal_x, self.goal_y = 1.887824, 7.211161
-        self.charger_x, self.charger_y = 0.95, 6.19
+        # self.charger_x, self.charger_y = 0.95, 6.19
+        self.charger_x, self.charger_y = 7.447, 5.476
         
         self.turtlebot3 = TurtleBot3(self.goal_x, self.goal_y, self.charger_x, self.charger_y)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self.callback_lidar, rclpy.qos.qos_profile_sensor_data)
@@ -140,7 +141,7 @@ class turtlebot3DQN(Node):
         else:
             angle_difference = self.rotateTo - heading_deg
             angular_distance = self.calculate_angular_distance(heading_deg, self.rotateTo)
-            turn = 0.1
+            turn = 0.05
             if abs(angle_difference) > 0.2:
                 
                 # print('Adjusting to angle: {:.2f} Current angle is: {:.2f}'.format(self.rotateTo, heading_deg))

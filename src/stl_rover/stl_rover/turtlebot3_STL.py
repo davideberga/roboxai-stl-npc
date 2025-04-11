@@ -30,7 +30,7 @@ class turtlebot3DQN(Node):
         # self.charger_x, self.charger_y = -2.696, 3.231999
         
         self.goal_x, self.goal_y = 1.887824, 7.211161
-        self.charger_x, self.charger_y = 0.95, 6.19
+        self.charger_x, self.charger_y = 2.89, 3.94
         
         self.turtlebot3 = TurtleBot3(self.goal_x, self.goal_y, self.charger_x, self.charger_y)
         self.scan_sub = self.create_subscription(LaserScan, "/scan", self.callback_lidar, rclpy.qos.qos_profile_sensor_data)
@@ -39,7 +39,7 @@ class turtlebot3DQN(Node):
 
         self.verbose = True
         self.agent = Agent(self.verbose, 'model-absolute-theta_0.87.pth', False,  self.device)
-        self.battery = 4
+        self.battery = 0.5
         self.hold_time = 0.6
         
         self.action_sequence = []
