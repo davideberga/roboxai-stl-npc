@@ -542,11 +542,11 @@ class DynamicsSimulator:
         ax.set_ylabel("Y")
         ax.grid(True)
 
-    def initialize_x_cycle(self, n):
+    def initialize_x_cycle(self, n, test=False):
         charger_x = uniform_tensor(0, 10, (n, 1))
         charger_y = uniform_tensor(0, 10, (n, 1))
 
-        closeness = 0.8
+        closeness = 10 if test else 0.8
         MAX_BATTERY_N = 25
         battery_t = rand_choice_tensor([self.dt * nn for nn in range(MAX_BATTERY_N + 1)], (n, 1))
         rover_theta = uniform_tensor(-np.pi, np.pi, (n, 1))
@@ -560,7 +560,7 @@ class DynamicsSimulator:
         dest_y = uniform_tensor(0, 10, (n, 1))
 
         # place hold case
-        ratio = 0.25
+        ratio = 0.25 if not test else 0.0
         rand_mask = uniform_tensor(0, 1, (n, 1))
         rand = rand_mask > 1 - ratio
         ego_rho = uniform_tensor(0, closeness, (n, 1))
@@ -600,6 +600,104 @@ class DynamicsSimulator:
         objs_t2 = [torch.roll(ele, shifts=-1, dims=2) for ele in objs_t1]
 
         return objs_np, objs, objs_t1, objs_t2
+    
+    def generate_objects_different(self):
+        obs_w = 3.0
+        objs_np = [np.array([[0.0, 0.0], [10, 0], [10, 10], [0, 10]])]  # map
+        objs_np.append(np.array([[0.0, 10.0], [obs_w, 10], [obs_w, 10 - obs_w], [0, 10 - obs_w]]))  # first obstacle
+        objs_np.append(np.array([[10-obs_w, 10.0], [10, 10], [10, 10 - obs_w], [10-obs_w, 10 - obs_w]])) 
+        objs_np.append(np.array([[5 - obs_w / 2, obs_w], [5 + obs_w / 2, 0], [5 + obs_w / 2, obs_w], [5 - obs_w / 2, 0]]))
+        objs_np.append(np.array([[5 - obs_w / 4, 6], [5 + obs_w / 4, obs_w], [5 + obs_w / 4, obs_w], [5 - obs_w / 4, 5]]))  
+        def to_torch(x, device):
+            return torch.from_numpy(x).float().to(device)
+
+        # Set walls for lidar
+        walls_w = obs_w
+        objs_np.append(np.array([[0.0, -10], [-walls_w, -10], [-walls_w, 20], [0, 20]]))
+        objs_np.append(np.array([[0.0, 0.0], [10, 0], [10, -walls_w], [0, -walls_w]]))
+        objs_np.append(np.array([[10.0 + walls_w, -10], [10, -10], [10, 20], [10 + walls_w, 20]]))
+        objs_np.append(np.array([[0.0, 10], [10, 10], [10, 10.0 + walls_w], [0.0, 10 + walls_w]]))
+
+        objs = [to_torch(ele, self.device) for ele in objs_np]
+        objs_t1 = [ele.unsqueeze(0).unsqueeze(0) for ele in objs]
+        objs_t2 = [torch.roll(ele, shifts=-1, dims=2) for ele in objs_t1]
+
+        return objs_np, objs, objs_t1, objs_t2
+    
+    def generate_objects_different_v2(self):
+        obs_w = 3.0
+        objs_np = [np.array([[0.0, 0.0], [10, 0], [10, 10], [0, 10]])]  # map
+        objs_np.append(np.array([[0.0, 10.0], [obs_w, 10], [obs_w, 10 - obs_w], [0, 10 - obs_w]]))  # first obstacle
+        objs_np.append(np.array([[10-obs_w, 10.0], [10, 10], [10, 10 - obs_w], [10-obs_w, 10 - obs_w]])) 
+        objs_np.append(np.array([[5 - obs_w / 2, obs_w], [5 + obs_w / 2, 0], [5 + obs_w / 2, obs_w], [5 - obs_w / 2, 0]]))
+        objs_np.append(np.array([[5 - obs_w / 3, 4], [5 + obs_w / 3, 5], [5 + obs_w / 3, 5], [5 - obs_w / 3, 5]])) 
+        objs_np.append(np.array([[8 - obs_w / 3, 6], [8 + obs_w / 3, 6], [8 + obs_w / 3, 4], [8 - obs_w / 3, 4]])) 
+        objs_np.append(np.array([[2 - obs_w / 3, 6], [2 + obs_w / 3, 6], [2 + obs_w / 3, 4], [2 - obs_w / 3, 4]])) 
+        # objs_np.append(np.array([[5 - obs_w / 4, 4], [5 + obs_w / 4, obs_w], [5 + obs_w / 4, obs_w], [5 - obs_w / 4, 5]]))  
+        def to_torch(x, device):
+            return torch.from_numpy(x).float().to(device)
+
+        # Set walls for lidar
+        walls_w = obs_w
+        objs_np.append(np.array([[0.0, -10], [-walls_w, -10], [-walls_w, 20], [0, 20]]))
+        objs_np.append(np.array([[0.0, 0.0], [10, 0], [10, -walls_w], [0, -walls_w]]))
+        objs_np.append(np.array([[10.0 + walls_w, -10], [10, -10], [10, 20], [10 + walls_w, 20]]))
+        objs_np.append(np.array([[0.0, 10], [10, 10], [10, 10.0 + walls_w], [0.0, 10 + walls_w]]))
+
+        objs = [to_torch(ele, self.device) for ele in objs_np]
+        objs_t1 = [ele.unsqueeze(0).unsqueeze(0) for ele in objs]
+        objs_t2 = [torch.roll(ele, shifts=-1, dims=2) for ele in objs_t1]
+
+        return objs_np, objs, objs_t1, objs_t2
+    
+    def generate_random_objects(self,
+                                num_samples: int,
+                                obj_count: int = 8,
+                                size_range: tuple = (3, 4)):
+        samples = []
+        map_corners = torch.tensor([
+            [0.0, 0.0],
+            [self.area_w, 0.0],
+            [self.area_w, self.area_h],
+            [0.0, self.area_h]
+        ], dtype=torch.float32, device=self.device)
+
+        # Precompute wall polygons
+        wall_polys = []
+        walls_w = 3.0
+        wall_polys.append(torch.tensor([[0.0, -10], [-walls_w, -10], [-walls_w, 20], [0, 20]], dtype=torch.float32, device=self.device))
+        wall_polys.append(torch.tensor([[0.0, 0.0], [10, 0], [10, -walls_w], [0, -walls_w]], dtype=torch.float32, device=self.device))
+        wall_polys.append(torch.tensor([[10.0 + walls_w, -10], [10, -10], [10, 20], [10 + walls_w, 20]], dtype=torch.float32, device=self.device))
+        wall_polys.append(torch.tensor([[0.0, 10], [10, 10], [10, 10.0 + walls_w], [0.0, 10 + walls_w]], dtype=torch.float32, device=self.device))
+
+        min_size, max_size = size_range
+        for _ in range(num_samples):
+            polys = [map_corners] + wall_polys.copy()
+            # Random obstacle sizes
+            widths = torch.empty(obj_count, device=self.device).uniform_(min_size, max_size)
+            heights = torch.empty(obj_count, device=self.device).uniform_(min_size, max_size)
+            # Random centers within valid range
+            rand = torch.rand(obj_count, device=self.device)
+            cx = (widths / 2) + rand * (self.area_w - widths)
+            rand = torch.rand(obj_count, device=self.device)
+            cy = (heights / 2) + rand * (self.area_h - heights)
+            # Build obstacle polygons
+            for w_i, h_i, cx_i, cy_i in zip(widths, heights, cx, cy):
+                half_w = w_i / 2
+                half_h = h_i / 2
+                corners = torch.stack([
+                    torch.tensor([cx_i - half_w, cy_i - half_h], device=self.device),
+                    torch.tensor([cx_i + half_w, cy_i - half_h], device=self.device),
+                    torch.tensor([cx_i + half_w, cy_i + half_h], device=self.device),
+                    torch.tensor([cx_i - half_w, cy_i + half_h], device=self.device)
+                ], dim=0)
+                polys.append(corners)
+
+            samples.append(polys)
+
+        return samples
+
+
 
     def transform_objects(self, objs):
         result = []
@@ -616,7 +714,7 @@ class DynamicsSimulator:
         x_theta = []
         total_n = 0
         while total_n < n:
-            x_init, thetas = self.initialize_x_cycle(n)
+            x_init, thetas = self.initialize_x_cycle(n, test)
             valids = []
             for obj_i, obj in enumerate(objs):
                 obs_cpu = obj.detach().cpu()
@@ -689,6 +787,109 @@ class DynamicsSimulator:
             .float()
             .to(self.device)
         )
+
+        return (
+            new_state,
+            tensor_objs_cx_cy_w_h,
+            robot_pose,
+            target_position,
+            charger_position,
+        )
+
+
+    def initialize_x_hard(self, n, objs, test=False):
+        x_list = []
+        x_theta = []
+        total_n = 0
+
+        # Precompute obstacle bounding‐boxes (skip the first obj, which is the map)
+        bboxes = []
+        for obj in objs[1:]:
+            obs_cpu = obj.detach().cpu()
+            xmin, xmax = torch.min(obs_cpu[:, 0]), torch.max(obs_cpu[:, 0])
+            ymin, ymax = torch.min(obs_cpu[:, 1]), torch.max(obs_cpu[:, 1])
+            bboxes.append((xmin, xmax, ymin, ymax))
+
+        while total_n < n:
+            x_init, thetas = self.initialize_x_cycle(n, test)   # shape [n, …]
+
+            # 1) your original “in‐map” and “outside‐obstacle” checks
+            valids = []
+            for obj_i, obj in enumerate(objs):
+                obs_cpu = obj.detach().cpu()
+                xmin, xmax = torch.min(obs_cpu[:, 0]), torch.max(obs_cpu[:, 0])
+                ymin, ymax = torch.min(obs_cpu[:, 1]), torch.max(obs_cpu[:, 1])
+
+                for dim in range(0, 6, 2):
+                    x, y = x_init[:, dim], x_init[:, dim+1]
+                    inside = (x - xmin) * (xmax - x) >= 0
+                    inside &= (y - ymin) * (ymax - y) >= 0
+
+                    if obj_i == 0:
+                        # must lie inside the map
+                        valids.append(inside)
+                    else:
+                        # must lie *outside* each obstacle
+                        valids.append(~inside)
+
+            valids = torch.stack(valids, dim=-1)
+            base_mask = torch.all(valids, dim=-1)   # shape [n]
+
+            # 2) NEW: straight‐line–collision check to the *target* (x_init[:,2:4])
+            #    we only accept samples where the line from robot→target *does* intersect an obstacle
+            robot_x, robot_y = x_init[:, 0], x_init[:, 1]
+            target_x, target_y = x_init[:, 2], x_init[:, 3]
+
+            # start with “no collision” everywhere
+            blocked = torch.zeros_like(robot_x, dtype=torch.bool)
+
+            # for each obstacle bbox, mark any segment that crosses it
+            for xmin, xmax, ymin, ymax in bboxes:
+                # trivial‐reject test:
+                #   no intersection if both endpoints are entirely on one side of the rect
+                reject = ((robot_x < xmin) & (target_x < xmin)) | \
+                        ((robot_x > xmax) & (target_x > xmax)) | \
+                        ((robot_y < ymin) & (target_y < ymin)) | \
+                        ((robot_y > ymax) & (target_y > ymax))
+
+                # if not rejected, it means the line *does* intersect this bbox
+                blocked |= ~reject
+
+            # combine both masks
+            final_mask = base_mask & blocked
+            valid_indices = torch.where(final_mask)[0]
+
+            # collect
+            x_list.append(x_init[valid_indices])
+            x_theta.append(thetas[valid_indices])
+            total_n += valid_indices.shape[0]
+
+        # truncate to exactly n
+        x_list = torch.cat(x_list, dim=0)[:n]
+        x_theta = torch.cat(x_theta, dim=0)[:n]
+
+        # … the rest of your code stays the same …
+        tensor_objs_cx_cy_w_h = torch.tensor(self.transform_objects(objs)).float().to(self.device)
+        tensor_objs_cx_cy_w_h[:, 2:] -= 0.5
+        obstacles = tensor_objs_cx_cy_w_h[1:]
+
+        robot_pose    = torch.cat((x_list[:, :2], x_theta), dim=1).float().to(self.device)
+        target_position  = x_list[:, 2:4].float().to(self.device)
+        charger_position = x_list[:, 4:6].float().to(self.device)
+        battery_time_hold = x_list[:, 6:].float().to(self.device)
+
+        scan              = self.simulate_lidar_scan(robot_pose, obstacles)
+        target_dist, target_angle   = self.estimate_destination(robot_pose, target_position)
+        charger_dist, charger_angle = self.estimate_destination(robot_pose, charger_position)
+
+        new_state = torch.cat([
+            scan,
+            target_angle,
+            target_dist,
+            charger_angle,
+            charger_dist,
+            battery_time_hold,
+        ], dim=1).to(self.device)
 
         return (
             new_state,
