@@ -15,6 +15,7 @@ This repo contains the code for the project of Robotics in AI and XAI courses.
 - [:checkered\_flag: Test result](#checkered_flag-test-result)
   - [Test in graphical env](#test-in-graphical-env)
   - [Test in unity](#test-in-unity)
+  - [Test in graphical complex env](#test-in-graphical-complex-env)
 
 
 **Team members:**
@@ -127,11 +128,11 @@ Set a threshold = 0.15 representing the safe distance to an obstacle, safety is 
 
 ### Test in graphical env
 
-|Method|N Goals Reached %|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
+|Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|20.8|73.44 ± 1.42|0.1 ± 0.26|0.13|99.2|8.6|33.69|0.86|0.0|28.38|0.08 ± 0.21|
-|OUR|12.2|3.06 ± 0.31|0.04 ± 0.03|0.05|91.2|85.5|0.0|0.39|2.3|40.41|0.16 ± 0.12|
-|OUR No avoid rule|98.7|13.5 ± 0.7|0.11 ± 0.04|0.13|92.9|1.3|1.5|0.45|0.0|34.54|0.19 ± 0.09|
+|Paper|76.4|23.5|0.1|91.02 ± 0.7|82.33|20.14|16.66|0.86|0.14 ± 0.08|0.17|0.83 ± 0.41|
+|OUR|69.3|26.1|4.6|81.04 ± 1.05|81.39|31.3|17.25|-0.35|0.09 ± 0.03|0.13|0.6 ± 0.27|
+|OUR No avoid rule|75.1|24.5|0.4|65.53 ± 1.38|83.24|2.33|16.07|-0.54|0.15 ± 0.05|0.19|0.62 ± 0.3|
 
 
 
@@ -140,11 +141,24 @@ Set a threshold = 0.15 representing the safe distance to an obstacle, safety is 
 
 ### Test in unity
 
-|Method|N Goals Reached %|Mean Battery %|Mean Velocity|Mean Abs Delta Velocity|Safety %|Low Battery %|Accuracy %|Battery correlation|Collision %|Avoid %|Total distance|
+|Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|32.0|48.52 ± 1.58|0.57 ± 0.56|0.5|40.0|21.0|78.58|0.17|47.0|24.29|3.76 ± 3.23|
-|DQN|53.0|45.51 ± 1.29|0.04 ± 0.02|0.01|99.0|19.0|13.45|-0.04|2.0|68.27|5.34 ± 3.77|
-|OUR|7.0|51.93 ± 1.54|0.32 ± 0.26|0.36|37.0|11.0|6.95|-0.21|82.0|27.21|3.94 ± 4.79|
-|OUR No avoid rule|5.0|52.79 ± 1.51|0.6 ± 0.28|0.62|52.0|1.0|24.57|-0.34|92.0|22.6|4.54 ± 5.78|
+|Paper|32.0|47.0|21.0|63.74 ± 1.16|41.18|78.58|24.29|0.17|0.38 ± 0.22|0.43|6.14 ± 3.89|
+|DQN|53.0|2.0|19.0|54.15 ± 1.07|100.0|13.45|68.27|-0.04|0.04 ± 0.01|0.01|5.64 ± 3.01|
+|OUR|7.0|82.0|11.0|58.47 ± 1.02|57.14|6.95|27.21|-0.21|0.28 ± 0.24|0.35|3.3 ± 3.23|
+|OUR No avoid rule|5.0|92.0|1.0|61.42 ± 1.39|100.0|24.57|22.6|-0.34|0.29 ± 0.21|0.51|1.3 ± 0.84|
+
+
+
+
+
+
+### Test in graphical complex env
+
+|Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|19.1|80.9|0.0|50.37 ± 0.26|70.98|14.11|7.07|nan|0.49 ± 0.29|0.39|0.5 ± 0.36|
+|OUR|31.9|68.1|0.0|51.15 ± 0.29|66.77|31.98|9.51|nan|0.14 ± 0.08|0.23|0.33 ± 0.2|
+|OUR No avoid rule|30.8|69.2|0.0|48.09 ± 0.28|72.08|20.07|6.97|nan|0.11 ± 0.04|0.13|0.17 ± 0.08|
 
 <!-- END TABLES -->

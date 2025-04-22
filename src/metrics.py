@@ -38,7 +38,7 @@ def divide_episodes(episodes, chunk_size=10):
         epi = np.array(epi)
         epi = epi[:, np.r_[0:11, 17, 18]]  # Seleziona solo i primi 11 valori e il 17° e 18° = 13 valori totali
         num_steps = len(epi)
-        num_full_chunks = num_steps // chunk_size  #
+        num_full_chunks = num_steps // chunk_size  
         last_steps = epi[-(num_full_chunks * chunk_size) :]
         chunks = last_steps.reshape(-1, chunk_size, epi.shape[1]) if num_full_chunks > 0 else []
 
@@ -82,7 +82,6 @@ def total_distance(pos_list):
 def calculate_metrics(episodes, rover_stl, method_name):
     goal_for_epi = []
     velocity_for_delta = []
-    min_radar_list = []
     collision_list = []
     low_battery_list = []
     mean_battery_list = []
@@ -92,7 +91,6 @@ def calculate_metrics(episodes, rover_stl, method_name):
     pos = []  # coordinate x, y del rover in uno step [x,y]
     distance_list = []  # lista delle distanze percorse in ogni episodio
     collision = 0
-    total_len_episodes = 0
     safe_threshold = 0.15
 
     no_episodes = len(episodes)
@@ -118,26 +116,25 @@ def calculate_metrics(episodes, rover_stl, method_name):
             goal_for_epi.append(0)
             collision_list.append(0)
             low_battery_list.append(0)
-            
-        mean_battery_list.append(np.sum(epi[:, 17]) / len(epi))
-        mean_velocity_list.append(np.sum(epi[:, 19]) / len(epi))
 
-        min_lidar_list.append(np.min(epi[:, 0:7]))
+        # if in this episode the rover has reached a goal
+        if goal_reached > 0:
+            min_lidar_list.append(np.min(epi[:, 0:7]))
+            mean_battery_list.append(np.sum(epi[:, 17]) / len(epi))
+            mean_velocity_list.append(np.sum(epi[:, 19]) / len(epi))
 
-        temp_list = []
-        for step in epi:
-            total_len_episodes += 1
-            temp_list.append(step[19])
-            min_radar_list.append(min(step[0:7]))
 
-        velocity_for_delta.append(temp_list)
+            temp_list = []
+            for step in epi:
+                # Calculate the mean velocity of rover
+                temp_list.append(step[19])
+                # Calculate the total distance of rover
+                pos_list.append([step[11], step[12]])  # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
 
-        # Calcolo della distanza totale percorsa
-        for step in epi:
-            pos_list.append([step[11], step[12]])  # [ [x1_pos, y1_pos], [x2_pos, y2_pos], ...]
+            velocity_for_delta.append(temp_list) # lista di liste di velocità ad ogni step
 
-        distance_list.append(total_distance(pos_list))  # lista delle distanze totali percorse in ogni episodio
-        pos_list = []  # reset della lista delle posizioni per il prossimo episodio
+            distance_list.append(total_distance(pos_list))  # lista delle distanze totali percorse in ogni episodio
+            pos_list = []  # reset della lista delle posizioni per il prossimo episodio
 
     perc_goals = (np.sum(goal_for_epi) / no_episodes) * 100
 
@@ -150,12 +147,12 @@ def calculate_metrics(episodes, rover_stl, method_name):
     # print(np.mean(np.array(list(goal_for_epi.values()))))
 
     # Calcolo della media della percentuale di batteria per test
-    perc_battery = ((np.sum(mean_battery_list) / no_episodes) * 100) / 5.0  # 5.0 è la capacità massima della batteria
+    perc_battery = ((np.sum(mean_battery_list) / len(mean_battery_list)) * 100) / 5.0  # 5.0 è la capacità massima della batteria
     # Calcolo della deviazione standard della batteria
     std_dev_battery = np.std(mean_battery_list)
 
     # Calcolo della media della velocità per test
-    mean_velocity = np.sum(mean_velocity_list) / no_episodes
+    mean_velocity = np.sum(mean_velocity_list) / len(mean_velocity_list)
     # Calcolo della deviazione standard della velocità
     std_dev_velocity = np.std(mean_velocity_list)
 
@@ -165,8 +162,8 @@ def calculate_metrics(episodes, rover_stl, method_name):
     # Calcolo della media assoluta del delta velocità, ignorando episodi vuoti
     mean_abs_delta_v = np.mean([np.mean(np.abs(ep)) for ep in delta_v if len(ep) > 0])
 
-    # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15
-    safety = (np.sum(np.array(min_lidar_list) > safe_threshold) / no_episodes) * 100
+    # Calcolo della percentuale di volte che il lidar in min_radar_list è maggiore di 0.15, sul totale degli episodi 'success'
+    safety = (np.sum(np.array(min_lidar_list) > safe_threshold) / len(min_lidar_list)) * 100
 
     # Calcolo della distanza totale percorsa
     distance = np.mean(distance_list)
@@ -213,17 +210,17 @@ def calculate_metrics(episodes, rover_stl, method_name):
 
     # Stampa dei risultati
     print("------------------------------------------------------------")
-    print(f"Goal Percentage: {perc_goals}%")
+    print(f"Success: {perc_goals}%")
+    print(f"Collision: {collision}%")
+    print(f"Low battery: {low_battery}%")
     print(f"Battery Percentage: {perc_battery}%")
     print(f"Battery std_dev: {std_dev_battery}")
     print(f"Mean Velocity: {mean_velocity}")
     print(f"Velocity std_dev: {std_dev_velocity}")
     print(f"Mean Abs Delta Velocity: {mean_abs_delta_v}")
     print(f"Safety: {safety}%")
-    print(f"Low battery: {low_battery}")
     print(f"Accuracy: {accuracy}%")
     print(f"Battery correlation: {battery_corr}")
-    print(f"Collision: {collision}")
     print(f"Avoid: {avoid}")
     print(f"Distance: {distance}")
     print(f"Distance std_dev: {std_dev_distance}")
@@ -252,16 +249,16 @@ def generate_markdown_table(title: str, column_names: List, methods: Dict) -> st
 
         row = [
             method,
-            str(metrics[0]),  # N_Goals_Reached
+            str(metrics[0]),  # N_Goals_Reached/Success
+            str(metrics[10]),  # Collision %
+            str(metrics[7]),  # Low Battery %
             str(metrics[1]) + " ± " + str(metrics[2]),  # Mean Battery % and # Battery std_dev
+            str(metrics[6]),  # Safety %
+            str(round(metrics[8], 2)),  # Accuracy %
+            str(metrics[11]),  # Avoid %
+            str(metrics[9]),  # Battery correlation
             str(metrics[3]) + " ± " + str(metrics[4]),  # Mean Velocity and # Velocity std_dev
             str(metrics[5]),  # Mean Abs Delta Velocity
-            str(metrics[6]),  # Safety %
-            str(metrics[7]),  # Low Battery %
-            str(round(metrics[8], 2)),  # Accuracy %
-            str(metrics[9]),  # Battery correlation
-            str(metrics[10]),  # Collision %
-            str(metrics[11]),  # Avoid %
             str(metrics[12]) + " ± " + str(metrics[13]),  # Distance and # Distance std_dev
         ]
         table_data.extend(row)
@@ -304,25 +301,33 @@ if __name__ == "__main__":
         "OUR": "STL/test-result/our-figure.result.npz",
         "OUR No avoid rule": "STL/test-result/no_avoid-figure.result.npz",
     }
+    methods_graphics_2 = {
+        "Paper": "STL/test-result/paper-figure-2.result.npz",
+        "OUR": "STL/test-result/our-figure-2.result.npz",
+        "OUR No avoid rule": "STL/test-result/no_avoid-figure-2.result.npz",
+    }
     columns = [
         "Method",
-        "N Goals Reached %",
+        "Success %", # Number of episodes that reached a goal
+        "Collision %",
+        "Low Battery %",
+
         "Mean Battery %",
+        "Safety %",
+        "Accuracy %",
+        "Avoid %",
+
+        "Battery correlation",
         "Mean Velocity",
         "Mean Abs Delta Velocity",
-        "Safety %",
-        "Low Battery %",
-        "Accuracy %",
-        "Battery correlation",
-        "Collision %",
-        "Avoid %",
         "Total distance",
     ]
 
     table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
     table_graphics_md = generate_markdown_table("Test in graphical env", copy.deepcopy(columns), methods_graphics)
+    table_graphics_md_2 = generate_markdown_table("Test in graphical complex env", copy.deepcopy(columns), methods_graphics_2)
 
     existing_md_file = "../README.md"
-    combined_tables = table_graphics_md + "\n\n" + table_unity_md
+    combined_tables = table_graphics_md + "\n\n" + table_unity_md + "\n\n" + table_graphics_md_2
 
     update_md_file(existing_md_file, combined_tables)
