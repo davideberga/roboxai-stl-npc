@@ -30,7 +30,7 @@ def main(model, iterations=1000, is_paper=False):
     saved_episodes = []
     max_steps = 200
     
-    visual = True
+    visual = False
     
     random_battery = np.random.uniform(2, 5, iterations).tolist()
     
@@ -43,9 +43,9 @@ def main(model, iterations=1000, is_paper=False):
 
     # Initialize simulator
     # obstacles= random_obstacles[0]
-    _, obstacles, _ , _ = sim.generate_objects_different_v2()
+    _, obstacles, _ , _ = sim.generate_no_obstacles()
     state, obstacles_t, robot_pose, target, charger = sim.initialize_x(1, obstacles)
-    battery = 3
+    battery = 1.5
     hold_time = 1
     state_paper = paper_state(robot_pose, target, charger, battery, hold_time)
     obstacles_t = obstacles_t[1:]
@@ -101,9 +101,12 @@ def main(model, iterations=1000, is_paper=False):
                     done = True
                     battery_finished = 1
 
-                if step_counter > 100 or collision_detected:
+                if collision_detected:
                     done = True
                     collision = 1
+                    
+                if step_counter > max_steps:
+                    done = True
                     
                 
                 if visual:
@@ -152,7 +155,7 @@ def main(model, iterations=1000, is_paper=False):
         state, _, robot_pose, target, charger = sim.initialize_x(1, obstacles, True)
         # obstacles_t = obstacles_t[1:]
         # world_objects = obstacles_t
-        battery = 3 # random_battery[ep]
+        battery = 1.5 # random_battery[ep]
         hold_time = 1
         state[..., 11] = battery
         state[..., 12] = hold_time
@@ -172,7 +175,7 @@ if __name__ == "__main__":
 
     try:
         saved_episodes = main(policy_paper, is_paper=True)
-        np.savez("test-result/paper-figure-2.result.npz", episodes=saved_episodes)
+        np.savez("test-result/paper-figure-3.result.npz", episodes=saved_episodes)
     finally:
         print("Test paper finished!")
 
@@ -184,7 +187,7 @@ if __name__ == "__main__":
 
     try:
         saved_episodes = main(policy_our)
-        np.savez("test-result/our-figure-2.result.npz", episodes=saved_episodes)
+        np.savez("test-result/our-figure-3.result.npz", episodes=saved_episodes)
     finally:
         print("Test our finished!")
         
@@ -195,6 +198,6 @@ if __name__ == "__main__":
 
     try:
         saved_episodes = main(policy_no_avoid)
-        np.savez("test-result/no_avoid-figure-2.result.npz", episodes=saved_episodes)
+        np.savez("test-result/no_avoid-figure-3.result.npz", episodes=saved_episodes)
     finally:
         print("Test our finished!")

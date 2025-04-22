@@ -650,6 +650,25 @@ class DynamicsSimulator:
 
         return objs_np, objs, objs_t1, objs_t2
     
+    def generate_no_obstacles(self):
+        obs_w = 3.0
+        objs_np = [np.array([[0.0, 0.0], [10, 0], [10, 10], [0, 10]])]  # map
+        def to_torch(x, device):
+            return torch.from_numpy(x).float().to(device)
+
+        # Set walls for lidar
+        walls_w = obs_w
+        objs_np.append(np.array([[0.0, -10], [-walls_w, -10], [-walls_w, 20], [0, 20]]))
+        objs_np.append(np.array([[0.0, 0.0], [10, 0], [10, -walls_w], [0, -walls_w]]))
+        objs_np.append(np.array([[10.0 + walls_w, -10], [10, -10], [10, 20], [10 + walls_w, 20]]))
+        objs_np.append(np.array([[0.0, 10], [10, 10], [10, 10.0 + walls_w], [0.0, 10 + walls_w]]))
+
+        objs = [to_torch(ele, self.device) for ele in objs_np]
+        objs_t1 = [ele.unsqueeze(0).unsqueeze(0) for ele in objs]
+        objs_t2 = [torch.roll(ele, shifts=-1, dims=2) for ele in objs_t1]
+
+        return objs_np, objs, objs_t1, objs_t2
+    
     def generate_random_objects(self,
                                 num_samples: int,
                                 obj_count: int = 8,
