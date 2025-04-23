@@ -83,13 +83,14 @@ class RoverSTL:
         return torch.tensor(tmp).float().to(self.device)
 
     def training_loop(self, args):
-
         eta = EtaEstimator(0, args.n_total_epochs, self.print_freq)
         stl, avoid, always_have_battery, if_low_battery_go_charger, charging, if_enough_battery_go_destiantion = self.generateSTL(self.predict_steps_ahead, battery_limit=self.battery_limit)
 
         _, obstacles, _, _ = self.simulator.generate_objects()
         states, obstacles_t, robot_poses, targets, chargers = self.simulator.initialize_x(self.sample_batch, obstacles)
+        states_val, obstacles_t_val, robot_poses_val, targets_val, chargers_val = self.simulator.initialize_x(self.sample_batch // 10, obstacles)
         obstacles_t = obstacles_t[1:]
+        obstacles_t_val = obstacles_t_val[1:]
 
         best_accuracy = 0
         for step in range(args.n_total_epochs):
@@ -111,7 +112,7 @@ class RoverSTL:
                 control,
                 include_first=True,
             )
- 
+
             score = stl(estimated_next_states, self.smoothing_factor)[:, :1]
             acc = (stl(estimated_next_states, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
             acc_avg = torch.mean(acc)
@@ -130,7 +131,7 @@ class RoverSTL:
             dist_target_charger_loss = torch.mean((dist_charger * small_charge + dist_target * (1 - small_charge)) * acc)
             dist_target_charger_loss = dist_target_charger_loss * 0.1
 
-            loss = torch.mean(F.relu(0.4 - score)) + dist_target_charger_loss
+            loss = torch.mean(F.relu(0.5 - score)) + dist_target_charger_loss
 
             if acc_avg.item() > best_accuracy:
                 print(f"Increased accuracy: {acc_avg.item()}")
@@ -142,9 +143,22 @@ class RoverSTL:
             self.optimizer.step()
 
             if step % self.visit_same_states_for == 0:
+                control_val = self.rover_policy(states_val.detach())
+                estimated_next_states_val, pos_array_val = self.dynamics(
+                    obstacles_t_val,
+                    states_val,
+                    robot_poses_val,
+                    targets_val,
+                    chargers_val,
+                    control_val,
+                    include_first=True,
+                )
+                acc_val = (stl(estimated_next_states_val, self.smoothing_factor, d={"hard": True})[:, :1] >= 0).float()
+                acc_avg_val = torch.mean(acc_val)
+                
                 print(
-                    "%s > %04d loss:%.3f acc:%.20f dist:%.3f dT:%s T:%s ETA:%s"
-                    % ("STL TRAINING ", step, loss.item(), acc_avg.item(), dist_target_charger_loss.item(), eta.interval_str(), eta.elapsed_str(), eta.eta_str())
+                    "%s > %04d loss:%.3f acc:%.20f dist:%.3f acc_val:%.3f dT:%s T:%s ETA:%s"
+                    % ("STL TRAINING ", step, loss.item(), acc_avg.item(), dist_target_charger_loss.item(), acc_avg_val.item(), eta.interval_str(), eta.elapsed_str(), eta.eta_str())
                 )
 
                 print(
@@ -264,7 +278,7 @@ class RoverSTL:
         always_have_battery = Always(0, steps_ahead, AP(lambda x: x[..., 11]))
 
         stand_by = AP(lambda x: self.enough_close_to - x[..., 10])
-        enough_stay = AP(lambda x:  -x[..., 12])
+        enough_stay = AP(lambda x: -x[..., 12])
         charging = Imply(at_charger, Always(0, self.wait_for_charging, Or(stand_by, enough_stay)))
 
         return (
