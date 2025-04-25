@@ -139,6 +139,32 @@ Set a threshold = 0.15 representing the safe distance to an obstacle, safety is 
 
 
 
+### Test in graphical complex env
+
+|Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|19.1|80.9|0.0|50.37 ± 0.26|70.98|14.11|7.07|nan|0.49 ± 0.29|0.39|0.5 ± 0.36|
+|OUR|31.9|68.1|0.0|51.15 ± 0.29|66.77|31.98|9.51|nan|0.14 ± 0.08|0.23|0.33 ± 0.2|
+|OUR No avoid rule|30.8|69.2|0.0|48.09 ± 0.28|72.08|20.07|6.97|nan|0.11 ± 0.04|0.13|0.17 ± 0.08|
+
+
+
+
+
+
+### Test in graphical low battery env
+
+|Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+|Paper|20.8|0.0|8.6|62.72 ± 1.64|98.56|33.69|28.38|0.86|0.47 ± 0.4|0.18|0.36 ± 0.32|
+|OUR|12.2|2.3|85.5|15.95 ± 0.46|86.05|0.0|40.41|0.39|0.06 ± 0.04|0.09|0.2 ± 0.12|
+|OUR No avoid rule|98.7|0.0|1.3|13.66 ± 0.7|92.91|1.5|34.54|0.45|0.11 ± 0.04|0.13|0.19 ± 0.09|
+
+
+
+
+
+
 ### Test in unity
 
 |Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
@@ -153,12 +179,13 @@ Set a threshold = 0.15 representing the safe distance to an obstacle, safety is 
 
 
 
-### Test in graphical complex env
+### Test in unity complex env
 
 |Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|19.1|80.9|0.0|50.37 ± 0.26|70.98|14.11|7.07|nan|0.49 ± 0.29|0.39|0.5 ± 0.36|
-|OUR|31.9|68.1|0.0|51.15 ± 0.29|66.77|31.98|9.51|nan|0.14 ± 0.08|0.23|0.33 ± 0.2|
-|OUR No avoid rule|30.8|69.2|0.0|48.09 ± 0.28|72.08|20.07|6.97|nan|0.11 ± 0.04|0.13|0.17 ± 0.08|
+|Paper|16.0|78.0|6.0|77.45 ± 0.72|6.25|68.73|11.74|-0.01|0.35 ± 0.18|0.46|6.29 ± 3.11|
+|DQN|51.0|18.0|9.0|62.7 ± 0.96|100.0|9.19|56.37|-0.08|0.04 ± 0.01|0.01|4.55 ± 3.15|
+|OUR|3.0|97.0|0.0|84.68 ± 0.61|33.33|1.83|4.67|-0.15|0.06 ± 0.08|0.26|0.17 ± 0.24|
+|OUR No avoid rule|2.0|98.0|0.0|77.89 ± 0.46|50.0|0.0|2.43|-0.09|0.0 ± 0.0|nan|0.0 ± 0.0|
 
 <!-- END TABLES -->

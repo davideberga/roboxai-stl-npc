@@ -290,12 +290,21 @@ def update_md_file(existing_md_path: str, new_content: str, start_marker: str = 
 
 
 if __name__ == "__main__":
+    
     methods_unity = {
         "Paper": "STL/test-result/paper.result.npz",
         "DQN": "DQN/test-result/dqn.result.npz",
         "OUR": "STL/test-result/our.result.npz",
         "OUR No avoid rule": "STL/test-result/no_avoid.result.npz",
     }
+    
+    methods_unity_2 = {
+        "Paper": "STL/test-result/paper-2.result.npz",
+        "DQN": "DQN/test-result/dqn-2.result.npz",
+        "OUR": "STL/test-result/our-2.result.npz",
+        "OUR No avoid rule": "STL/test-result/no_avoid-2.result.npz",
+    }
+    
     methods_graphics = {
         "Paper": "STL/test-result/paper-figure.result.npz",
         "OUR": "STL/test-result/our-figure.result.npz",
@@ -305,6 +314,12 @@ if __name__ == "__main__":
         "Paper": "STL/test-result/paper-figure-2.result.npz",
         "OUR": "STL/test-result/our-figure-2.result.npz",
         "OUR No avoid rule": "STL/test-result/no_avoid-figure-2.result.npz",
+    }
+    
+    methods_graphics_3 = {
+        "Paper": "STL/test-result/paper-figure-3.result.npz",
+        "OUR": "STL/test-result/our-figure-3.result.npz",
+        "OUR No avoid rule": "STL/test-result/no_avoid-figure-3.result.npz",
     }
     columns = [
         "Method",
@@ -324,10 +339,13 @@ if __name__ == "__main__":
     ]
 
     table_unity_md = generate_markdown_table("Test in unity", copy.deepcopy(columns), methods_unity)
+    table_unity_2_md = generate_markdown_table("Test in unity complex env", copy.deepcopy(columns), methods_unity_2)
+    
     table_graphics_md = generate_markdown_table("Test in graphical env", copy.deepcopy(columns), methods_graphics)
     table_graphics_md_2 = generate_markdown_table("Test in graphical complex env", copy.deepcopy(columns), methods_graphics_2)
+    table_graphics_md_3 = generate_markdown_table("Test in graphical low battery env", copy.deepcopy(columns), methods_graphics_3)
 
     existing_md_file = "../README.md"
-    combined_tables = table_graphics_md + "\n\n" + table_unity_md + "\n\n" + table_graphics_md_2
+    combined_tables = "\n\n".join([table_graphics_md, table_graphics_md_2, table_graphics_md_3,table_unity_md, table_unity_2_md])
 
     update_md_file(existing_md_file, combined_tables)
