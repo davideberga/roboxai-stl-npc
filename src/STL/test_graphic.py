@@ -29,6 +29,7 @@ def main(model, iterations=1000, is_paper=False):
     steps_ahead = 10
     saved_episodes = []
     max_steps = 200
+    visual = False
     
     random_battery = np.random.uniform(0.08, 5, iterations).tolist()
 
@@ -45,7 +46,7 @@ def main(model, iterations=1000, is_paper=False):
     obstacles_t = obstacles_t[1:]
     world_objects = obstacles_t
 
-    # fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
     # writer = animation.FFMpegWriter(fps=5, codec="libx264", extra_args=["-pix_fmt", "yuv420p"])
 
     # with writer.saving(fig, f"test_{'paper' if is_paper else 'our'}.mp4", dpi=100):
@@ -76,23 +77,27 @@ def main(model, iterations=1000, is_paper=False):
                 new_state[..., 11] = battery
                 new_state[..., 12] = hold_time
                 
-                # ax.clear()
-                # new_lidar = sim.simulate_lidar_scan(new_pose, world_objects)
-                # extra = torch.full_like(target, 0.4)  # Create zeros of required shape
-                # targets_expanded = torch.cat([target, extra], dim=1)
-                # extra = torch.full_like(charger, 0.4)
-                # chargers_expanded = torch.cat([charger, extra], dim=1).unsqueeze(1)
-                # sim.visualize_environment(
-                #     new_pose.squeeze(),
-                #     new_lidar.squeeze(),
-                #     world_objects,
-                #     targets_expanded[0],
-                #     chargers_expanded[0],
-                #     battery_level=new_state[..., 11].item(),
-                #     ax=ax,
-                # )
-
-                # writer.grab_frame()
+                if visual:
+                    ax.clear()
+                    new_lidar = sim.simulate_lidar_scan(new_pose, world_objects)
+                    print(new_lidar)
+                    extra = torch.full_like(target, 0.4)  # Create zeros of required shape
+                    targets_expanded = torch.cat([target, extra], dim=1)
+                    extra = torch.full_like(charger, 0.4)
+                    chargers_expanded = torch.cat([charger, extra], dim=1).unsqueeze(1)
+                    sim.visualize_environment(
+                        new_pose.squeeze(),
+                        new_lidar.squeeze(),
+                        world_objects,
+                        targets_expanded[0],
+                        chargers_expanded[0],
+                        battery_level=new_state[..., 11].item(),
+                        ax=ax,
+                    )
+                
+                    fig.canvas.draw()       # re‑draw the canvas
+                    plt.pause(0.05) 
+                    plt.waitforbuttonpress() 
 
 
                 step_counter += 1
@@ -148,34 +153,36 @@ def main(model, iterations=1000, is_paper=False):
 if __name__ == "__main__":
     ENV_TYPE = "test"
 
-    seed_everything(seed)
+   
     policy_paper = PolicyPaper().to(device).float()
     policy_paper.load_eval_paper("model_testing/model_final_paper.ckpt")
     policy_paper.eval()
 
     try:
+        seed_everything(seed)
         saved_episodes = main(policy_paper, is_paper=True)
         np.savez("test-result/paper-figure.result.npz", episodes=saved_episodes)
     finally:
         print("Test paper finished!")
-
-    seed_everything(seed)
+    
     policy_our = RoverSTLPolicy(10).to(device).float()
     policy_our.load_eval("model_testing/model-closeness-beta-increased_0.9581999778747559_157500.pth")
     policy_our.eval()
 
     try:
+        seed_everything(seed)
         saved_episodes = main(policy_our)
         np.savez("test-result/our-figure.result.npz", episodes=saved_episodes)
     finally:
         print("Test our finished!")
         
-    seed_everything(seed)
+   
     policy_no_avoid = RoverSTLPolicy(10).to(device).float()
     policy_no_avoid.load_eval("model_testing/model-no-avoid_1.0_92000.pth")
     policy_no_avoid.eval()
 
     try:
+        seed_everything(seed)
         saved_episodes = main(policy_no_avoid)
         np.savez("test-result/no_avoid-figure.result.npz", episodes=saved_episodes)
     finally:

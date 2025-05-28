@@ -30,7 +30,7 @@ def main(model, iterations=1000, is_paper=False):
     saved_episodes = []
     max_steps = 200
     
-    visual = False
+    visual = True
     
     random_battery = np.random.uniform(2, 5, iterations).tolist()
     

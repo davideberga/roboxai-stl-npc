@@ -31,7 +31,7 @@ class RoverNavigationTest(gym.Env):
         #     env_path = "env/training_rover_DQN/TrainingRoverDDQN"
         if env_type == "test":
             env_path = "env/testing_rover/TestingRoverSTL"
-        if env_type == "test_obs":
+        elif env_type == "test_obs":
             env_path = "env/testing_rover_obs/testing_rover_obs"
         else:
             env_path = None

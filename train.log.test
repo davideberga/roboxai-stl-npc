@@ -3620,3 +3620,1659 @@ Battery level: tensor([[5.0000e+00, 4.7500e+00, 4.5001e+00, 4.2501e+00, 4.0001e+
          2.0001e+00, 1.7501e+00, 1.5001e+00, 1.2501e+00, 1.0001e+00, 7.5010e-01,
          5.0010e-01, 2.5010e-01, 9.7193e-05]], device='cuda:0',
        grad_fn=<MulBackward0>)
+
+
+# After charger fix
+
+Battery 3355, low: 1588
+Battery 319, low: 174
+Increased accuracy: 0.01979999989271164
+STL TRAINING  > 0000 loss:1.171 acc:0.01979999989271163940 dist:0.022 acc_val:0.022 dT:00.00s T:00.55s ETA:00.00s
+Avoid: 0.162, Battery: 2.241, Dest: 0.149, Charger: 1.790, Charging: 0.097
+Saving with: 0.01979999989271164
+Increased accuracy: 0.020399998873472214
+Increased accuracy: 0.020999999716877937
+Increased accuracy: 0.022199999541044235
+Increased accuracy: 0.025200000032782555
+Increased accuracy: 0.027400000020861626
+Increased accuracy: 0.027799999341368675
+Increased accuracy: 0.0284000001847744
+Increased accuracy: 0.028999999165534973
+Increased accuracy: 0.029600000008940697
+Increased accuracy: 0.02979999966919422
+Increased accuracy: 0.029999999329447746
+Increased accuracy: 0.03019999898970127
+Increased accuracy: 0.03099999949336052
+Increased accuracy: 0.03139999881386757
+Increased accuracy: 0.03199999779462814
+Increased accuracy: 0.03240000084042549
+Increased accuracy: 0.032600000500679016
+Increased accuracy: 0.032999999821186066
+Increased accuracy: 0.03359999880194664
+Increased accuracy: 0.034199997782707214
+Increased accuracy: 0.03460000082850456
+Increased accuracy: 0.03500000014901161
+Increased accuracy: 0.03519999980926514
+Increased accuracy: 0.03539999946951866
+Increased accuracy: 0.03579999879002571
+Increased accuracy: 0.03619999811053276
+Increased accuracy: 0.036399997770786285
+Increased accuracy: 0.03680000081658363
+Increased accuracy: 0.03720000013709068
+Increased accuracy: 0.03739999979734421
+Increased accuracy: 0.03779999911785126
+Increased accuracy: 0.038599997758865356
+Increased accuracy: 0.039000000804662704
+Increased accuracy: 0.03920000046491623
+Increased accuracy: 0.039799999445676804
+Increased accuracy: 0.03999999910593033
+Increased accuracy: 0.04019999876618385
+Increased accuracy: 0.0405999980866909
+Increased accuracy: 0.041200000792741776
+Increased accuracy: 0.0414000004529953
+Increased accuracy: 0.0429999977350235
+Increased accuracy: 0.04439999908208847
+Increased accuracy: 0.045399997383356094
+Increased accuracy: 0.04659999907016754
+Increased accuracy: 0.04800000041723251
+Increased accuracy: 0.04820000007748604
+Increased accuracy: 0.04879999905824661
+Increased accuracy: 0.04959999769926071
+Increased accuracy: 0.05119999870657921
+Increased accuracy: 0.05339999869465828
+Increased accuracy: 0.056199997663497925
+Increased accuracy: 0.05719999969005585
+Increased accuracy: 0.06119999662041664
+Increased accuracy: 0.06579999625682831
+Increased accuracy: 0.06859999895095825
+Increased accuracy: 0.07039999961853027
+Increased accuracy: 0.07079999893903732
+Increased accuracy: 0.07279999554157257
+Increased accuracy: 0.0729999989271164
+Increased accuracy: 0.0737999975681305
+Increased accuracy: 0.07639999687671661
+Increased accuracy: 0.07719999551773071
+Increased accuracy: 0.07979999482631683
+Increased accuracy: 0.07999999821186066
+Increased accuracy: 0.08020000159740448
+Increased accuracy: 0.0803999975323677
+Increased accuracy: 0.08139999955892563
+Increased accuracy: 0.08159999549388885
+Increased accuracy: 0.08179999887943268
+Increased accuracy: 0.0819999948143959
+Increased accuracy: 0.08240000158548355
+Increased accuracy: 0.0851999968290329
+Increased accuracy: 0.08720000088214874
+Increased accuracy: 0.08739999681711197
+Increased accuracy: 0.08779999613761902
+Increased accuracy: 0.08899999409914017
+Increased accuracy: 0.09119999408721924
+Increased accuracy: 0.09139999747276306
+Increased accuracy: 0.09160000085830688
+Increased accuracy: 0.09259999543428421
+Increased accuracy: 0.09339999407529831
+Increased accuracy: 0.09459999948740005
+Increased accuracy: 0.0949999988079071
+Increased accuracy: 0.09539999812841415
+Increased accuracy: 0.09779999405145645
+Increased accuracy: 0.09999999403953552
+Increased accuracy: 0.1005999967455864
+Increased accuracy: 0.10119999945163727
+Increased accuracy: 0.1013999953866005
+Increased accuracy: 0.1021999940276146
+Increased accuracy: 0.10419999808073044
+Increased accuracy: 0.10520000010728836
+Increased accuracy: 0.10679999738931656
+Increased accuracy: 0.10799999535083771
+Increased accuracy: 0.10979999601840973
+Increased accuracy: 0.1119999960064888
+Increased accuracy: 0.1136000007390976
+Increased accuracy: 0.11419999599456787
+Increased accuracy: 0.11539999395608902
+Increased accuracy: 0.11559999734163284
+Increased accuracy: 0.11639999598264694
+Increased accuracy: 0.11800000071525574
+Increased accuracy: 0.11959999799728394
+Increased accuracy: 0.12060000002384186
+Increased accuracy: 0.12139999866485596
+Increased accuracy: 0.1225999966263771
+Increased accuracy: 0.12280000001192093
+Increased accuracy: 0.1241999939084053
+Increased accuracy: 0.12439999729394913
+Increased accuracy: 0.12559999525547028
+Increased accuracy: 0.12719999253749847
+Increased accuracy: 0.12839999794960022
+Increased accuracy: 0.13019999861717224
+Increased accuracy: 0.131400004029274
+Increased accuracy: 0.13300000131130219
+Increased accuracy: 0.13539999723434448
+Increased accuracy: 0.1356000006198883
+Increased accuracy: 0.13779999315738678
+Increased accuracy: 0.13899999856948853
+Increased accuracy: 0.14059999585151672
+Increased accuracy: 0.14159999787807465
+Increased accuracy: 0.14339999854564667
+Increased accuracy: 0.14479999244213104
+Increased accuracy: 0.14579999446868896
+Increased accuracy: 0.1477999985218048
+Increased accuracy: 0.14899998903274536
+Increased accuracy: 0.14980000257492065
+Increased accuracy: 0.1501999944448471
+Increased accuracy: 0.15079998970031738
+Increased accuracy: 0.15320000052452087
+Increased accuracy: 0.15459999442100525
+Increased accuracy: 0.15539999306201935
+Increased accuracy: 0.15600000321865082
+Increased accuracy: 0.1565999984741211
+Increased accuracy: 0.15699999034404755
+Increased accuracy: 0.15839999914169312
+Increased accuracy: 0.15860000252723694
+Increased accuracy: 0.1589999943971634
+Increased accuracy: 0.15919999778270721
+Increased accuracy: 0.16019999980926514
+Increased accuracy: 0.1605999916791916
+Increased accuracy: 0.16099999845027924
+Increased accuracy: 0.16339999437332153
+Increased accuracy: 0.1639999896287918
+Increased accuracy: 0.1664000004529953
+Increased accuracy: 0.1687999963760376
+Increased accuracy: 0.16979999840259552
+Increased accuracy: 0.1703999936580658
+Increased accuracy: 0.17219999432563782
+Increased accuracy: 0.17440000176429749
+Increased accuracy: 0.1753999888896942
+Increased accuracy: 0.17639999091625214
+Increased accuracy: 0.17919999361038208
+Increased accuracy: 0.18039999902248383
+Increased accuracy: 0.18060000240802765
+Increased accuracy: 0.18159998953342438
+Increased accuracy: 0.18299999833106995
+Increased accuracy: 0.1858000010251999
+Increased accuracy: 0.18599998950958252
+Increased accuracy: 0.18979999423027039
+Increased accuracy: 0.1931999921798706
+Increased accuracy: 0.19359999895095825
+Increased accuracy: 0.19419999420642853
+Increased accuracy: 0.19599999487400055
+Increased accuracy: 0.1987999975681305
+Increased accuracy: 0.19919998943805695
+Increased accuracy: 0.19939999282360077
+Increased accuracy: 0.19979999959468842
+Increased accuracy: 0.20080000162124634
+Increased accuracy: 0.2011999934911728
+Increased accuracy: 0.2035999894142151
+Increased accuracy: 0.20399999618530273
+Increased accuracy: 0.204599991440773
+Battery 3387, low: 1551
+STL TRAINING  > 0500 loss:0.652 acc:0.19339999556541442871 dist:0.015 acc_val:0.262 dT:00.14s T:01m08s ETA:09H24m12s
+Avoid: 0.007, Battery: 2.298, Dest: 0.352, Charger: 1.866, Charging: 0.095
+Saving with: 0.19339999556541443
+Increased accuracy: 0.2078000009059906
+Increased accuracy: 0.20799998939037323
+Increased accuracy: 0.20839999616146088
+Increased accuracy: 0.21040000021457672
+Increased accuracy: 0.21119999885559082
+Increased accuracy: 0.21139998733997345
+Increased accuracy: 0.2133999913930893
+Increased accuracy: 0.21539999544620514
+Increased accuracy: 0.21719999611377716
+Increased accuracy: 0.2175999879837036
+Increased accuracy: 0.21819999814033508
+Increased accuracy: 0.21879999339580536
+Increased accuracy: 0.22139999270439148
+Increased accuracy: 0.22219999134540558
+Increased accuracy: 0.2223999947309494
+Increased accuracy: 0.22379998862743378
+Increased accuracy: 0.22459998726844788
+Increased accuracy: 0.22599999606609344
+Increased accuracy: 0.2287999987602234
+Increased accuracy: 0.22899998724460602
+Increased accuracy: 0.22939999401569366
+Increased accuracy: 0.2295999974012375
+Increased accuracy: 0.23019999265670776
+Increased accuracy: 0.2303999960422516
+Increased accuracy: 0.23420000076293945
+Increased accuracy: 0.23539999127388
+Increased accuracy: 0.23680000007152557
+Increased accuracy: 0.23999999463558197
+Increased accuracy: 0.241799995303154
+Increased accuracy: 0.2451999932527542
+Increased accuracy: 0.24619999527931213
+Increased accuracy: 0.24939998984336853
+Increased accuracy: 0.24959999322891235
+Increased accuracy: 0.2502000033855438
+Increased accuracy: 0.25279998779296875
+Increased accuracy: 0.2540000081062317
+Increased accuracy: 0.25519999861717224
+Increased accuracy: 0.25779998302459717
+Increased accuracy: 0.2595999836921692
+Increased accuracy: 0.25999999046325684
+Increased accuracy: 0.26080000400543213
+Increased accuracy: 0.2613999843597412
+Increased accuracy: 0.26260000467300415
+Increased accuracy: 0.26420000195503235
+Increased accuracy: 0.2701999843120575
+Increased accuracy: 0.2709999978542328
+Increased accuracy: 0.27219998836517334
+Increased accuracy: 0.2733999788761139
+Increased accuracy: 0.2735999822616577
+Increased accuracy: 0.2741999924182892
+Increased accuracy: 0.2751999795436859
+Increased accuracy: 0.27539998292922974
+Increased accuracy: 0.2757999897003174
+Increased accuracy: 0.2768000066280365
+Increased accuracy: 0.27699998021125793
+Increased accuracy: 0.2777999937534332
+Increased accuracy: 0.2789999842643738
+Increased accuracy: 0.2793999910354614
+Increased accuracy: 0.2802000045776367
+Increased accuracy: 0.28119999170303345
+Increased accuracy: 0.2815999984741211
+Increased accuracy: 0.28200000524520874
+Increased accuracy: 0.2833999991416931
+Increased accuracy: 0.28459998965263367
+Increased accuracy: 0.28599998354911804
+Increased accuracy: 0.2881999909877777
+Increased accuracy: 0.289000004529953
+Increased accuracy: 0.2913999855518341
+Increased accuracy: 0.29179999232292175
+Increased accuracy: 0.2921999990940094
+Increased accuracy: 0.29260000586509705
+Increased accuracy: 0.2929999828338623
+Increased accuracy: 0.2935999929904938
+Increased accuracy: 0.2937999963760376
+Increased accuracy: 0.29440000653266907
+Increased accuracy: 0.2955999970436096
+Battery 3385, low: 1532
+STL TRAINING  > 1000 loss:0.616 acc:0.27699998021125793457 dist:0.015 acc_val:0.300 dT:00.14s T:02m15s ETA:09H21m03s
+Avoid: 0.019, Battery: 2.334, Dest: 0.388, Charger: 1.849, Charging: 0.096
+Saving with: 0.27699998021125793
+Increased accuracy: 0.29600000381469727
+Increased accuracy: 0.29659998416900635
+Increased accuracy: 0.29679998755455017
+Increased accuracy: 0.2978000044822693
+Increased accuracy: 0.29839998483657837
+Increased accuracy: 0.2985999882221222
+Increased accuracy: 0.2994000017642975
+Increased accuracy: 0.29999998211860657
+Increased accuracy: 0.30059999227523804
+Increased accuracy: 0.30140000581741333
+Increased accuracy: 0.30159997940063477
+Increased accuracy: 0.3019999861717224
+Increased accuracy: 0.3033999800682068
+Increased accuracy: 0.3041999936103821
+Increased accuracy: 0.3046000003814697
+Increased accuracy: 0.30480000376701355
+Increased accuracy: 0.30559998750686646
+Increased accuracy: 0.30640000104904175
+Increased accuracy: 0.306799978017807
+Increased accuracy: 0.30699998140335083
+Increased accuracy: 0.3073999881744385
+Increased accuracy: 0.3077999949455261
+Increased accuracy: 0.30820000171661377
+Increased accuracy: 0.30879998207092285
+Increased accuracy: 0.3091999888420105
+Increased accuracy: 0.3105999827384949
+Increased accuracy: 0.31119999289512634
+Increased accuracy: 0.311599999666214
+Increased accuracy: 0.3123999834060669
+Battery 3393, low: 1540
+STL TRAINING  > 1500 loss:0.603 acc:0.30359998345375061035 dist:0.015 acc_val:0.314 dT:00.14s T:03m23s ETA:09H21m47s
+Avoid: 0.019, Battery: 2.358, Dest: 0.383, Charger: 1.858, Charging: 0.098
+Saving with: 0.3035999834537506
+Increased accuracy: 0.3131999969482422
+Increased accuracy: 0.31439998745918274
+Increased accuracy: 0.31599998474121094
+Increased accuracy: 0.31679999828338623
+Increased accuracy: 0.3181999921798706
+Increased accuracy: 0.31839999556541443
+Increased accuracy: 0.31859999895095825
+Increased accuracy: 0.3190000057220459
+Increased accuracy: 0.31919997930526733
+Increased accuracy: 0.3197999894618988
+Increased accuracy: 0.32019999623298645
+Increased accuracy: 0.3215999901294708
+Increased accuracy: 0.3224000036716461
+Increased accuracy: 0.32600000500679016
+Increased accuracy: 0.3269999921321869
+Increased accuracy: 0.32739999890327454
+Increased accuracy: 0.32819998264312744
+Increased accuracy: 0.32899999618530273
+Increased accuracy: 0.32979997992515564
+Increased accuracy: 0.3312000036239624
+Increased accuracy: 0.33159998059272766
+Increased accuracy: 0.3325999975204468
+Increased accuracy: 0.3330000042915344
+Increased accuracy: 0.3346000015735626
+Increased accuracy: 0.33480000495910645
+Increased accuracy: 0.33640000224113464
+Increased accuracy: 0.33799999952316284
+Increased accuracy: 0.3391999900341034
+Increased accuracy: 0.33980000019073486
+Increased accuracy: 0.3400000035762787
+Increased accuracy: 0.3401999771595001
+Increased accuracy: 0.34059998393058777
+Increased accuracy: 0.34119999408721924
+Increased accuracy: 0.3416000008583069
+Increased accuracy: 0.34199997782707214
+Increased accuracy: 0.3425999879837036
+Increased accuracy: 0.3434000015258789
+Increased accuracy: 0.34379997849464417
+Increased accuracy: 0.34439998865127563
+Battery 3368, low: 1566
+STL TRAINING  > 2000 loss:0.599 acc:0.31159999966621398926 dist:0.014 acc_val:0.332 dT:00.14s T:04m32s ETA:09H22m25s
+Avoid: 0.025, Battery: 2.349, Dest: 0.400, Charger: 1.849, Charging: 0.094
+Saving with: 0.311599999666214
+Increased accuracy: 0.3452000021934509
+Increased accuracy: 0.34700000286102295
+Increased accuracy: 0.3479999899864197
+Increased accuracy: 0.34880000352859497
+Increased accuracy: 0.34919998049736023
+Increased accuracy: 0.3495999872684479
+Increased accuracy: 0.3527999818325043
+Increased accuracy: 0.3531999886035919
+Increased accuracy: 0.35359999537467957
+Increased accuracy: 0.3540000021457672
+Increased accuracy: 0.3545999825000763
+Increased accuracy: 0.3561999797821045
+Increased accuracy: 0.35679998993873596
+Increased accuracy: 0.3569999933242798
+Battery 3328, low: 1603
+STL TRAINING  > 2500 loss:0.596 acc:0.34079998731613159180 dist:0.013 acc_val:0.380 dT:00.14s T:05m41s ETA:09H22m39s
+Avoid: 0.033, Battery: 2.313, Dest: 0.413, Charger: 1.817, Charging: 0.096
+Saving with: 0.3407999873161316
+Increased accuracy: 0.35839998722076416
+Increased accuracy: 0.3587999939918518
+Increased accuracy: 0.36079999804496765
+Increased accuracy: 0.3612000048160553
+Increased accuracy: 0.36239999532699585
+Increased accuracy: 0.3635999858379364
+Increased accuracy: 0.3643999993801117
+Increased accuracy: 0.3649999797344208
+Increased accuracy: 0.3662000000476837
+Increased accuracy: 0.3667999804019928
+Increased accuracy: 0.36739999055862427
+Increased accuracy: 0.368399977684021
+Increased accuracy: 0.3693999946117401
+Increased accuracy: 0.37139999866485596
+Increased accuracy: 0.3723999857902527
+Increased accuracy: 0.37359997630119324
+Increased accuracy: 0.3739999830722809
+Increased accuracy: 0.3741999864578247
+Increased accuracy: 0.375
+Increased accuracy: 0.3763999938964844
+Increased accuracy: 0.37779998779296875
+Increased accuracy: 0.3783999979496002
+Increased accuracy: 0.3789999783039093
+Increased accuracy: 0.37959998846054077
+Increased accuracy: 0.3797999918460846
+Increased accuracy: 0.38040000200271606
+Increased accuracy: 0.3813999891281128
+Increased accuracy: 0.3823999762535095
+Increased accuracy: 0.38359999656677246
+Increased accuracy: 0.3853999972343445
+Increased accuracy: 0.38599997758865356
+Increased accuracy: 0.3863999843597412
+Increased accuracy: 0.3871999979019165
+Increased accuracy: 0.38839998841285706
+Increased accuracy: 0.3895999789237976
+Increased accuracy: 0.38979998230934143
+Increased accuracy: 0.38999998569488525
+Increased accuracy: 0.3901999890804291
+Increased accuracy: 0.39079999923706055
+Increased accuracy: 0.3911999762058258
+Battery 3377, low: 1562
+STL TRAINING  > 3000 loss:0.583 acc:0.36679998040199279785 dist:0.012 acc_val:0.386 dT:00.14s T:06m50s ETA:09H23m06s
+Avoid: 0.035, Battery: 2.361, Dest: 0.406, Charger: 1.866, Charging: 0.095
+Saving with: 0.3667999804019928
+Increased accuracy: 0.39139997959136963
+Increased accuracy: 0.3917999863624573
+Increased accuracy: 0.3919999897480011
+Increased accuracy: 0.3921999931335449
+Increased accuracy: 0.3929999768733978
+Increased accuracy: 0.3933999836444855
+Increased accuracy: 0.39479997754096985
+Increased accuracy: 0.39579999446868896
+Increased accuracy: 0.39640000462532043
+Increased accuracy: 0.39719998836517334
+Increased accuracy: 0.39879998564720154
+Increased accuracy: 0.3991999924182892
+Increased accuracy: 0.39980000257492065
+Increased accuracy: 0.40119999647140503
+Increased accuracy: 0.4016000032424927
+Increased accuracy: 0.4017999768257141
+Increased accuracy: 0.40219998359680176
+Increased accuracy: 0.4025999903678894
+Increased accuracy: 0.40359997749328613
+Increased accuracy: 0.4041999876499176
+Increased accuracy: 0.40459999442100525
+Increased accuracy: 0.4052000045776367
+Increased accuracy: 0.405599981546402
+Increased accuracy: 0.4057999849319458
+Increased accuracy: 0.4059999883174896
+Increased accuracy: 0.40699997544288635
+Increased accuracy: 0.407399982213974
+Increased accuracy: 0.40799999237060547
+Increased accuracy: 0.40959998965263367
+Increased accuracy: 0.4097999930381775
+Increased accuracy: 0.4105999767780304
+Increased accuracy: 0.4107999801635742
+Increased accuracy: 0.4115999937057495
+Increased accuracy: 0.41179999709129333
+Increased accuracy: 0.41259998083114624
+Increased accuracy: 0.4129999876022339
+Increased accuracy: 0.41439998149871826
+Increased accuracy: 0.4147999882698059
+Increased accuracy: 0.41599997878074646
+Increased accuracy: 0.4163999855518341
+Increased accuracy: 0.41679999232292175
+Increased accuracy: 0.4177999794483185
+Increased accuracy: 0.4193999767303467
+Increased accuracy: 0.4197999835014343
+Increased accuracy: 0.4203999936580658
+Increased accuracy: 0.42100000381469727
+Increased accuracy: 0.42260000109672546
+Increased accuracy: 0.4227999746799469
+Increased accuracy: 0.4229999780654907
+Increased accuracy: 0.42339998483657837
+Increased accuracy: 0.423799991607666
+Increased accuracy: 0.4245999753475189
+Increased accuracy: 0.42659997940063477
+Increased accuracy: 0.42819997668266296
+Increased accuracy: 0.4291999936103821
+Increased accuracy: 0.4293999969959259
+Increased accuracy: 0.42980000376701355
+Increased accuracy: 0.429999977350235
+Increased accuracy: 0.4301999807357788
+Increased accuracy: 0.43219998478889465
+Increased accuracy: 0.4325999915599823
+Increased accuracy: 0.4327999949455261
+Increased accuracy: 0.43299999833106995
+Increased accuracy: 0.43320000171661377
+Increased accuracy: 0.43359997868537903
+Increased accuracy: 0.4341999888420105
+Increased accuracy: 0.4343999922275543
+Increased accuracy: 0.43459999561309814
+Increased accuracy: 0.4350000023841858
+Increased accuracy: 0.43539997935295105
+Increased accuracy: 0.4357999861240387
+Increased accuracy: 0.4359999895095825
+Increased accuracy: 0.436599999666214
+Increased accuracy: 0.4375999867916107
+Increased accuracy: 0.438400000333786
+Increased accuracy: 0.43939998745918274
+Increased accuracy: 0.44020000100135803
+Increased accuracy: 0.4415999948978424
+Increased accuracy: 0.4421999752521515
+Battery 3371, low: 1572
+STL TRAINING  > 3500 loss:0.578 acc:0.42039999365806579590 dist:0.012 acc_val:0.460 dT:00.14s T:07m59s ETA:09H22m41s
+Avoid: 0.038, Battery: 2.323, Dest: 0.418, Charger: 1.847, Charging: 0.096
+Saving with: 0.4203999936580658
+Increased accuracy: 0.44279998540878296
+Increased accuracy: 0.4431999921798706
+Increased accuracy: 0.44339999556541443
+Increased accuracy: 0.44359999895095825
+Increased accuracy: 0.4438000023365021
+Increased accuracy: 0.4439999759197235
+Increased accuracy: 0.44419997930526733
+Increased accuracy: 0.44519999623298645
+Increased accuracy: 0.4456000030040741
+Increased accuracy: 0.4461999833583832
+Increased accuracy: 0.446399986743927
+Increased accuracy: 0.44679999351501465
+Increased accuracy: 0.44699999690055847
+Increased accuracy: 0.44739997386932373
+Increased accuracy: 0.44759997725486755
+Increased accuracy: 0.448199987411499
+Increased accuracy: 0.44859999418258667
+Increased accuracy: 0.4490000009536743
+Increased accuracy: 0.45159998536109924
+Increased accuracy: 0.4527999758720398
+Increased accuracy: 0.45399999618530273
+Increased accuracy: 0.4544000029563904
+Increased accuracy: 0.45499998331069946
+Increased accuracy: 0.4553999900817871
+Increased accuracy: 0.45639997720718384
+Increased accuracy: 0.4575999975204468
+Increased accuracy: 0.4583999812602997
+Increased accuracy: 0.4585999846458435
+Increased accuracy: 0.459199994802475
+Increased accuracy: 0.4596000015735626
+Increased accuracy: 0.460999995470047
+Increased accuracy: 0.4615999758243561
+Increased accuracy: 0.46239998936653137
+Increased accuracy: 0.4657999873161316
+Increased accuracy: 0.46639999747276306
+Increased accuracy: 0.46799999475479126
+Increased accuracy: 0.46859997510910034
+Increased accuracy: 0.46939998865127563
+Increased accuracy: 0.46959999203681946
+Increased accuracy: 0.47079998254776
+Increased accuracy: 0.47099998593330383
+Increased accuracy: 0.4717999994754791
+Increased accuracy: 0.47200000286102295
+Increased accuracy: 0.47259998321533203
+Increased accuracy: 0.47360000014305115
+Increased accuracy: 0.4737999737262726
+Increased accuracy: 0.4739999771118164
+Increased accuracy: 0.4745999872684479
+Increased accuracy: 0.4757999777793884
+Increased accuracy: 0.4763999879360199
+Increased accuracy: 0.47699999809265137
+Increased accuracy: 0.47759997844696045
+Increased accuracy: 0.4781999886035919
+Battery 3373, low: 1568
+STL TRAINING  > 4000 loss:0.578 acc:0.43239998817443847656 dist:0.012 acc_val:0.482 dT:00.14s T:09m07s ETA:09H21m15s
+Avoid: 0.037, Battery: 2.368, Dest: 0.419, Charger: 1.868, Charging: 0.094
+Saving with: 0.4323999881744385
+Increased accuracy: 0.47859999537467957
+Increased accuracy: 0.4790000021457672
+Increased accuracy: 0.47999998927116394
+Increased accuracy: 0.48099997639656067
+Increased accuracy: 0.48179998993873596
+Increased accuracy: 0.4827999770641327
+Increased accuracy: 0.48339998722076416
+Increased accuracy: 0.48420000076293945
+Increased accuracy: 0.48479998111724854
+Increased accuracy: 0.48499998450279236
+Battery 3451, low: 1491
+STL TRAINING  > 4500 loss:0.571 acc:0.46179997920989990234 dist:0.012 acc_val:0.496 dT:00.14s T:10m15s ETA:09H19m31s
+Avoid: 0.040, Battery: 2.403, Dest: 0.397, Charger: 1.893, Charging: 0.093
+Saving with: 0.4617999792098999
+Increased accuracy: 0.4860000014305115
+Increased accuracy: 0.48659998178482056
+Increased accuracy: 0.48739999532699585
+Increased accuracy: 0.4887999892234802
+Increased accuracy: 0.48899999260902405
+Increased accuracy: 0.48979997634887695
+Increased accuracy: 0.4903999865055084
+Increased accuracy: 0.49079999327659607
+Increased accuracy: 0.49219998717308044
+Increased accuracy: 0.4927999973297119
+Increased accuracy: 0.4935999810695648
+Increased accuracy: 0.4943999946117401
+Increased accuracy: 0.49480000138282776
+Increased accuracy: 0.4957999885082245
+Increased accuracy: 0.49619999527931213
+Increased accuracy: 0.4973999857902527
+Increased accuracy: 0.4975999891757965
+Increased accuracy: 0.49799999594688416
+Increased accuracy: 0.5026000142097473
+Increased accuracy: 0.5029999613761902
+Increased accuracy: 0.5033999681472778
+Increased accuracy: 0.5047999620437622
+Increased accuracy: 0.5062000155448914
+Increased accuracy: 0.5063999891281128
+Increased accuracy: 0.5083999633789062
+Battery 3365, low: 1571
+STL TRAINING  > 5000 loss:0.572 acc:0.48420000076293945312 dist:0.012 acc_val:0.502 dT:00.14s T:11m22s ETA:09H17m04s
+Avoid: 0.044, Battery: 2.352, Dest: 0.426, Charger: 1.853, Charging: 0.091
+Saving with: 0.48420000076293945
+Increased accuracy: 0.5085999965667725
+Increased accuracy: 0.5099999904632568
+Increased accuracy: 0.5108000040054321
+Increased accuracy: 0.5112000107765198
+Increased accuracy: 0.5115999579429626
+Increased accuracy: 0.5117999911308289
+Increased accuracy: 0.5123999714851379
+Increased accuracy: 0.5126000046730042
+Increased accuracy: 0.5133999586105347
+Increased accuracy: 0.5137999653816223
+Increased accuracy: 0.5139999985694885
+Increased accuracy: 0.5144000053405762
+Increased accuracy: 0.5148000121116638
+Increased accuracy: 0.5153999924659729
+Increased accuracy: 0.5157999992370605
+Increased accuracy: 0.515999972820282
+Increased accuracy: 0.5166000127792358
+Increased accuracy: 0.5167999863624573
+Increased accuracy: 0.5173999667167664
+Increased accuracy: 0.5180000066757202
+Increased accuracy: 0.5184000134468079
+Increased accuracy: 0.519599974155426
+Increased accuracy: 0.5199999809265137
+Increased accuracy: 0.5209999680519104
+Increased accuracy: 0.5221999883651733
+Increased accuracy: 0.5227999687194824
+Increased accuracy: 0.5230000019073486
+Battery 3425, low: 1517
+STL TRAINING  > 5500 loss:0.571 acc:0.48939999938011169434 dist:0.012 acc_val:0.526 dT:00.14s T:12m27s ETA:09H13m16s
+Avoid: 0.041, Battery: 2.363, Dest: 0.410, Charger: 1.861, Charging: 0.096
+Saving with: 0.4893999993801117
+Battery 3411, low: 1495
+STL TRAINING  > 6000 loss:0.567 acc:0.50119996070861816406 dist:0.012 acc_val:0.536 dT:00.14s T:13m36s ETA:09H13m08s
+Avoid: 0.041, Battery: 2.385, Dest: 0.410, Charger: 1.871, Charging: 0.092
+Saving with: 0.5011999607086182
+Increased accuracy: 0.5234000086784363
+Increased accuracy: 0.5239999890327454
+Increased accuracy: 0.5248000025749207
+Increased accuracy: 0.5263999700546265
+Increased accuracy: 0.5266000032424927
+Increased accuracy: 0.5271999835968018
+Increased accuracy: 0.527999997138977
+Increased accuracy: 0.5285999774932861
+Increased accuracy: 0.5288000106811523
+Increased accuracy: 0.5291999578475952
+Increased accuracy: 0.5293999910354614
+Increased accuracy: 0.5295999646186829
+Increased accuracy: 0.5302000045776367
+Increased accuracy: 0.5307999849319458
+Increased accuracy: 0.5313999652862549
+Battery 3387, low: 1548
+STL TRAINING  > 6500 loss:0.569 acc:0.50279998779296875000 dist:0.012 acc_val:0.542 dT:00.14s T:14m42s ETA:09H10m56s
+Avoid: 0.042, Battery: 2.377, Dest: 0.418, Charger: 1.863, Charging: 0.095
+Saving with: 0.5027999877929688
+Battery 3415, low: 1532
+STL TRAINING  > 7000 loss:0.566 acc:0.50800001621246337891 dist:0.012 acc_val:0.534 dT:00.14s T:15m49s ETA:09H09m26s
+Avoid: 0.041, Battery: 2.408, Dest: 0.414, Charger: 1.895, Charging: 0.096
+Saving with: 0.5080000162124634
+Increased accuracy: 0.5317999720573425
+Increased accuracy: 0.5331999659538269
+Increased accuracy: 0.5333999991416931
+Increased accuracy: 0.5335999727249146
+Increased accuracy: 0.5342000126838684
+Increased accuracy: 0.5343999862670898
+Increased accuracy: 0.5345999598503113
+Increased accuracy: 0.5349999666213989
+Increased accuracy: 0.5351999998092651
+Increased accuracy: 0.5363999605178833
+Increased accuracy: 0.5365999937057495
+Increased accuracy: 0.5371999740600586
+Increased accuracy: 0.5374000072479248
+Increased accuracy: 0.5375999808311462
+Increased accuracy: 0.5378000140190125
+Battery 3360, low: 1571
+STL TRAINING  > 7500 loss:0.571 acc:0.51099997758865356445 dist:0.012 acc_val:0.548 dT:00.14s T:16m55s ETA:09H07m04s
+Avoid: 0.042, Battery: 2.341, Dest: 0.430, Charger: 1.845, Charging: 0.095
+Saving with: 0.5109999775886536
+Battery 3429, low: 1523
+STL TRAINING  > 8000 loss:0.566 acc:0.51239997148513793945 dist:0.012 acc_val:0.552 dT:00.13s T:17m59s ETA:09H03m58s
+Avoid: 0.042, Battery: 2.374, Dest: 0.421, Charger: 1.875, Charging: 0.094
+Saving with: 0.5123999714851379
+Increased accuracy: 0.5381999611854553
+Increased accuracy: 0.538599967956543
+Increased accuracy: 0.5389999747276306
+Increased accuracy: 0.5396000146865845
+Battery 3333, low: 1591
+STL TRAINING  > 8500 loss:0.565 acc:0.51459997892379760742 dist:0.012 acc_val:0.544 dT:00.13s T:19m06s ETA:09H02m40s
+Avoid: 0.043, Battery: 2.328, Dest: 0.439, Charger: 1.830, Charging: 0.098
+Saving with: 0.5145999789237976
+Battery 3355, low: 1572
+STL TRAINING  > 9000 loss:0.568 acc:0.49819999933242797852 dist:0.012 acc_val:0.516 dT:00.13s T:20m11s ETA:09H00m37s
+Avoid: 0.046, Battery: 2.360, Dest: 0.434, Charger: 1.852, Charging: 0.096
+Saving with: 0.498199999332428
+Increased accuracy: 0.5401999950408936
+Increased accuracy: 0.5407999753952026
+Battery 3387, low: 1553
+STL TRAINING  > 9500 loss:0.565 acc:0.53039997816085815430 dist:0.012 acc_val:0.542 dT:00.13s T:21m17s ETA:08H59m02s
+Avoid: 0.043, Battery: 2.376, Dest: 0.432, Charger: 1.871, Charging: 0.091
+Saving with: 0.5303999781608582
+Increased accuracy: 0.542199969291687
+Increased accuracy: 0.5437999963760376
+Increased accuracy: 0.5447999835014343
+Increased accuracy: 0.545199990272522
+Increased accuracy: 0.545799970626831
+Increased accuracy: 0.5464000105857849
+Increased accuracy: 0.546999990940094
+Increased accuracy: 0.5478000044822693
+Increased accuracy: 0.5482000112533569
+Increased accuracy: 0.5483999848365784
+Increased accuracy: 0.5485999584197998
+Increased accuracy: 0.548799991607666
+Increased accuracy: 0.5497999787330627
+Increased accuracy: 0.550000011920929
+Increased accuracy: 0.550599992275238
+Increased accuracy: 0.5507999658584595
+Increased accuracy: 0.551800012588501
+Increased accuracy: 0.5523999929428101
+Increased accuracy: 0.5525999665260315
+Increased accuracy: 0.5527999997138977
+Increased accuracy: 0.5532000064849854
+Battery 3359, low: 1574
+STL TRAINING  > 10000 loss:0.564 acc:0.53179997205734252930 dist:0.012 acc_val:0.554 dT:00.13s T:22m24s ETA:08H57m49s
+Avoid: 0.044, Battery: 2.335, Dest: 0.436, Charger: 1.845, Charging: 0.096
+Saving with: 0.5317999720573425
+Increased accuracy: 0.5533999800682068
+Increased accuracy: 0.553600013256073
+Increased accuracy: 0.5537999868392944
+Increased accuracy: 0.5539999604225159
+Increased accuracy: 0.5547999739646912
+Increased accuracy: 0.5550000071525574
+Increased accuracy: 0.5555999875068665
+Increased accuracy: 0.5557999610900879
+Increased accuracy: 0.5559999942779541
+Increased accuracy: 0.5565999746322632
+Increased accuracy: 0.5569999814033508
+Increased accuracy: 0.5575999617576599
+Increased accuracy: 0.5577999949455261
+Increased accuracy: 0.5583999752998352
+Increased accuracy: 0.5587999820709229
+Increased accuracy: 0.5595999956130981
+Increased accuracy: 0.5604000091552734
+Increased accuracy: 0.5615999698638916
+Increased accuracy: 0.5619999766349792
+Increased accuracy: 0.562999963760376
+Battery 3381, low: 1540
+STL TRAINING  > 10500 loss:0.562 acc:0.54339998960494995117 dist:0.012 acc_val:0.554 dT:00.13s T:23m32s ETA:08H56m52s
+Avoid: 0.045, Battery: 2.354, Dest: 0.424, Charger: 1.857, Charging: 0.095
+Saving with: 0.54339998960495
+Increased accuracy: 0.5631999969482422
+Increased accuracy: 0.5633999705314636
+Increased accuracy: 0.5637999773025513
+Increased accuracy: 0.5640000104904175
+Increased accuracy: 0.5643999576568604
+Increased accuracy: 0.5645999908447266
+Increased accuracy: 0.5649999976158142
+Increased accuracy: 0.5654000043869019
+Increased accuracy: 0.5659999847412109
+Increased accuracy: 0.5661999583244324
+Increased accuracy: 0.5663999915122986
+Increased accuracy: 0.5669999718666077
+Battery 3407, low: 1524
+STL TRAINING  > 11000 loss:0.564 acc:0.54079997539520263672 dist:0.012 acc_val:0.560 dT:00.13s T:24m39s ETA:08H55m47s
+Avoid: 0.044, Battery: 2.367, Dest: 0.429, Charger: 1.869, Charging: 0.093
+Saving with: 0.5407999753952026
+Battery 3303, low: 1630
+STL TRAINING  > 11500 loss:0.562 acc:0.54579997062683105469 dist:0.012 acc_val:0.560 dT:00.13s T:25m47s ETA:08H54m37s
+Avoid: 0.045, Battery: 2.316, Dest: 0.445, Charger: 1.822, Charging: 0.096
+Saving with: 0.545799970626831
+Battery 3436, low: 1509
+STL TRAINING  > 12000 loss:0.563 acc:0.50679999589920043945 dist:0.012 acc_val:0.534 dT:00.13s T:26m55s ETA:08H53m45s
+Avoid: 0.043, Battery: 2.398, Dest: 0.404, Charger: 1.889, Charging: 0.096
+Saving with: 0.5067999958992004
+Battery 3449, low: 1494
+STL TRAINING  > 12500 loss:0.564 acc:0.53339999914169311523 dist:0.012 acc_val:0.556 dT:00.13s T:28m04s ETA:08H53m20s
+Avoid: 0.045, Battery: 2.406, Dest: 0.416, Charger: 1.895, Charging: 0.094
+Saving with: 0.5333999991416931
+Increased accuracy: 0.5694000124931335
+Increased accuracy: 0.5703999996185303
+Increased accuracy: 0.5740000009536743
+Increased accuracy: 0.574400007724762
+Increased accuracy: 0.5763999819755554
+Increased accuracy: 0.5791999697685242
+Increased accuracy: 0.5843999981880188
+Increased accuracy: 0.5848000049591064
+Increased accuracy: 0.5877999663352966
+Increased accuracy: 0.5899999737739563
+Increased accuracy: 0.590399980545044
+Increased accuracy: 0.5934000015258789
+Increased accuracy: 0.5953999757766724
+Increased accuracy: 0.5961999893188477
+Increased accuracy: 0.5965999960899353
+Increased accuracy: 0.5997999906539917
+Increased accuracy: 0.6025999784469604
+Increased accuracy: 0.6029999852180481
+Increased accuracy: 0.6033999919891357
+Increased accuracy: 0.6039999723434448
+Increased accuracy: 0.6067999601364136
+Increased accuracy: 0.6085999608039856
+Increased accuracy: 0.6097999811172485
+Increased accuracy: 0.6101999878883362
+Increased accuracy: 0.6110000014305115
+Increased accuracy: 0.6114000082015991
+Increased accuracy: 0.611799955368042
+Increased accuracy: 0.6132000088691711
+Increased accuracy: 0.6141999959945679
+Increased accuracy: 0.6146000027656555
+Increased accuracy: 0.6150000095367432
+Increased accuracy: 0.615399956703186
+Increased accuracy: 0.6157999634742737
+Increased accuracy: 0.6182000041007996
+Increased accuracy: 0.6187999844551086
+Increased accuracy: 0.6189999580383301
+Increased accuracy: 0.6197999715805054
+Increased accuracy: 0.620199978351593
+Increased accuracy: 0.6204000115394592
+Increased accuracy: 0.6205999851226807
+Increased accuracy: 0.6225999593734741
+Increased accuracy: 0.6241999864578247
+Increased accuracy: 0.6245999932289124
+Increased accuracy: 0.6247999668121338
+Increased accuracy: 0.6254000067710876
+Increased accuracy: 0.6272000074386597
+Increased accuracy: 0.6275999546051025
+Increased accuracy: 0.6277999877929688
+Increased accuracy: 0.6281999945640564
+Increased accuracy: 0.6295999884605408
+Increased accuracy: 0.6304000020027161
+Increased accuracy: 0.6315999627113342
+Increased accuracy: 0.6333999633789062
+Increased accuracy: 0.6335999965667725
+Increased accuracy: 0.6340000033378601
+Increased accuracy: 0.6341999769210815
+Increased accuracy: 0.6344000101089478
+Increased accuracy: 0.6351999640464783
+Increased accuracy: 0.6355999708175659
+Increased accuracy: 0.6367999911308289
+Increased accuracy: 0.6387999653816223
+Increased accuracy: 0.6389999985694885
+Increased accuracy: 0.6398000121116638
+Increased accuracy: 0.6399999856948853
+Increased accuracy: 0.6401999592781067
+Increased accuracy: 0.6413999795913696
+Increased accuracy: 0.6417999863624573
+Increased accuracy: 0.6430000066757202
+Increased accuracy: 0.6437999606132507
+Increased accuracy: 0.6444000005722046
+Increased accuracy: 0.6448000073432922
+Increased accuracy: 0.6455999612808228
+Battery 3394, low: 1541
+STL TRAINING  > 13000 loss:0.554 acc:0.62319999933242797852 dist:0.011 acc_val:0.648 dT:00.13s T:29m12s ETA:08H52m15s
+Avoid: 0.056, Battery: 2.353, Dest: 0.433, Charger: 1.871, Charging: 0.092
+Saving with: 0.623199999332428
+Increased accuracy: 0.6466000080108643
+Increased accuracy: 0.6467999815940857
+Increased accuracy: 0.6477999687194824
+Increased accuracy: 0.6485999822616577
+Increased accuracy: 0.6523999571800232
+Increased accuracy: 0.6534000039100647
+Increased accuracy: 0.6549999713897705
+Increased accuracy: 0.6553999781608582
+Increased accuracy: 0.6559999585151672
+Increased accuracy: 0.6561999917030334
+Increased accuracy: 0.6571999788284302
+Increased accuracy: 0.6583999991416931
+Increased accuracy: 0.6597999930381775
+Increased accuracy: 0.6607999801635742
+Increased accuracy: 0.6611999869346619
+Increased accuracy: 0.6615999937057495
+Increased accuracy: 0.6621999740600586
+Increased accuracy: 0.6624000072479248
+Increased accuracy: 0.6629999876022339
+Increased accuracy: 0.6643999814987183
+Increased accuracy: 0.6647999882698059
+Increased accuracy: 0.665399968624115
+Increased accuracy: 0.6661999821662903
+Battery 3447, low: 1491
+STL TRAINING  > 13500 loss:0.561 acc:0.52219998836517333984 dist:0.012 acc_val:0.524 dT:00.13s T:30m19s ETA:08H51m03s
+Avoid: 0.041, Battery: 2.392, Dest: 0.405, Charger: 1.891, Charging: 0.092
+Saving with: 0.5221999883651733
+Increased accuracy: 0.6667999625205994
+Increased accuracy: 0.667199969291687
+Increased accuracy: 0.6675999760627747
+Increased accuracy: 0.6679999828338623
+Increased accuracy: 0.6692000031471252
+Increased accuracy: 0.6705999970436096
+Increased accuracy: 0.6711999773979187
+Increased accuracy: 0.6715999841690063
+Increased accuracy: 0.6717999577522278
+Increased accuracy: 0.6721999645233154
+Increased accuracy: 0.6725999712944031
+Increased accuracy: 0.6728000044822693
+Increased accuracy: 0.6733999848365784
+Increased accuracy: 0.6735999584197998
+Increased accuracy: 0.6741999983787537
+Increased accuracy: 0.6753999590873718
+Increased accuracy: 0.6757999658584595
+Battery 3346, low: 1602
+STL TRAINING  > 14000 loss:0.556 acc:0.57679998874664306641 dist:0.010 acc_val:0.630 dT:00.13s T:31m28s ETA:08H50m26s
+Avoid: 0.056, Battery: 2.281, Dest: 0.433, Charger: 1.848, Charging: 0.094
+Saving with: 0.5767999887466431
+Increased accuracy: 0.6759999990463257
+Increased accuracy: 0.6765999794006348
+Increased accuracy: 0.676800012588501
+Increased accuracy: 0.6769999861717224
+Increased accuracy: 0.6773999929428101
+Increased accuracy: 0.6777999997138977
+Increased accuracy: 0.6779999732971191
+Increased accuracy: 0.6782000064849854
+Increased accuracy: 0.6785999536514282
+Increased accuracy: 0.6793999671936035
+Battery 3394, low: 1541
+STL TRAINING  > 14500 loss:0.561 acc:0.46959999203681945801 dist:0.011 acc_val:0.502 dT:00.13s T:32m34s ETA:08H49m04s
+Avoid: 0.053, Battery: 2.313, Dest: 0.421, Charger: 1.872, Charging: 0.096
+Saving with: 0.46959999203681946
+Increased accuracy: 0.6797999739646912
+Battery 3356, low: 1564
+STL TRAINING  > 15000 loss:0.548 acc:0.67079997062683105469 dist:0.010 acc_val:0.658 dT:00.13s T:33m42s ETA:08H47m55s
+Avoid: 0.058, Battery: 2.271, Dest: 0.437, Charger: 1.849, Charging: 0.093
+Saving with: 0.670799970626831
+Increased accuracy: 0.6803999543190002
+Increased accuracy: 0.6814000010490417
+Increased accuracy: 0.6818000078201294
+Increased accuracy: 0.6823999881744385
+Increased accuracy: 0.6833999752998352
+Increased accuracy: 0.6841999888420105
+Increased accuracy: 0.6847999691963196
+Increased accuracy: 0.6850000023841858
+Increased accuracy: 0.6857999563217163
+Increased accuracy: 0.6865999698638916
+Increased accuracy: 0.6868000030517578
+Increased accuracy: 0.6872000098228455
+Increased accuracy: 0.6875999569892883
+Increased accuracy: 0.6881999969482422
+Increased accuracy: 0.6886000037193298
+Increased accuracy: 0.6895999908447266
+Increased accuracy: 0.6899999976158142
+Increased accuracy: 0.6901999711990356
+Increased accuracy: 0.6911999583244324
+Increased accuracy: 0.6922000050544739
+Increased accuracy: 0.6926000118255615
+Increased accuracy: 0.692799985408783
+Battery 3355, low: 1584
+STL TRAINING  > 15500 loss:0.550 acc:0.65859997272491455078 dist:0.010 acc_val:0.668 dT:00.13s T:34m49s ETA:08H46m39s
+Avoid: 0.057, Battery: 2.249, Dest: 0.443, Charger: 1.828, Charging: 0.095
+Saving with: 0.6585999727249146
+Battery 3321, low: 1613
+STL TRAINING  > 16000 loss:0.553 acc:0.63559997081756591797 dist:0.010 acc_val:0.668 dT:00.13s T:35m56s ETA:08H45m30s
+Avoid: 0.058, Battery: 2.229, Dest: 0.454, Charger: 1.815, Charging: 0.099
+Saving with: 0.6355999708175659
+Battery 3388, low: 1548
+STL TRAINING  > 16500 loss:0.547 acc:0.66619998216629028320 dist:0.010 acc_val:0.670 dT:00.13s T:37m03s ETA:08H44m27s
+Avoid: 0.058, Battery: 2.315, Dest: 0.430, Charger: 1.884, Charging: 0.091
+Saving with: 0.6661999821662903
+Battery 3370, low: 1579
+STL TRAINING  > 17000 loss:0.552 acc:0.65499997138977050781 dist:0.010 acc_val:0.674 dT:00.13s T:38m12s ETA:08H43m33s
+Avoid: 0.057, Battery: 2.246, Dest: 0.454, Charger: 1.839, Charging: 0.095
+Saving with: 0.6549999713897705
+Battery 3354, low: 1590
+STL TRAINING  > 17500 loss:0.551 acc:0.66219997406005859375 dist:0.010 acc_val:0.668 dT:00.13s T:39m20s ETA:08H42m30s
+Avoid: 0.057, Battery: 2.251, Dest: 0.453, Charger: 1.844, Charging: 0.094
+Saving with: 0.6621999740600586
+Battery 3363, low: 1570
+STL TRAINING  > 18000 loss:0.551 acc:0.66780000925064086914 dist:0.010 acc_val:0.678 dT:00.13s T:40m27s ETA:08H41m28s
+Avoid: 0.057, Battery: 2.272, Dest: 0.446, Charger: 1.868, Charging: 0.092
+Saving with: 0.6678000092506409
+Battery 3437, low: 1509
+STL TRAINING  > 18500 loss:0.551 acc:0.65560001134872436523 dist:0.010 acc_val:0.686 dT:00.13s T:41m35s ETA:08H40m26s
+Avoid: 0.057, Battery: 2.294, Dest: 0.434, Charger: 1.889, Charging: 0.092
+Saving with: 0.6556000113487244
+Battery 3389, low: 1549
+STL TRAINING  > 19000 loss:0.547 acc:0.67500001192092895508 dist:0.010 acc_val:0.684 dT:00.13s T:42m44s ETA:08H39m37s
+Avoid: 0.059, Battery: 2.272, Dest: 0.441, Charger: 1.862, Charging: 0.095
+Saving with: 0.675000011920929
+Battery 3438, low: 1506
+STL TRAINING  > 19500 loss:0.548 acc:0.66920000314712524414 dist:0.010 acc_val:0.670 dT:00.14s T:43m54s ETA:08H38m53s
+Avoid: 0.057, Battery: 2.294, Dest: 0.425, Charger: 1.883, Charging: 0.093
+Saving with: 0.6692000031471252
+Battery 3396, low: 1533
+STL TRAINING  > 20000 loss:0.549 acc:0.64980000257492065430 dist:0.010 acc_val:0.668 dT:00.14s T:45m04s ETA:08H38m13s
+Avoid: 0.058, Battery: 2.291, Dest: 0.433, Charger: 1.876, Charging: 0.093
+Saving with: 0.6498000025749207
+Increased accuracy: 0.6929999589920044
+Increased accuracy: 0.6940000057220459
+Increased accuracy: 0.6943999528884888
+Increased accuracy: 0.694599986076355
+Increased accuracy: 0.6949999928474426
+Increased accuracy: 0.6959999799728394
+Increased accuracy: 0.6965999603271484
+Increased accuracy: 0.6969999670982361
+Battery 3331, low: 1596
+STL TRAINING  > 20500 loss:0.546 acc:0.68199998140335083008 dist:0.010 acc_val:0.672 dT:00.14s T:46m11s ETA:08H36m59s
+Avoid: 0.061, Battery: 2.251, Dest: 0.449, Charger: 1.838, Charging: 0.095
+Saving with: 0.6819999814033508
+Increased accuracy: 0.6973999738693237
+Increased accuracy: 0.6979999542236328
+Increased accuracy: 0.698199987411499
+Increased accuracy: 0.699400007724762
+Increased accuracy: 0.6995999813079834
+Increased accuracy: 0.6997999548912048
+Increased accuracy: 0.699999988079071
+Battery 3363, low: 1582
+STL TRAINING  > 21000 loss:0.554 acc:0.57379996776580810547 dist:0.010 acc_val:0.646 dT:00.14s T:47m19s ETA:08H36m03s
+Avoid: 0.064, Battery: 2.294, Dest: 0.437, Charger: 1.860, Charging: 0.095
+Saving with: 0.5737999677658081
+Battery 3406, low: 1522
+STL TRAINING  > 21500 loss:0.545 acc:0.68159997463226318359 dist:0.010 acc_val:0.664 dT:00.14s T:48m26s ETA:08H34m51s
+Avoid: 0.060, Battery: 2.289, Dest: 0.427, Charger: 1.872, Charging: 0.093
+Saving with: 0.6815999746322632
+Battery 3430, low: 1509
+STL TRAINING  > 22000 loss:0.548 acc:0.67019999027252197266 dist:0.010 acc_val:0.670 dT:00.14s T:49m33s ETA:08H33m36s
+Avoid: 0.058, Battery: 2.311, Dest: 0.423, Charger: 1.893, Charging: 0.094
+Saving with: 0.670199990272522
+Battery 3404, low: 1533
+STL TRAINING  > 22500 loss:0.545 acc:0.67839998006820678711 dist:0.010 acc_val:0.686 dT:00.14s T:50m41s ETA:08H32m29s
+Avoid: 0.057, Battery: 2.296, Dest: 0.429, Charger: 1.874, Charging: 0.097
+Saving with: 0.6783999800682068
+Increased accuracy: 0.7001999616622925
+Increased accuracy: 0.701200008392334
+Increased accuracy: 0.7015999555587769
+Increased accuracy: 0.7017999887466431
+Increased accuracy: 0.7019999623298645
+Increased accuracy: 0.7021999955177307
+Increased accuracy: 0.7023999691009521
+Increased accuracy: 0.7027999758720398
+Battery 3350, low: 1584
+STL TRAINING  > 23000 loss:0.546 acc:0.68039995431900024414 dist:0.010 acc_val:0.694 dT:00.14s T:51m50s ETA:08H31m31s
+Avoid: 0.059, Battery: 2.258, Dest: 0.440, Charger: 1.846, Charging: 0.098
+Saving with: 0.6803999543190002
+Increased accuracy: 0.7037999629974365
+Increased accuracy: 0.7039999961853027
+Battery 3357, low: 1575
+STL TRAINING  > 23500 loss:0.545 acc:0.69359999895095825195 dist:0.010 acc_val:0.692 dT:00.14s T:52m55s ETA:08H30m08s
+Avoid: 0.059, Battery: 2.269, Dest: 0.442, Charger: 1.858, Charging: 0.095
+Saving with: 0.6935999989509583
+Increased accuracy: 0.7044000029563904
+Increased accuracy: 0.7045999765396118
+Increased accuracy: 0.704800009727478
+Increased accuracy: 0.7053999900817871
+Increased accuracy: 0.7071999907493591
+Increased accuracy: 0.7081999778747559
+Increased accuracy: 0.7087999582290649
+Increased accuracy: 0.7093999981880188
+Increased accuracy: 0.7099999785423279
+Increased accuracy: 0.710599958896637
+Increased accuracy: 0.7116000056266785
+Increased accuracy: 0.712399959564209
+Increased accuracy: 0.7127999663352966
+Increased accuracy: 0.7131999731063843
+Increased accuracy: 0.7143999934196472
+Increased accuracy: 0.7149999737739563
+Increased accuracy: 0.7155999541282654
+Increased accuracy: 0.7173999547958374
+Battery 3398, low: 1531
+STL TRAINING  > 24000 loss:0.545 acc:0.68759995698928833008 dist:0.010 acc_val:0.692 dT:00.14s T:54m02s ETA:08H28m52s
+Avoid: 0.057, Battery: 2.297, Dest: 0.421, Charger: 1.870, Charging: 0.096
+Saving with: 0.6875999569892883
+Battery 3416, low: 1517
+STL TRAINING  > 24500 loss:0.547 acc:0.64419996738433837891 dist:0.009 acc_val:0.622 dT:00.14s T:55m09s ETA:08H27m40s
+Avoid: 0.060, Battery: 2.281, Dest: 0.426, Charger: 1.879, Charging: 0.093
+Saving with: 0.6441999673843384
+Increased accuracy: 0.7191999554634094
+Increased accuracy: 0.72079998254776
+Increased accuracy: 0.7213999629020691
+Increased accuracy: 0.7235999703407288
+Increased accuracy: 0.7263999581336975
+Increased accuracy: 0.727400004863739
+Increased accuracy: 0.7283999919891357
+Increased accuracy: 0.7287999987602234
+Increased accuracy: 0.7301999926567078
+Increased accuracy: 0.7303999662399292
+Increased accuracy: 0.7305999994277954
+Increased accuracy: 0.7311999797821045
+Increased accuracy: 0.7325999736785889
+Increased accuracy: 0.7339999675750732
+Increased accuracy: 0.7342000007629395
+Increased accuracy: 0.7346000075340271
+Increased accuracy: 0.7353999614715576
+Increased accuracy: 0.7357999682426453
+Increased accuracy: 0.7371999621391296
+Increased accuracy: 0.7378000020980835
+Increased accuracy: 0.7389999628067017
+Increased accuracy: 0.7396000027656555
+Increased accuracy: 0.7407999634742737
+Increased accuracy: 0.7411999702453613
+Increased accuracy: 0.7423999905586243
+Increased accuracy: 0.7441999912261963
+Increased accuracy: 0.7445999979972839
+Increased accuracy: 0.7447999715805054
+Increased accuracy: 0.7450000047683716
+Increased accuracy: 0.745199978351593
+Increased accuracy: 0.7455999851226807
+Increased accuracy: 0.7457999587059021
+Increased accuracy: 0.7465999722480774
+Increased accuracy: 0.7473999857902527
+Increased accuracy: 0.7475999593734741
+Increased accuracy: 0.7486000061035156
+Increased accuracy: 0.7491999864578247
+Increased accuracy: 0.7501999735832214
+Increased accuracy: 0.7507999539375305
+Increased accuracy: 0.7513999938964844
+Increased accuracy: 0.7519999742507935
+Increased accuracy: 0.7529999613761902
+Increased accuracy: 0.7540000081062317
+Increased accuracy: 0.7549999952316284
+Increased accuracy: 0.7554000020027161
+Increased accuracy: 0.7558000087738037
+Increased accuracy: 0.7561999559402466
+Increased accuracy: 0.7567999958992004
+Battery 3343, low: 1599
+STL TRAINING  > 25000 loss:0.547 acc:0.70620000362396240234 dist:0.009 acc_val:0.698 dT:00.14s T:56m16s ETA:08H26m25s
+Avoid: 0.058, Battery: 2.196, Dest: 0.459, Charger: 1.825, Charging: 0.098
+Saving with: 0.7062000036239624
+Battery 3356, low: 1570
+STL TRAINING  > 25500 loss:0.545 acc:0.72240000963211059570 dist:0.009 acc_val:0.740 dT:00.14s T:57m23s ETA:08H25m12s
+Avoid: 0.062, Battery: 2.228, Dest: 0.450, Charger: 1.846, Charging: 0.096
+Saving with: 0.7224000096321106
+Battery 3389, low: 1554
+STL TRAINING  > 26000 loss:0.541 acc:0.73939996957778930664 dist:0.009 acc_val:0.740 dT:00.14s T:58m30s ETA:08H24m05s
+Avoid: 0.061, Battery: 2.247, Dest: 0.436, Charger: 1.855, Charging: 0.097
+Saving with: 0.7393999695777893
+Increased accuracy: 0.7569999694824219
+Increased accuracy: 0.7577999830245972
+Increased accuracy: 0.7581999897956848
+Increased accuracy: 0.7583999633789062
+Increased accuracy: 0.7587999701499939
+Increased accuracy: 0.7590000033378601
+Increased accuracy: 0.7599999904632568
+Increased accuracy: 0.7603999972343445
+Increased accuracy: 0.7608000040054321
+Increased accuracy: 0.761199951171875
+Increased accuracy: 0.7613999843597412
+Increased accuracy: 0.7621999979019165
+Increased accuracy: 0.7626000046730042
+Increased accuracy: 0.7627999782562256
+Increased accuracy: 0.762999951839447
+Increased accuracy: 0.7633999586105347
+Increased accuracy: 0.7635999917984009
+Increased accuracy: 0.7637999653816223
+Increased accuracy: 0.7639999985694885
+Increased accuracy: 0.76419997215271
+Increased accuracy: 0.7644000053405762
+Increased accuracy: 0.7649999856948853
+Increased accuracy: 0.7655999660491943
+Increased accuracy: 0.7657999992370605
+Increased accuracy: 0.765999972820282
+Increased accuracy: 0.7662000060081482
+Battery 3359, low: 1592
+STL TRAINING  > 26500 loss:0.550 acc:0.65939998626708984375 dist:0.009 acc_val:0.674 dT:00.14s T:59m38s ETA:08H22m54s
+Avoid: 0.056, Battery: 2.240, Dest: 0.453, Charger: 1.862, Charging: 0.091
+Saving with: 0.6593999862670898
+Battery 3365, low: 1584
+STL TRAINING  > 27000 loss:0.545 acc:0.71579998731613159180 dist:0.010 acc_val:0.722 dT:00.13s T:01H00m40s ETA:08H21m04s
+Avoid: 0.061, Battery: 2.246, Dest: 0.453, Charger: 1.850, Charging: 0.097
+Saving with: 0.7157999873161316
+Battery 3376, low: 1565
+STL TRAINING  > 27500 loss:0.543 acc:0.72959995269775390625 dist:0.009 acc_val:0.744 dT:00.13s T:01H01m46s ETA:08H19m44s
+Avoid: 0.064, Battery: 2.256, Dest: 0.450, Charger: 1.867, Charging: 0.089
+Saving with: 0.7295999526977539
+Battery 3320, low: 1602
+STL TRAINING  > 28000 loss:0.550 acc:0.63539999723434448242 dist:0.009 acc_val:0.704 dT:00.13s T:01H02m53s ETA:08H18m38s
+Avoid: 0.054, Battery: 2.199, Dest: 0.447, Charger: 1.837, Charging: 0.094
+Saving with: 0.6353999972343445
+Battery 3416, low: 1514
+STL TRAINING  > 28500 loss:0.556 acc:0.52419996261596679688 dist:0.008 acc_val:0.556 dT:00.13s T:01H04m01s ETA:08H17m33s
+Avoid: 0.051, Battery: 2.221, Dest: 0.415, Charger: 1.882, Charging: 0.091
+Saving with: 0.5241999626159668
+Battery 3399, low: 1544
+STL TRAINING  > 29000 loss:0.540 acc:0.74339997768402099609 dist:0.009 acc_val:0.750 dT:00.13s T:01H05m06s ETA:08H16m10s
+Avoid: 0.064, Battery: 2.255, Dest: 0.444, Charger: 1.881, Charging: 0.095
+Saving with: 0.743399977684021
+Increased accuracy: 0.7663999795913696
+Increased accuracy: 0.7665999531745911
+Increased accuracy: 0.7667999863624573
+Increased accuracy: 0.7669999599456787
+Increased accuracy: 0.7675999999046326
+Battery 3351, low: 1584
+STL TRAINING  > 29500 loss:0.546 acc:0.71160000562667846680 dist:0.009 acc_val:0.748 dT:00.13s T:01H06m12s ETA:08H14m47s
+Avoid: 0.059, Battery: 2.216, Dest: 0.447, Charger: 1.852, Charging: 0.093
+Saving with: 0.7116000056266785
+Battery 3382, low: 1544
+STL TRAINING  > 30000 loss:0.541 acc:0.74099999666213989258 dist:0.009 acc_val:0.760 dT:00.13s T:01H07m20s ETA:08H13m48s
+Avoid: 0.064, Battery: 2.236, Dest: 0.441, Charger: 1.853, Charging: 0.097
+Saving with: 0.7409999966621399
+Battery 3439, low: 1502
+STL TRAINING  > 30500 loss:0.538 acc:0.74680000543594360352 dist:0.009 acc_val:0.754 dT:00.13s T:01H08m29s ETA:08H12m53s
+Avoid: 0.060, Battery: 2.273, Dest: 0.425, Charger: 1.903, Charging: 0.097
+Saving with: 0.7468000054359436
+Increased accuracy: 0.7683999538421631
+Increased accuracy: 0.7685999870300293
+Increased accuracy: 0.7687999606132507
+Increased accuracy: 0.7689999938011169
+Increased accuracy: 0.7698000073432922
+Increased accuracy: 0.7703999876976013
+Increased accuracy: 0.770799994468689
+Increased accuracy: 0.7712000012397766
+Increased accuracy: 0.7716000080108643
+Increased accuracy: 0.7717999815940857
+Increased accuracy: 0.7721999883651733
+Increased accuracy: 0.7727999687194824
+Increased accuracy: 0.7730000019073486
+Increased accuracy: 0.7731999754905701
+Increased accuracy: 0.7735999822616577
+Increased accuracy: 0.7741999626159668
+Increased accuracy: 0.774399995803833
+Increased accuracy: 0.7753999829292297
+Battery 3345, low: 1595
+STL TRAINING  > 31000 loss:0.542 acc:0.73799997568130493164 dist:0.009 acc_val:0.736 dT:00.13s T:01H09m33s ETA:08H11m22s
+Avoid: 0.063, Battery: 2.233, Dest: 0.454, Charger: 1.848, Charging: 0.096
+Saving with: 0.7379999756813049
+Battery 3416, low: 1518
+STL TRAINING  > 31500 loss:0.545 acc:0.72060000896453857422 dist:0.009 acc_val:0.724 dT:00.13s T:01H10m40s ETA:08H10m10s
+Avoid: 0.059, Battery: 2.248, Dest: 0.443, Charger: 1.877, Charging: 0.092
+Saving with: 0.7206000089645386
+Battery 3381, low: 1559
+STL TRAINING  > 32000 loss:0.542 acc:0.74719995260238647461 dist:0.009 acc_val:0.748 dT:00.13s T:01H11m48s ETA:08H09m06s
+Avoid: 0.064, Battery: 2.262, Dest: 0.445, Charger: 1.883, Charging: 0.091
+Saving with: 0.7471999526023865
+Battery 3375, low: 1564
+STL TRAINING  > 32500 loss:0.542 acc:0.73039996623992919922 dist:0.009 acc_val:0.764 dT:00.13s T:01H12m55s ETA:08H08m00s
+Avoid: 0.059, Battery: 2.207, Dest: 0.445, Charger: 1.843, Charging: 0.093
+Saving with: 0.7303999662399292
+Battery 3407, low: 1534
+STL TRAINING  > 33000 loss:0.542 acc:0.74140000343322753906 dist:0.009 acc_val:0.758 dT:00.13s T:01H14m02s ETA:08H06m52s
+Avoid: 0.062, Battery: 2.262, Dest: 0.444, Charger: 1.875, Charging: 0.093
+Saving with: 0.7414000034332275
+Battery 3319, low: 1622
+STL TRAINING  > 33500 loss:0.541 acc:0.72939997911453247070 dist:0.009 acc_val:0.752 dT:00.13s T:01H15m10s ETA:08H05m49s
+Avoid: 0.065, Battery: 2.212, Dest: 0.456, Charger: 1.835, Charging: 0.092
+Saving with: 0.7293999791145325
+Battery 3358, low: 1582
+STL TRAINING  > 34000 loss:0.548 acc:0.68919998407363891602 dist:0.009 acc_val:0.746 dT:00.13s T:01H16m19s ETA:08H04m51s
+Avoid: 0.059, Battery: 2.213, Dest: 0.446, Charger: 1.847, Charging: 0.097
+Saving with: 0.6891999840736389
+Battery 3381, low: 1561
+STL TRAINING  > 34500 loss:0.539 acc:0.74719995260238647461 dist:0.009 acc_val:0.750 dT:00.13s T:01H17m25s ETA:08H03m37s
+Avoid: 0.063, Battery: 2.257, Dest: 0.442, Charger: 1.870, Charging: 0.096
+Saving with: 0.7471999526023865
+Battery 3394, low: 1544
+STL TRAINING  > 35000 loss:0.541 acc:0.74479997158050537109 dist:0.009 acc_val:0.742 dT:00.13s T:01H18m33s ETA:08H02m30s
+Avoid: 0.062, Battery: 2.253, Dest: 0.438, Charger: 1.870, Charging: 0.096
+Saving with: 0.7447999715805054
+Battery 3357, low: 1579
+STL TRAINING  > 35500 loss:0.542 acc:0.74279999732971191406 dist:0.009 acc_val:0.754 dT:00.13s T:01H19m37s ETA:08H01m06s
+Avoid: 0.062, Battery: 2.227, Dest: 0.453, Charger: 1.853, Charging: 0.092
+Saving with: 0.7427999973297119
+Battery 3355, low: 1594
+STL TRAINING  > 36000 loss:0.542 acc:0.74159997701644897461 dist:0.009 acc_val:0.748 dT:00.13s T:01H20m47s ETA:08H00m11s
+Avoid: 0.062, Battery: 2.207, Dest: 0.456, Charger: 1.841, Charging: 0.096
+Saving with: 0.741599977016449
+Battery 3397, low: 1540
+STL TRAINING  > 36500 loss:0.553 acc:0.59639996290206909180 dist:0.009 acc_val:0.656 dT:00.13s T:01H21m54s ETA:07H59m06s
+Avoid: 0.063, Battery: 2.222, Dest: 0.434, Charger: 1.875, Charging: 0.093
+Saving with: 0.5963999629020691
+Battery 3407, low: 1545
+STL TRAINING  > 37000 loss:0.539 acc:0.75259995460510253906 dist:0.009 acc_val:0.762 dT:00.13s T:01H23m03s ETA:07H58m07s
+Avoid: 0.063, Battery: 2.252, Dest: 0.437, Charger: 1.887, Charging: 0.093
+Saving with: 0.7525999546051025
+Battery 3382, low: 1555
+STL TRAINING  > 37500 loss:0.544 acc:0.73460000753402709961 dist:0.009 acc_val:0.758 dT:00.13s T:01H24m11s ETA:07H57m03s
+Avoid: 0.060, Battery: 2.232, Dest: 0.453, Charger: 1.873, Charging: 0.092
+Saving with: 0.7346000075340271
+Battery 3404, low: 1543
+STL TRAINING  > 38000 loss:0.541 acc:0.74459999799728393555 dist:0.009 acc_val:0.760 dT:00.13s T:01H25m19s ETA:07H56m02s
+Avoid: 0.061, Battery: 2.231, Dest: 0.443, Charger: 1.866, Charging: 0.092
+Saving with: 0.7445999979972839
+Battery 3371, low: 1572
+STL TRAINING  > 38500 loss:0.542 acc:0.73899996280670166016 dist:0.009 acc_val:0.766 dT:00.13s T:01H26m27s ETA:07H54m56s
+Avoid: 0.060, Battery: 2.212, Dest: 0.453, Charger: 1.853, Charging: 0.094
+Saving with: 0.7389999628067017
+Battery 3389, low: 1551
+STL TRAINING  > 39000 loss:0.543 acc:0.72299998998641967773 dist:0.009 acc_val:0.754 dT:00.13s T:01H27m34s ETA:07H53m46s
+Avoid: 0.056, Battery: 2.227, Dest: 0.443, Charger: 1.864, Charging: 0.095
+Saving with: 0.7229999899864197
+Battery 3386, low: 1559
+STL TRAINING  > 39500 loss:0.543 acc:0.73339998722076416016 dist:0.009 acc_val:0.758 dT:00.13s T:01H28m41s ETA:07H52m37s
+Avoid: 0.059, Battery: 2.230, Dest: 0.444, Charger: 1.868, Charging: 0.097
+Saving with: 0.7333999872207642
+Battery 3399, low: 1537
+STL TRAINING  > 40000 loss:0.540 acc:0.75379997491836547852 dist:0.009 acc_val:0.760 dT:00.13s T:01H29m47s ETA:07H51m25s
+Avoid: 0.062, Battery: 2.239, Dest: 0.444, Charger: 1.867, Charging: 0.095
+Saving with: 0.7537999749183655
+Battery 3331, low: 1603
+STL TRAINING  > 40500 loss:0.541 acc:0.74399995803833007812 dist:0.009 acc_val:0.768 dT:00.13s T:01H30m55s ETA:07H50m19s
+Avoid: 0.062, Battery: 2.215, Dest: 0.457, Charger: 1.847, Charging: 0.094
+Saving with: 0.7439999580383301
+Battery 3367, low: 1572
+STL TRAINING  > 41000 loss:0.540 acc:0.74000000953674316406 dist:0.008 acc_val:0.754 dT:00.13s T:01H32m02s ETA:07H49m08s
+Avoid: 0.061, Battery: 2.212, Dest: 0.451, Charger: 1.849, Charging: 0.097
+Saving with: 0.7400000095367432
+Battery 3375, low: 1562
+STL TRAINING  > 41500 loss:0.540 acc:0.74739998579025268555 dist:0.009 acc_val:0.764 dT:00.13s T:01H33m09s ETA:07H48m01s
+Avoid: 0.061, Battery: 2.204, Dest: 0.446, Charger: 1.851, Charging: 0.098
+Saving with: 0.7473999857902527
+Battery 3374, low: 1570
+STL TRAINING  > 42000 loss:0.540 acc:0.74739998579025268555 dist:0.009 acc_val:0.760 dT:00.13s T:01H34m19s ETA:07H47m04s
+Avoid: 0.061, Battery: 2.226, Dest: 0.445, Charger: 1.856, Charging: 0.095
+Saving with: 0.7473999857902527
+Battery 3375, low: 1554
+STL TRAINING  > 42500 loss:0.541 acc:0.74199998378753662109 dist:0.008 acc_val:0.760 dT:00.13s T:01H35m24s ETA:07H45m48s
+Avoid: 0.060, Battery: 2.198, Dest: 0.444, Charger: 1.847, Charging: 0.098
+Saving with: 0.7419999837875366
+Battery 3397, low: 1546
+STL TRAINING  > 43000 loss:0.541 acc:0.74419999122619628906 dist:0.009 acc_val:0.756 dT:00.13s T:01H36m34s ETA:07H44m54s
+Avoid: 0.061, Battery: 2.218, Dest: 0.444, Charger: 1.863, Charging: 0.093
+Saving with: 0.7441999912261963
+Battery 3340, low: 1598
+STL TRAINING  > 43500 loss:0.544 acc:0.71219998598098754883 dist:0.008 acc_val:0.746 dT:00.13s T:01H37m44s ETA:07H43m57s
+Avoid: 0.060, Battery: 2.187, Dest: 0.453, Charger: 1.836, Charging: 0.094
+Saving with: 0.7121999859809875
+Battery 3308, low: 1630
+STL TRAINING  > 44000 loss:0.541 acc:0.74360001087188720703 dist:0.008 acc_val:0.748 dT:00.13s T:01H38m54s ETA:07H43m02s
+Avoid: 0.063, Battery: 2.166, Dest: 0.465, Charger: 1.821, Charging: 0.096
+Saving with: 0.7436000108718872
+Battery 3411, low: 1539
+STL TRAINING  > 44500 loss:0.543 acc:0.74099999666213989258 dist:0.009 acc_val:0.760 dT:00.13s T:01H40m04s ETA:07H42m04s
+Avoid: 0.060, Battery: 2.223, Dest: 0.447, Charger: 1.871, Charging: 0.094
+Saving with: 0.7409999966621399
+Battery 3395, low: 1543
+STL TRAINING  > 45000 loss:0.541 acc:0.74860000610351562500 dist:0.009 acc_val:0.756 dT:00.13s T:01H41m13s ETA:07H41m08s
+Avoid: 0.060, Battery: 2.220, Dest: 0.447, Charger: 1.871, Charging: 0.096
+Saving with: 0.7486000061035156
+Battery 3391, low: 1547
+STL TRAINING  > 45500 loss:0.539 acc:0.75360000133514404297 dist:0.009 acc_val:0.756 dT:00.14s T:01H42m23s ETA:07H40m12s
+Avoid: 0.060, Battery: 2.229, Dest: 0.435, Charger: 1.857, Charging: 0.096
+Saving with: 0.753600001335144
+Battery 3358, low: 1583
+STL TRAINING  > 46000 loss:0.541 acc:0.74979996681213378906 dist:0.009 acc_val:0.758 dT:00.14s T:01H43m33s ETA:07H39m15s
+Avoid: 0.061, Battery: 2.206, Dest: 0.450, Charger: 1.844, Charging: 0.099
+Saving with: 0.7497999668121338
+Battery 3377, low: 1561
+STL TRAINING  > 46500 loss:0.540 acc:0.75459998846054077148 dist:0.009 acc_val:0.754 dT:00.14s T:01H44m43s ETA:07H38m19s
+Avoid: 0.062, Battery: 2.246, Dest: 0.444, Charger: 1.862, Charging: 0.095
+Saving with: 0.7545999884605408
+Increased accuracy: 0.7755999565124512
+Increased accuracy: 0.7767999768257141
+Increased accuracy: 0.7770000100135803
+Increased accuracy: 0.7775999903678894
+Increased accuracy: 0.777999997138977
+Increased accuracy: 0.7781999707221985
+Increased accuracy: 0.7784000039100647
+Battery 3363, low: 1576
+STL TRAINING  > 47000 loss:0.541 acc:0.74759995937347412109 dist:0.009 acc_val:0.754 dT:00.14s T:01H45m51s ETA:07H37m09s
+Avoid: 0.063, Battery: 2.208, Dest: 0.454, Charger: 1.846, Charging: 0.090
+Saving with: 0.7475999593734741
+Battery 3419, low: 1524
+STL TRAINING  > 47500 loss:0.542 acc:0.74959999322891235352 dist:0.009 acc_val:0.750 dT:00.14s T:01H47m01s ETA:07H36m12s
+Avoid: 0.062, Battery: 2.259, Dest: 0.441, Charger: 1.876, Charging: 0.094
+Saving with: 0.7495999932289124
+Battery 3338, low: 1591
+STL TRAINING  > 48000 loss:0.540 acc:0.74680000543594360352 dist:0.008 acc_val:0.748 dT:00.14s T:01H48m09s ETA:07H35m09s
+Avoid: 0.061, Battery: 2.220, Dest: 0.456, Charger: 1.853, Charging: 0.093
+Saving with: 0.7468000054359436
+Battery 3456, low: 1491
+STL TRAINING  > 48500 loss:0.541 acc:0.74339997768402099609 dist:0.009 acc_val:0.742 dT:00.14s T:01H49m19s ETA:07H34m11s
+Avoid: 0.061, Battery: 2.278, Dest: 0.434, Charger: 1.911, Charging: 0.088
+Saving with: 0.743399977684021
+Battery 3403, low: 1533
+STL TRAINING  > 49000 loss:0.541 acc:0.73820000886917114258 dist:0.009 acc_val:0.754 dT:00.14s T:01H50m28s ETA:07H33m09s
+Avoid: 0.058, Battery: 2.240, Dest: 0.439, Charger: 1.866, Charging: 0.096
+Saving with: 0.7382000088691711
+Battery 3403, low: 1522
+STL TRAINING  > 49500 loss:0.539 acc:0.75180000066757202148 dist:0.008 acc_val:0.758 dT:00.14s T:01H51m38s ETA:07H32m11s
+Avoid: 0.061, Battery: 2.237, Dest: 0.441, Charger: 1.878, Charging: 0.092
+Saving with: 0.751800000667572
+Battery 3333, low: 1583
+STL TRAINING  > 50000 loss:0.541 acc:0.70959997177124023438 dist:0.009 acc_val:0.742 dT:00.14s T:01H52m48s ETA:07H31m10s
+Avoid: 0.062, Battery: 2.216, Dest: 0.443, Charger: 1.849, Charging: 0.095
+Saving with: 0.7095999717712402
+Increased accuracy: 0.7785999774932861
+Increased accuracy: 0.7787999510765076
+Increased accuracy: 0.7789999842643738
+Increased accuracy: 0.7791999578475952
+Increased accuracy: 0.7795999646186829
+Battery 3324, low: 1608
+STL TRAINING  > 50500 loss:0.543 acc:0.73780000209808349609 dist:0.008 acc_val:0.738 dT:00.14s T:01H53m57s ETA:07H30m11s
+Avoid: 0.064, Battery: 2.187, Dest: 0.464, Charger: 1.837, Charging: 0.095
+Saving with: 0.7378000020980835
+Battery 3412, low: 1538
+STL TRAINING  > 51000 loss:0.546 acc:0.67939996719360351562 dist:0.009 acc_val:0.682 dT:00.14s T:01H55m04s ETA:07H28m58s
+Avoid: 0.062, Battery: 2.247, Dest: 0.437, Charger: 1.881, Charging: 0.091
+Saving with: 0.6793999671936035
+Battery 3288, low: 1651
+STL TRAINING  > 51500 loss:0.541 acc:0.74939996004104614258 dist:0.009 acc_val:0.756 dT:00.14s T:01H56m13s ETA:07H27m56s
+Avoid: 0.062, Battery: 2.154, Dest: 0.466, Charger: 1.800, Charging: 0.097
+Saving with: 0.7493999600410461
+Battery 3369, low: 1562
+STL TRAINING  > 52000 loss:0.540 acc:0.74559998512268066406 dist:0.009 acc_val:0.768 dT:00.14s T:01H57m22s ETA:07H26m54s
+Avoid: 0.063, Battery: 2.202, Dest: 0.445, Charger: 1.845, Charging: 0.093
+Saving with: 0.7455999851226807
+Battery 3395, low: 1533
+STL TRAINING  > 52500 loss:0.540 acc:0.75999999046325683594 dist:0.009 acc_val:0.772 dT:00.14s T:01H58m32s ETA:07H25m55s
+Avoid: 0.062, Battery: 2.217, Dest: 0.440, Charger: 1.854, Charging: 0.096
+Saving with: 0.7599999904632568
+Battery 3364, low: 1573
+STL TRAINING  > 53000 loss:0.541 acc:0.71859997510910034180 dist:0.009 acc_val:0.758 dT:00.14s T:01H59m36s ETA:07H24m33s
+Avoid: 0.063, Battery: 2.230, Dest: 0.437, Charger: 1.856, Charging: 0.097
+Saving with: 0.7185999751091003
+Increased accuracy: 0.7797999978065491
+Increased accuracy: 0.7799999713897705
+Increased accuracy: 0.7802000045776367
+Increased accuracy: 0.7803999781608582
+Increased accuracy: 0.7807999849319458
+Increased accuracy: 0.7813999652862549
+Increased accuracy: 0.7823999524116516
+Increased accuracy: 0.7827999591827393
+Increased accuracy: 0.7831999659538269
+Increased accuracy: 0.7835999727249146
+Increased accuracy: 0.7838000059127808
+Increased accuracy: 0.7841999530792236
+Increased accuracy: 0.7845999598503113
+Increased accuracy: 0.7853999733924866
+Increased accuracy: 0.7856000065803528
+Increased accuracy: 0.7861999869346619
+Increased accuracy: 0.7865999937057495
+Increased accuracy: 0.786799967288971
+Increased accuracy: 0.7871999740600586
+Battery 3372, low: 1573
+STL TRAINING  > 53500 loss:0.543 acc:0.73820000886917114258 dist:0.009 acc_val:0.748 dT:00.14s T:02H00m44s ETA:07H23m28s
+Avoid: 0.064, Battery: 2.219, Dest: 0.449, Charger: 1.857, Charging: 0.094
+Saving with: 0.7382000088691711
+Battery 3364, low: 1563
+STL TRAINING  > 54000 loss:0.538 acc:0.76219999790191650391 dist:0.009 acc_val:0.752 dT:00.14s T:02H01m52s ETA:07H22m21s
+Avoid: 0.063, Battery: 2.209, Dest: 0.447, Charger: 1.841, Charging: 0.097
+Saving with: 0.7621999979019165
+Battery 3406, low: 1533
+STL TRAINING  > 54500 loss:0.538 acc:0.75819998979568481445 dist:0.009 acc_val:0.754 dT:00.14s T:02H02m59s ETA:07H21m11s
+Avoid: 0.063, Battery: 2.241, Dest: 0.441, Charger: 1.880, Charging: 0.093
+Saving with: 0.7581999897956848
+Battery 3358, low: 1567
+STL TRAINING  > 55000 loss:0.535 acc:0.77219998836517333984 dist:0.008 acc_val:0.768 dT:00.14s T:02H04m06s ETA:07H20m00s
+Avoid: 0.065, Battery: 2.218, Dest: 0.444, Charger: 1.854, Charging: 0.096
+Saving with: 0.7721999883651733
+Increased accuracy: 0.7874000072479248
+Increased accuracy: 0.7875999808311462
+Increased accuracy: 0.7877999544143677
+Increased accuracy: 0.788599967956543
+Increased accuracy: 0.7889999747276306
+Increased accuracy: 0.7892000079154968
+Increased accuracy: 0.7895999550819397
+Increased accuracy: 0.7899999618530273
+Increased accuracy: 0.7906000018119812
+Battery 3418, low: 1520
+STL TRAINING  > 55500 loss:0.542 acc:0.68759995698928833008 dist:0.009 acc_val:0.668 dT:00.14s T:02H05m12s ETA:07H18m47s
+Avoid: 0.064, Battery: 2.220, Dest: 0.424, Charger: 1.866, Charging: 0.096
+Saving with: 0.6875999569892883
+Battery 3369, low: 1572
+STL TRAINING  > 56000 loss:0.541 acc:0.75059998035430908203 dist:0.009 acc_val:0.742 dT:00.14s T:02H06m18s ETA:07H17m31s
+Avoid: 0.063, Battery: 2.218, Dest: 0.446, Charger: 1.861, Charging: 0.093
+Saving with: 0.7505999803543091
+Battery 3355, low: 1582
+STL TRAINING  > 56500 loss:0.540 acc:0.75079995393753051758 dist:0.008 acc_val:0.766 dT:00.14s T:02H07m23s ETA:07H16m15s
+Avoid: 0.062, Battery: 2.179, Dest: 0.454, Charger: 1.833, Charging: 0.094
+Saving with: 0.7507999539375305
+Battery 3395, low: 1535
+STL TRAINING  > 57000 loss:0.539 acc:0.75839996337890625000 dist:0.008 acc_val:0.768 dT:00.14s T:02H08m28s ETA:07H15m00s
+Avoid: 0.063, Battery: 2.210, Dest: 0.441, Charger: 1.854, Charging: 0.093
+Saving with: 0.7583999633789062
+Battery 3353, low: 1579
+STL TRAINING  > 57500 loss:0.539 acc:0.75679999589920043945 dist:0.008 acc_val:0.764 dT:00.14s T:02H09m37s ETA:07H13m56s
+Avoid: 0.064, Battery: 2.196, Dest: 0.458, Charger: 1.848, Charging: 0.094
+Saving with: 0.7567999958992004
+Battery 3410, low: 1539
+STL TRAINING  > 58000 loss:0.538 acc:0.76099997758865356445 dist:0.009 acc_val:0.764 dT:00.14s T:02H10m45s ETA:07H12m50s
+Avoid: 0.062, Battery: 2.230, Dest: 0.438, Charger: 1.872, Charging: 0.098
+Saving with: 0.7609999775886536
+Battery 3353, low: 1577
+STL TRAINING  > 58500 loss:0.540 acc:0.75659996271133422852 dist:0.009 acc_val:0.756 dT:00.14s T:02H11m53s ETA:07H11m42s
+Avoid: 0.062, Battery: 2.186, Dest: 0.450, Charger: 1.835, Charging: 0.098
+Saving with: 0.7565999627113342
+Battery 3367, low: 1574
+STL TRAINING  > 59000 loss:0.542 acc:0.73659998178482055664 dist:0.009 acc_val:0.760 dT:00.14s T:02H13m01s ETA:07H10m37s
+Avoid: 0.062, Battery: 2.197, Dest: 0.452, Charger: 1.845, Charging: 0.097
+Saving with: 0.7365999817848206
+Battery 3410, low: 1545
+STL TRAINING  > 59500 loss:0.548 acc:0.57580000162124633789 dist:0.008 acc_val:0.628 dT:00.14s T:02H14m09s ETA:07H09m31s
+Avoid: 0.067, Battery: 2.222, Dest: 0.430, Charger: 1.866, Charging: 0.093
+Saving with: 0.5758000016212463
+Battery 3387, low: 1562
+STL TRAINING  > 60000 loss:0.539 acc:0.75940001010894775391 dist:0.009 acc_val:0.754 dT:00.14s T:02H15m17s ETA:07H08m25s
+Avoid: 0.063, Battery: 2.215, Dest: 0.443, Charger: 1.859, Charging: 0.096
+Saving with: 0.7594000101089478
+Battery 3354, low: 1590
+STL TRAINING  > 60500 loss:0.540 acc:0.75419998168945312500 dist:0.009 acc_val:0.760 dT:00.14s T:02H16m26s ETA:07H07m21s
+Avoid: 0.063, Battery: 2.193, Dest: 0.461, Charger: 1.850, Charging: 0.094
+Saving with: 0.7541999816894531
+Battery 3387, low: 1561
+STL TRAINING  > 61000 loss:0.554 acc:0.58419996500015258789 dist:0.009 acc_val:0.550 dT:00.14s T:02H17m32s ETA:07H06m09s
+Avoid: 0.056, Battery: 2.217, Dest: 0.433, Charger: 1.866, Charging: 0.093
+Saving with: 0.5841999650001526
+Battery 3292, low: 1654
+STL TRAINING  > 61500 loss:0.543 acc:0.73799997568130493164 dist:0.008 acc_val:0.758 dT:00.14s T:02H18m39s ETA:07H04m59s
+Avoid: 0.063, Battery: 2.137, Dest: 0.469, Charger: 1.802, Charging: 0.099
+Saving with: 0.7379999756813049
+Battery 3411, low: 1522
+STL TRAINING  > 62000 loss:0.539 acc:0.74699997901916503906 dist:0.008 acc_val:0.762 dT:00.14s T:02H19m45s ETA:07H03m45s
+Avoid: 0.062, Battery: 2.240, Dest: 0.436, Charger: 1.888, Charging: 0.097
+Saving with: 0.746999979019165
+Battery 3382, low: 1556
+STL TRAINING  > 62500 loss:0.541 acc:0.75540000200271606445 dist:0.009 acc_val:0.774 dT:00.14s T:02H20m51s ETA:07H02m33s
+Avoid: 0.064, Battery: 2.208, Dest: 0.446, Charger: 1.852, Charging: 0.096
+Saving with: 0.7554000020027161
+Battery 3414, low: 1516
+STL TRAINING  > 63000 loss:0.541 acc:0.70359998941421508789 dist:0.008 acc_val:0.754 dT:00.14s T:02H21m58s ETA:07H01m24s
+Avoid: 0.058, Battery: 2.241, Dest: 0.427, Charger: 1.894, Charging: 0.093
+Saving with: 0.7035999894142151
+Increased accuracy: 0.7907999753952026
+Increased accuracy: 0.7911999821662903
+Increased accuracy: 0.7913999557495117
+Increased accuracy: 0.7915999889373779
+Increased accuracy: 0.792199969291687
+Increased accuracy: 0.7925999760627747
+Increased accuracy: 0.7929999828338623
+Increased accuracy: 0.79339998960495
+Battery 3378, low: 1565
+STL TRAINING  > 63500 loss:0.540 acc:0.75459998846054077148 dist:0.008 acc_val:0.766 dT:00.14s T:02H23m04s ETA:07H00m11s
+Avoid: 0.064, Battery: 2.222, Dest: 0.457, Charger: 1.870, Charging: 0.092
+Saving with: 0.7545999884605408
+Battery 3380, low: 1559
+STL TRAINING  > 64000 loss:0.538 acc:0.76279997825622558594 dist:0.008 acc_val:0.764 dT:00.14s T:02H24m13s ETA:06H59m07s
+Avoid: 0.064, Battery: 2.210, Dest: 0.449, Charger: 1.863, Charging: 0.096
+Saving with: 0.7627999782562256
+Battery 3379, low: 1564
+STL TRAINING  > 64500 loss:0.541 acc:0.75419998168945312500 dist:0.009 acc_val:0.762 dT:00.14s T:02H25m20s ETA:06H57m57s
+Avoid: 0.064, Battery: 2.215, Dest: 0.453, Charger: 1.857, Charging: 0.096
+Saving with: 0.7541999816894531
+Battery 3342, low: 1607
+STL TRAINING  > 65000 loss:0.540 acc:0.75279998779296875000 dist:0.008 acc_val:0.764 dT:00.14s T:02H26m25s ETA:06H56m43s
+Avoid: 0.064, Battery: 2.183, Dest: 0.461, Charger: 1.833, Charging: 0.095
+Saving with: 0.7527999877929688
+Battery 3408, low: 1527
+STL TRAINING  > 65500 loss:0.540 acc:0.75559997558593750000 dist:0.008 acc_val:0.770 dT:00.14s T:02H27m34s ETA:06H55m39s
+Avoid: 0.061, Battery: 2.213, Dest: 0.447, Charger: 1.867, Charging: 0.093
+Saving with: 0.7555999755859375
+Battery 3353, low: 1583
+STL TRAINING  > 66000 loss:0.545 acc:0.72200000286102294922 dist:0.008 acc_val:0.748 dT:00.14s T:02H28m42s ETA:06H54m32s
+Avoid: 0.063, Battery: 2.194, Dest: 0.458, Charger: 1.858, Charging: 0.094
+Saving with: 0.722000002861023
+Battery 3352, low: 1582
+STL TRAINING  > 66500 loss:0.541 acc:0.75499999523162841797 dist:0.008 acc_val:0.756 dT:00.14s T:02H29m49s ETA:06H53m25s
+Avoid: 0.065, Battery: 2.173, Dest: 0.453, Charger: 1.838, Charging: 0.094
+Saving with: 0.7549999952316284
+Battery 3384, low: 1545
+STL TRAINING  > 67000 loss:0.539 acc:0.75940001010894775391 dist:0.008 acc_val:0.762 dT:00.14s T:02H30m56s ETA:06H52m16s
+Avoid: 0.064, Battery: 2.210, Dest: 0.445, Charger: 1.867, Charging: 0.094
+Saving with: 0.7594000101089478
+Battery 3356, low: 1591
+STL TRAINING  > 67500 loss:0.539 acc:0.74839997291564941406 dist:0.008 acc_val:0.776 dT:00.14s T:02H32m04s ETA:06H51m09s
+Avoid: 0.064, Battery: 2.173, Dest: 0.449, Charger: 1.832, Charging: 0.098
+Saving with: 0.7483999729156494
+Battery 3390, low: 1564
+STL TRAINING  > 68000 loss:0.540 acc:0.75699996948242187500 dist:0.008 acc_val:0.768 dT:00.14s T:02H33m11s ETA:06H50m00s
+Avoid: 0.062, Battery: 2.216, Dest: 0.449, Charger: 1.870, Charging: 0.096
+Saving with: 0.7569999694824219
+Battery 3380, low: 1567
+STL TRAINING  > 68500 loss:0.540 acc:0.75400000810623168945 dist:0.008 acc_val:0.772 dT:00.14s T:02H34m20s ETA:06H48m56s
+Avoid: 0.064, Battery: 2.200, Dest: 0.454, Charger: 1.858, Charging: 0.095
+Saving with: 0.7540000081062317
+Battery 3315, low: 1623
+STL TRAINING  > 69000 loss:0.539 acc:0.76019996404647827148 dist:0.008 acc_val:0.768 dT:00.14s T:02H35m28s ETA:06H47m48s
+Avoid: 0.068, Battery: 2.168, Dest: 0.466, Charger: 1.818, Charging: 0.096
+Saving with: 0.7601999640464783
+Battery 3391, low: 1558
+STL TRAINING  > 69500 loss:0.538 acc:0.76919996738433837891 dist:0.008 acc_val:0.774 dT:00.14s T:02H36m36s ETA:06H46m42s
+Avoid: 0.063, Battery: 2.232, Dest: 0.448, Charger: 1.877, Charging: 0.095
+Saving with: 0.7691999673843384
+Battery 3352, low: 1592
+STL TRAINING  > 70000 loss:0.536 acc:0.77319997549057006836 dist:0.008 acc_val:0.782 dT:00.14s T:02H37m45s ETA:06H45m39s
+Avoid: 0.064, Battery: 2.208, Dest: 0.447, Charger: 1.850, Charging: 0.097
+Saving with: 0.7731999754905701
+Increased accuracy: 0.7942000031471252
+Increased accuracy: 0.7949999570846558
+Battery 3370, low: 1555
+STL TRAINING  > 70500 loss:0.539 acc:0.76459997892379760742 dist:0.008 acc_val:0.780 dT:00.14s T:02H38m54s ETA:06H44m35s
+Avoid: 0.066, Battery: 2.203, Dest: 0.453, Charger: 1.859, Charging: 0.094
+Saving with: 0.7645999789237976
+Battery 3355, low: 1585
+STL TRAINING  > 71000 loss:0.537 acc:0.76800000667572021484 dist:0.008 acc_val:0.774 dT:00.14s T:02H39m59s ETA:06H43m20s
+Avoid: 0.066, Battery: 2.192, Dest: 0.450, Charger: 1.842, Charging: 0.095
+Saving with: 0.7680000066757202
+Increased accuracy: 0.795199990272522
+Increased accuracy: 0.7955999970436096
+Increased accuracy: 0.7961999773979187
+Battery 3381, low: 1571
+STL TRAINING  > 71500 loss:0.537 acc:0.77179998159408569336 dist:0.008 acc_val:0.780 dT:00.14s T:02H41m04s ETA:06H42m06s
+Avoid: 0.064, Battery: 2.212, Dest: 0.454, Charger: 1.870, Charging: 0.096
+Saving with: 0.7717999815940857
+Battery 3374, low: 1570
+STL TRAINING  > 72000 loss:0.539 acc:0.75559997558593750000 dist:0.008 acc_val:0.758 dT:00.14s T:02H42m08s ETA:06H40m51s
+Avoid: 0.064, Battery: 2.207, Dest: 0.451, Charger: 1.859, Charging: 0.094
+Saving with: 0.7555999755859375
+Battery 3330, low: 1605
+STL TRAINING  > 72500 loss:0.539 acc:0.75279998779296875000 dist:0.008 acc_val:0.768 dT:00.14s T:02H43m16s ETA:06H39m44s
+Avoid: 0.064, Battery: 2.178, Dest: 0.463, Charger: 1.830, Charging: 0.094
+Saving with: 0.7527999877929688
+Battery 3398, low: 1534
+STL TRAINING  > 73000 loss:0.539 acc:0.75559997558593750000 dist:0.009 acc_val:0.776 dT:00.14s T:02H44m26s ETA:06H38m40s
+Avoid: 0.066, Battery: 2.211, Dest: 0.434, Charger: 1.858, Charging: 0.097
+Saving with: 0.7555999755859375
+Battery 3399, low: 1530
+STL TRAINING  > 73500 loss:0.538 acc:0.76359999179840087891 dist:0.008 acc_val:0.768 dT:00.14s T:02H45m30s ETA:06H37m25s
+Avoid: 0.067, Battery: 2.224, Dest: 0.445, Charger: 1.879, Charging: 0.092
+Saving with: 0.7635999917984009
+Battery 3382, low: 1559
+STL TRAINING  > 74000 loss:0.538 acc:0.76519995927810668945 dist:0.008 acc_val:0.770 dT:00.14s T:02H46m37s ETA:06H36m17s
+Avoid: 0.063, Battery: 2.202, Dest: 0.446, Charger: 1.846, Charging: 0.095
+Saving with: 0.7651999592781067
+Battery 3382, low: 1557
+STL TRAINING  > 74500 loss:0.538 acc:0.76379996538162231445 dist:0.008 acc_val:0.776 dT:00.14s T:02H47m42s ETA:06H35m03s
+Avoid: 0.065, Battery: 2.208, Dest: 0.448, Charger: 1.865, Charging: 0.092
+Saving with: 0.7637999653816223
+Battery 3363, low: 1576
+STL TRAINING  > 75000 loss:0.536 acc:0.76779997348785400391 dist:0.008 acc_val:0.772 dT:00.14s T:02H48m50s ETA:06H33m57s
+Avoid: 0.066, Battery: 2.205, Dest: 0.446, Charger: 1.849, Charging: 0.097
+Saving with: 0.767799973487854
+Battery 3353, low: 1575
+STL TRAINING  > 75500 loss:0.536 acc:0.76319998502731323242 dist:0.008 acc_val:0.764 dT:00.14s T:02H49m58s ETA:06H32m50s
+Avoid: 0.067, Battery: 2.211, Dest: 0.453, Charger: 1.863, Charging: 0.094
+Saving with: 0.7631999850273132
+Battery 3404, low: 1537
+STL TRAINING  > 76000 loss:0.537 acc:0.74919998645782470703 dist:0.008 acc_val:0.736 dT:00.14s T:02H51m03s ETA:06H31m38s
+Avoid: 0.066, Battery: 2.231, Dest: 0.432, Charger: 1.879, Charging: 0.094
+Saving with: 0.7491999864578247
+Battery 3379, low: 1563
+STL TRAINING  > 76500 loss:0.538 acc:0.76379996538162231445 dist:0.008 acc_val:0.778 dT:00.14s T:02H52m07s ETA:06H30m22s
+Avoid: 0.066, Battery: 2.228, Dest: 0.445, Charger: 1.872, Charging: 0.095
+Saving with: 0.7637999653816223
+Battery 3393, low: 1553
+STL TRAINING  > 77000 loss:0.535 acc:0.77779996395111083984 dist:0.008 acc_val:0.774 dT:00.13s T:02H53m15s ETA:06H29m14s
+Avoid: 0.065, Battery: 2.237, Dest: 0.442, Charger: 1.875, Charging: 0.090
+Saving with: 0.7777999639511108
+Increased accuracy: 0.7963999509811401
+Increased accuracy: 0.796999990940094
+Increased accuracy: 0.7971999645233154
+Increased accuracy: 0.7973999977111816
+Increased accuracy: 0.7975999712944031
+Increased accuracy: 0.7979999780654907
+Battery 3372, low: 1574
+STL TRAINING  > 77500 loss:0.540 acc:0.74759995937347412109 dist:0.008 acc_val:0.782 dT:00.13s T:02H54m22s ETA:06H28m07s
+Avoid: 0.064, Battery: 2.209, Dest: 0.450, Charger: 1.857, Charging: 0.095
+Saving with: 0.7475999593734741
+Battery 3341, low: 1590
+STL TRAINING  > 78000 loss:0.536 acc:0.76779997348785400391 dist:0.008 acc_val:0.778 dT:00.13s T:02H55m28s ETA:06H26m55s
+Avoid: 0.064, Battery: 2.184, Dest: 0.447, Charger: 1.831, Charging: 0.097
+Saving with: 0.767799973487854
+Battery 3363, low: 1585
+STL TRAINING  > 78500 loss:0.538 acc:0.76339995861053466797 dist:0.008 acc_val:0.782 dT:00.13s T:02H56m36s ETA:06H25m49s
+Avoid: 0.066, Battery: 2.204, Dest: 0.457, Charger: 1.863, Charging: 0.093
+Saving with: 0.7633999586105347
+Battery 3319, low: 1611
+STL TRAINING  > 79000 loss:0.537 acc:0.76279997825622558594 dist:0.008 acc_val:0.780 dT:00.13s T:02H57m45s ETA:06H24m44s
+Avoid: 0.064, Battery: 2.170, Dest: 0.462, Charger: 1.828, Charging: 0.094
+Saving with: 0.7627999782562256
+Battery 3340, low: 1605
+STL TRAINING  > 79500 loss:0.536 acc:0.76959997415542602539 dist:0.008 acc_val:0.780 dT:00.13s T:02H58m47s ETA:06H23m27s
+Avoid: 0.066, Battery: 2.169, Dest: 0.453, Charger: 1.823, Charging: 0.098
+Saving with: 0.769599974155426
+Battery 3400, low: 1524
+STL TRAINING  > 80000 loss:0.535 acc:0.77179998159408569336 dist:0.008 acc_val:0.778 dT:00.13s T:02H59m54s ETA:06H22m17s
+Avoid: 0.064, Battery: 2.238, Dest: 0.432, Charger: 1.873, Charging: 0.095
+Saving with: 0.7717999815940857
+Battery 3332, low: 1598
+STL TRAINING  > 80500 loss:0.538 acc:0.76479995250701904297 dist:0.008 acc_val:0.776 dT:00.13s T:03H00m57s ETA:06H21m01s
+Avoid: 0.065, Battery: 2.167, Dest: 0.462, Charger: 1.829, Charging: 0.095
+Saving with: 0.764799952507019
+Battery 3327, low: 1620
+STL TRAINING  > 81000 loss:0.544 acc:0.71199995279312133789 dist:0.008 acc_val:0.680 dT:00.13s T:03H02m04s ETA:06H19m52s
+Avoid: 0.062, Battery: 2.165, Dest: 0.459, Charger: 1.828, Charging: 0.093
+Saving with: 0.7119999527931213

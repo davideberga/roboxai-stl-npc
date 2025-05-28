@@ -169,7 +169,7 @@ Set a threshold = 0.15 representing the safe distance to an obstacle, safety is 
 
 |Method|Success %|Collision %|Low Battery %|Mean Battery %|Safety %|Accuracy %|Avoid %|Battery correlation|Mean Velocity|Mean Abs Delta Velocity|Total distance|
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-|Paper|32.0|47.0|21.0|63.74 ± 1.16|41.18|78.58|24.29|0.17|0.38 ± 0.22|0.43|6.14 ± 3.89|
+|Paper|35.0|38.0|27.0|71.46 ± 1.07|71.43|79.97|43.18|0.34|0.37 ± 0.18|0.39|6.48 ± 3.87|
 |DQN|53.0|2.0|19.0|54.15 ± 1.07|100.0|13.45|68.27|-0.04|0.04 ± 0.01|0.01|5.64 ± 3.01|
 |OUR|7.0|82.0|11.0|58.47 ± 1.02|57.14|6.95|27.21|-0.21|0.28 ± 0.24|0.35|3.3 ± 3.23|
 |OUR No avoid rule|5.0|92.0|1.0|61.42 ± 1.39|100.0|24.57|22.6|-0.34|0.29 ± 0.21|0.51|1.3 ± 0.84|

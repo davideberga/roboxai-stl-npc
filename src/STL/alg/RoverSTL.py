@@ -38,8 +38,8 @@ class RoverSTL:
         self.visit_same_states_for = 500
 
         # Task specific
-        self.safe_distance = 0.05  # 0.12 From unity
-        self.enough_close_to = 0.08  # Adapted from the paper
+        self.safe_distance = 0.10  # 0.12 From unity
+        self.enough_close_to = 0.05  # Adapted from the paper
         self.wait_for_charging = 3
         self.battery_limit = 2
 
@@ -173,7 +173,7 @@ class RoverSTL:
                 )
 
                 print(f"Saving with: {acc_avg.item()}")
-                self.rover_policy.save(f"model_testing/model-closeness-beta-increased_{acc_avg.item()}_{step}.pth")
+                self.rover_policy.save(f"model_testing/model-correct-charging_{acc_avg.item()}_{step}.pth")
 
                 # ---- PLOT training result ---
 
@@ -257,17 +257,17 @@ class RoverSTL:
         )
 
     def generateSTL(self, steps_ahead: int, battery_limit: float):
-        avoid0 = Always(0, steps_ahead, AP(lambda x: (x[..., 0] - self.safe_distance) * 100))
-        avoid1 = Always(0, steps_ahead, AP(lambda x: (x[..., 1] - self.safe_distance) * 100))
-        avoid2 = Always(0, steps_ahead, AP(lambda x: (x[..., 2] - self.safe_distance) * 100))
-        avoid3 = Always(0, steps_ahead, AP(lambda x: (x[..., 3] - self.safe_distance) * 100))
-        avoid4 = Always(0, steps_ahead, AP(lambda x: (x[..., 4] - self.safe_distance) * 100))
-        avoid5 = Always(0, steps_ahead, AP(lambda x: (x[..., 5] - self.safe_distance) * 100))
-        avoid6 = Always(0, steps_ahead, AP(lambda x: (x[..., 6] - self.safe_distance) * 100))
+        avoid0 = AP(lambda x: (x[..., 0] - self.safe_distance) * 1)
+        avoid1 = AP(lambda x: (x[..., 1] - self.safe_distance) * 1)
+        avoid2 = AP(lambda x: (x[..., 2] - self.safe_distance) * 1)
+        avoid3 = AP(lambda x: (x[..., 3] - self.safe_distance) * 1)
+        avoid4 = AP(lambda x: (x[..., 4] - self.safe_distance) * 1)
+        avoid5 = AP(lambda x: (x[..., 5] - self.safe_distance) * 1)
+        avoid6 = AP(lambda x: (x[..., 6] - self.safe_distance) * 1)
 
         avoid_list = [avoid0, avoid1, avoid2, avoid3, avoid4, avoid5, avoid6]
 
-        avoid = ListAnd(avoid_list)
+        avoid = Always(0, steps_ahead, ListAnd(avoid_list))
 
         at_dest = AP(lambda x: self.enough_close_to - x[..., 8])
         at_charger = AP(lambda x: self.enough_close_to - x[..., 10])

@@ -1,10 +1,7 @@
-from shapely import LineString
 import torch
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import math
-from shapely.geometry import box, Point
-from shapely.prepared import prep
 import numpy as np
 
 from .utils import rand_choice_tensor, soft_step_hard, stable_softmax, stable_softmin, uniform_tensor
@@ -219,33 +216,23 @@ class DynamicsSimulator:
 
         new_scan = self.simulate_lidar_scan(new_pose, world_objects)
         t_norm, t_angle = self.estimate_destination(new_pose, target)
+        c_norm, c_angle = self.estimate_destination(new_pose, chargers)
 
-        robot_pos = new_pose[:, :2].unsqueeze(1)
-        charger_centers = chargers[..., :2]
-        diff = charger_centers - robot_pos
-        dists = torch.norm(diff, dim=2)
-        angles = torch.atan2(diff[..., 1], diff[..., 0] + self.epsilon)
-
-        nearest_dists, min_idx = dists.min(dim=1)
-        batch_indices = torch.arange(new_pose.shape[0], device=self.device)
-        nearest_angles = angles[batch_indices, min_idx]
-
-        nearest_dists = nearest_dists / self.max_range_destination
 
         # ADAPTED from the paper code
         battery_charge = 5
-        near_charger = soft_step_hard(0.05 * (self.enough_close_to_charger - nearest_dists))
+        near_charger = soft_step_hard(0.05 * (self.enough_close_to_charger - c_norm))
         # near_charger = (torch.tanh(500 * (0.05 * (self.enough_close_to_charger - nearest_dists))) + 1) / 2
-        es_battery_time = (state[:, 11].unsqueeze(1) - self.dt) * (1 - near_charger.unsqueeze(1)) + battery_charge * near_charger.unsqueeze(1)
-        es_charger_time = state[:, 12].unsqueeze(1) - self.dt * near_charger.unsqueeze(1)
-
+        es_battery_time = (state[:, 11].unsqueeze(1) - self.dt) * (1 - near_charger) + battery_charge * near_charger
+        es_charger_time = state[:, 12].unsqueeze(1) - self.dt * near_charger
+        
         new_state = torch.cat(
             [
                 new_scan,
                 t_angle,
                 t_norm,
-                nearest_angles.unsqueeze(1),
-                nearest_dists.unsqueeze(1),
+                c_angle,
+                c_norm,
                 es_battery_time,
                 es_charger_time,
             ],
@@ -555,9 +542,13 @@ class DynamicsSimulator:
 
         rover_x = charger_x + rover_rho * torch.cos(rover_theta)
         rover_y = charger_y + rover_rho * torch.sin(rover_theta)
-
+        
         dest_x = uniform_tensor(0, 10, (n, 1))
         dest_y = uniform_tensor(0, 10, (n, 1))
+        
+        delta_x = dest_x - rover_x
+        delta_y = dest_y - rover_y
+        rover_theta = torch.atan2(delta_y, delta_x)
 
         # place hold case
         ratio = 0.25 if not test else 0.0
@@ -566,7 +557,7 @@ class DynamicsSimulator:
         ego_rho = uniform_tensor(0, closeness, (n, 1))
         rover_x[rand] = (charger_x + ego_rho * torch.cos(rover_theta))[rand]
         rover_y[rand] = (charger_y + ego_rho * torch.sin(rover_theta))[rand]
-        # battery_t[rand] = np.random.random() * (2 - 0.2) + 0.2
+        # battery_t[rand] = np.random.random() * 4 
         battery_t[rand] = self.dt * MAX_BATTERY_N  # np.random.random() * (2.5 - 1.5) + 1.5
 
         hold_t = 0 * dest_x + self.dt * self.hold_t
@@ -716,8 +707,6 @@ class DynamicsSimulator:
 
         return samples
 
-
-
     def transform_objects(self, objs):
         result = []
         for obj in objs:
@@ -783,13 +772,27 @@ class DynamicsSimulator:
         obstacles = tensor_objs_cx_cy_w_h[1:]
 
         robot_pose = torch.cat((x_list[:, :2], x_theta), dim=1).float().to(self.device)
+        
+                # The robot always face the target direction
+        
         target_position = x_list[:, 2:4].float().to(self.device)
         charger_position = x_list[:, 4:6].float().to(self.device)
         battery_time_hold = x_list[:, 6:].float().to(self.device)
+        
+        above_2 = battery_time_hold[:, 0] > 2
+        below_2 = battery_time_hold[:, 0] < 2
+
+        # Counts
+        num_above = above_2.sum().item()
+        num_below = below_2.sum().item()
+
+        # Output
+        print(f"Battery {num_above}, low: {num_below}")
 
         scan = self.simulate_lidar_scan(robot_pose, obstacles)
         target_dist, target_angle = self.estimate_destination(robot_pose, target_position)
         charger_dist, charger_angle = self.estimate_destination(robot_pose, charger_position)
+
 
         new_state = (
             torch.cat(
